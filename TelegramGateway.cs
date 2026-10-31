@@ -205,7 +205,8 @@ public static class TelegramGateway
                 int start = Math.Clamp(anchor + I(N(request, "add_offset")), 0, history.Length);
                 var values = history.Skip(start).Where(m => (N(request, "min_id") == 0 || m.Id > N(request, "min_id")) &&
                     (N(request, "max_id") == 0 || m.Id < N(request, "max_id"))).Take(Math.Clamp(I(N(request, "limit", 50)), 1, 100));
-                return T("TL_messages_messages", ("messages", values.Select(m => Message(db, m, uid)).ToArray()), ("users", users), ("chats", chats));
+                var participants = db.Users.Where(u => c.Members.Contains(u.Id)).Select(u => User(db, u, uid)).ToArray();
+                return T("TL_messages_messages", ("messages", values.Select(m => Message(db, m, uid)).ToArray()), ("users", participants), ("chats", chats));
             }
             case "TL_messages_getMessages":
             {
@@ -216,8 +217,12 @@ public static class TelegramGateway
             }
             case "TL_messages_sendMessage":
             {
-                if (N(request, "schedule_date") != 0 || request["send_as"] is not null || request["reply_markup"] is not null)
+                if (N(request, "schedule_date") != 0 || request["reply_markup"] is not null)
                     throw new ApiException(501, "BOTGRAM_MESSAGE_FEATURE_UNSUPPORTED");
+                // The Android sender includes send_as even for an ordinary message
+                // from the current user. Alternate/impersonated senders remain forbidden.
+                if (request["send_as"] is JsonNode sender && PeerId(sender, db, uid) != UserId(db, uid))
+                    throw new ApiException(403, "SEND_AS_PEER_INVALID");
                 var c = FindConversation(db, PeerId(request["peer"], db, uid), uid, true);
                 string text = S(request, "message"), key = "tl:" + N(request, "random_id");
                 if (string.IsNullOrWhiteSpace(text) || text.Length > 16000) throw new ApiException(400, "MESSAGE_EMPTY");
@@ -290,6 +295,20 @@ public static class TelegramGateway
                 // The real createChat response in this checkout wraps Updates in invitedUsers.
                 return T("TL_messages_invitedUsers", ("updates", Updates(db, uid,
                     [T("TL_updateNewMessage", ("message", Message(db, service, uid)), ("pts", Pts(db, uid)), ("pts_count", 1))], [c])));
+            }
+            case "TL_messages_getPeerSettings":
+            {
+                long peer = PeerId(request["peer"], db, uid);
+                if (peer > 0)
+                {
+                    var user = FindUser(db, peer);
+                    return T("TL_messages_peerSettings", ("settings", T("TL_peerSettings")),
+                        ("users", new[] { User(db, user, uid) }), ("chats", Array.Empty<JsonObject>()));
+                }
+                var c = FindConversation(db, peer, uid);
+                return T("TL_messages_peerSettings", ("settings", T("TL_peerSettings")),
+                    ("users", db.Users.Where(u => c.Members.Contains(u.Id)).Select(u => User(db, u, uid)).ToArray()),
+                    ("chats", new[] { Chat(db, c) }));
             }
             case "TL_users_getFullUser":
             {

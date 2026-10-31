@@ -84,10 +84,6 @@ try {
   await request('POST', '/api/auth/login', null, { username: 'alice', password: 'bad-password' }, 401);
   const login = await request('POST', '/api/auth/login', null, { username: 'ALICE', password: 'correct-horse-123' });
   assert.equal(login.user.id, alice.user.id);
-  const conv = await request('POST', '/api/conversations', alice.token, { kind: 'direct', memberIds: [bob.user.id] });
-  const duplicate = await request('POST', '/api/conversations', bob.token, { kind: 'direct', memberIds: [alice.user.id] });
-  assert.equal(duplicate.id, conv.id);
-  const route = `/api/conversations/${conv.id}`;
   const tl = (type, fields = {}) => ({ $type: `org.telegram.tgnet.TLRPC$${type}`, ...fields });
   const rpc = async (token, type, fields, status = 200) => {
     const requestType = type.startsWith('org.') ? type : `org.telegram.tgnet.TLRPC$${type}`;
@@ -100,6 +96,17 @@ try {
   assert.equal(aliceTl.$type, 'org.telegram.tgnet.TLRPC$TL_user');
   assert.equal(typeof aliceTl.id, 'number');
   assert.notEqual(aliceTl.id, bobTl.id);
+  const peer = tl('TL_inputPeerUser', { user_id: bobTl.id, access_hash: 1 });
+  const firstHistory = await rpc(alice.token, 'TL_messages_getHistory', { peer, offset_id: 0, limit: 50 });
+  assert.equal(firstHistory.messages.length, 0);
+  assert(firstHistory.users.some(u => u.id === bobTl.id), 'first chat history must include the new peer');
+  const peerSettings = await rpc(alice.token, 'TL_messages_getPeerSettings', { peer });
+  assert.equal(peerSettings.$type, 'org.telegram.tgnet.TLRPC$TL_messages_peerSettings');
+  assert(peerSettings.users.some(u => u.id === bobTl.id));
+  const conv = await request('POST', '/api/conversations', alice.token, { kind: 'direct', memberIds: [bob.user.id] });
+  const duplicate = await request('POST', '/api/conversations', bob.token, { kind: 'direct', memberIds: [alice.user.id] });
+  assert.equal(duplicate.id, conv.id);
+  const route = `/api/conversations/${conv.id}`;
   const userVector = await rpc(alice.token, 'TL_users_getUsers', { id: [tl('TL_inputUser', { user_id: bobTl.id })] });
   assert.equal(userVector.objects[0].id, bobTl.id);
   const selfPeer = tl('TL_inputPeerSelf');
@@ -111,8 +118,9 @@ try {
   assert.equal(found.users[0].id, bobTl.id);
   const state = await rpc(bob.token, 'TL_updates_getState');
   assert.equal(state.pts, 1, 'fresh accounts require a nonzero initial pts');
-  const peer = tl('TL_inputPeerUser', { user_id: bobTl.id, access_hash: 1 });
-  const sendFields = { peer, random_id: 12345678, message: '原 Telegram 页面消息' };
+  const sendFields = { peer, random_id: 12345678, message: '原 Telegram 页面消息',
+    send_as: tl('TL_inputPeerUser', { user_id: aliceTl.id, access_hash: 1 }) };
+  await rpc(alice.token, 'TL_messages_sendMessage', { ...sendFields, send_as: peer }, 403);
   const sent = await rpc(alice.token, 'TL_messages_sendMessage', sendFields);
   const duplicateTl = await rpc(alice.token, 'TL_messages_sendMessage', sendFields);
   assert.equal(sent.updates[0].id, duplicateTl.updates[0].id);
@@ -122,6 +130,14 @@ try {
   assert.equal(diff.state.pts, state.pts + 1);
   const history = await rpc(alice.token, 'TL_messages_getHistory', { peer, offset_id: 0, add_offset: 0, limit: 50 });
   assert.equal(history.messages[0].message, sendFields.message);
+  const aliceBeforeReply = await rpc(alice.token, 'TL_updates_getState');
+  const reply = await rpc(bob.token, 'TL_messages_sendMessage', {
+    peer: tl('TL_inputPeerUser', { user_id: aliceTl.id, access_hash: 1 }),
+    send_as: tl('TL_inputPeerSelf'), random_id: 12345679, message: 'TL reply from Bob'
+  });
+  assert.equal(reply.updates[1].message.from_id.user_id, bobTl.id);
+  const aliceDiff = await rpc(alice.token, 'TL_updates_getDifference', { pts: aliceBeforeReply.pts, date: aliceBeforeReply.date, qts: 0 });
+  assert(aliceDiff.new_messages.some(m => m.message === 'TL reply from Bob' && m.out === false));
   const tlGroup = await rpc(alice.token, 'TL_messages_createChat', { title: '原界面群聊', users: [tl('TL_inputUser', { user_id: bobTl.id })] });
   const chat = tlGroup.updates.chats[0];
   assert.equal(tlGroup.$type, 'org.telegram.tgnet.TLRPC$TL_messages_invitedUsers');
@@ -198,7 +214,8 @@ try {
   await request('POST', `/api/calls/${call.id}/signals`, alice.token, { type: 'ice', data: 'candidate' }, 409);
   await stop();
   await start();
-  assert.equal((await request('GET', `${route}/messages`, alice.token)).length, 3);
+  assert.deepEqual((await request('GET', `${route}/messages`, alice.token)).map(m => m.id).sort((a, b) => a - b),
+    [sent.updates[0].id, reply.updates[0].id, message.id, second.id].sort((a, b) => a - b));
   assert.equal((await request('GET', '/api/telegram/me', alice.token)).id, aliceTl.id);
   assert.equal((await request('GET', '/api/events?after=0', bob.token)).cursor, signal.cursor + 1);
   const snapshot = JSON.parse(await readFile(database, 'utf8'));
