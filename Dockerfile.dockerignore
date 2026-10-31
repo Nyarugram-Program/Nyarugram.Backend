@@ -1,0 +1,9 @@
+**
+!*.cs
+!*.csproj
+!appsettings.json
+!global.json
+!Resources/
+!Resources/M49/
+!Resources/M49/botgram-m49.json
+!Resources/M49/botgram-m49.sha256

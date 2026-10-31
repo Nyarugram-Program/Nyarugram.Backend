@@ -1,0 +1,13 @@
+{
+  "snapshotVersion": "2026-11-01",
+  "sourceUrl": "https://unstats.un.org/unsd/methodology/m49/overview/",
+  "retrievedOn": "2026-11-01",
+  "note": "Application-pinned retrieval snapshot, not a UN release number. Numeric codes/mappings from the official English M49 table; labels and explicit overrides from policy.json.",
+  "sourceHtmlSha256": "B9048114F6E7F2ABDA83BF03D4263C9D7CD1BD7230E3D0461025EE7839A7A1FB",
+  "sourceSha256": "5CC0B6F84C14A40E11E622078694BF7921BDFE43C010083F0F74767851EDF0A7",
+  "policySha256": "2F2DE6917D34AB21E7AD3293D1475016B4F834CB20B8622ADAE7537CC0135EA7",
+  "dataSha256": "2E8988BFCCA6457AC2A71445A6D76973407B32B79280332580DE6EE21A962FEA",
+  "officialCountryCount": 248,
+  "countryCount": 249,
+  "selectableRegionCount": 29
+}

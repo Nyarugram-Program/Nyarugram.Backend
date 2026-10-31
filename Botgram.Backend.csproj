@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DefaultItemExcludes>$(DefaultItemExcludes);artifacts/**</DefaultItemExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Remove="Resources/M49/**" />
+    <EmbeddedResource Include="Resources/M49/botgram-m49.json" LogicalName="Botgram.M49" />
+  </ItemGroup>
+  <Target Name="VerifyM49Snapshot" BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <_M49ExpectedHash>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)/Resources/M49/botgram-m49.sha256').Trim())</_M49ExpectedHash>
+    </PropertyGroup>
+    <GetFileHash Files="$(MSBuildProjectDirectory)/Resources/M49/botgram-m49.json" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_M49Hash" />
+    </GetFileHash>
+    <Error Condition="'%(_M49Hash.FileHash)' != '$(_M49ExpectedHash)'" Text="M49 snapshot checksum mismatch. Run the offline M49 validation and review the pinned data update." />
+  </Target>
+</Project>

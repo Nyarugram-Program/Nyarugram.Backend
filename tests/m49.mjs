@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { generate, sha256, sourceUrl } from '../tools/m49-data.mjs';
+
+const directory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../Resources/M49');
+const manifest = JSON.parse(await readFile(path.join(directory, 'manifest.json'), 'utf8'));
+const data = await readFile(path.join(directory, 'botgram-m49.json'));
+const source = await readFile(path.join(directory, 'source.json'));
+const policy = await readFile(path.join(directory, 'policy.json'));
+assert.equal(manifest.sourceUrl, sourceUrl);
+assert.match(manifest.snapshotVersion, /^\d{4}-\d{2}-\d{2}$/);
+assert.equal(sha256(data), manifest.dataSha256);
+assert.equal((await readFile(path.join(directory, 'botgram-m49.sha256'), 'utf8')).trim(), manifest.dataSha256);
+assert.equal(sha256(source), manifest.sourceSha256);
+assert.equal(sha256(policy), manifest.policySha256);
+const expected = generate(JSON.parse(source), JSON.parse(policy));
+assert.deepEqual(JSON.parse(data), expected, 'Bundled data must follow the fixed source and policy');
+assert.equal(expected.regions.length - 1, manifest.selectableRegionCount);
+assert.equal(Object.keys(expected.countries).length, manifest.countryCount);
+assert.equal(Object.keys(JSON.parse(source).countries).length, manifest.officialCountryCount);
+console.log(`PASS: pinned M49 ${manifest.snapshotVersion}, SHA-256, policy, ${manifest.selectableRegionCount} selectable regions and ${manifest.countryCount} country mappings (offline, no client checkout)`);

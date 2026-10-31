@@ -1,0 +1,190 @@
+{
+  "regions": [
+    {
+      "code": "001",
+      "name": "World",
+      "nameZh": "世界",
+      "abbreviation": "WLD"
+    },
+    {
+      "code": "002",
+      "name": "Africa",
+      "nameZh": "非洲",
+      "abbreviation": "AFR"
+    },
+    {
+      "code": "005",
+      "name": "South America",
+      "nameZh": "南美洲",
+      "abbreviation": "SAM"
+    },
+    {
+      "code": "009",
+      "name": "Oceania",
+      "nameZh": "大洋洲",
+      "abbreviation": "OCE"
+    },
+    {
+      "code": "011",
+      "name": "Western Africa",
+      "nameZh": "西非",
+      "abbreviation": "WAF"
+    },
+    {
+      "code": "013",
+      "name": "Central America",
+      "nameZh": "中美洲",
+      "abbreviation": "CAM"
+    },
+    {
+      "code": "014",
+      "name": "Eastern Africa",
+      "nameZh": "东非",
+      "abbreviation": "EAF"
+    },
+    {
+      "code": "015",
+      "name": "Northern Africa",
+      "nameZh": "北非",
+      "abbreviation": "NAF"
+    },
+    {
+      "code": "017",
+      "name": "Middle Africa",
+      "nameZh": "中非",
+      "abbreviation": "MAF"
+    },
+    {
+      "code": "018",
+      "name": "Southern Africa",
+      "nameZh": "南部非洲",
+      "abbreviation": "SAF"
+    },
+    {
+      "code": "019",
+      "name": "Americas",
+      "nameZh": "美洲",
+      "abbreviation": "AME"
+    },
+    {
+      "code": "021",
+      "name": "Northern America",
+      "nameZh": "北美地区",
+      "abbreviation": "NAM"
+    },
+    {
+      "code": "029",
+      "name": "Caribbean",
+      "nameZh": "加勒比地区",
+      "abbreviation": "CAR"
+    },
+    {
+      "code": "030",
+      "name": "Eastern Asia",
+      "nameZh": "东亚",
+      "abbreviation": "EAS"
+    },
+    {
+      "code": "034",
+      "name": "Southern Asia",
+      "nameZh": "南亚",
+      "abbreviation": "SAS"
+    },
+    {
+      "code": "035",
+      "name": "South-eastern Asia",
+      "nameZh": "东南亚",
+      "abbreviation": "SEA"
+    },
+    {
+      "code": "039",
+      "name": "Southern Europe",
+      "nameZh": "南欧",
+      "abbreviation": "SEU"
+    },
+    {
+      "code": "053",
+      "name": "Australia and New Zealand",
+      "nameZh": "澳大利亚和新西兰",
+      "abbreviation": "ANZ"
+    },
+    {
+      "code": "054",
+      "name": "Melanesia",
+      "nameZh": "美拉尼西亚",
+      "abbreviation": "MEL"
+    },
+    {
+      "code": "057",
+      "name": "Micronesia",
+      "nameZh": "密克罗尼西亚",
+      "abbreviation": "MIC"
+    },
+    {
+      "code": "061",
+      "name": "Polynesia",
+      "nameZh": "波利尼西亚",
+      "abbreviation": "POL"
+    },
+    {
+      "code": "142",
+      "name": "Asia",
+      "nameZh": "亚洲",
+      "abbreviation": "ASI"
+    },
+    {
+      "code": "143",
+      "name": "Central Asia",
+      "nameZh": "中亚",
+      "abbreviation": "CAS"
+    },
+    {
+      "code": "145",
+      "name": "Western Asia",
+      "nameZh": "西亚",
+      "abbreviation": "WAS"
+    },
+    {
+      "code": "150",
+      "name": "Europe",
+      "nameZh": "欧洲",
+      "abbreviation": "EUR"
+    },
+    {
+      "code": "151",
+      "name": "Eastern Europe",
+      "nameZh": "东欧",
+      "abbreviation": "EEU"
+    },
+    {
+      "code": "154",
+      "name": "Northern Europe",
+      "nameZh": "北欧",
+      "abbreviation": "NEU"
+    },
+    {
+      "code": "155",
+      "name": "Western Europe",
+      "nameZh": "西欧",
+      "abbreviation": "WEU"
+    },
+    {
+      "code": "202",
+      "name": "Sub-Saharan Africa",
+      "nameZh": "撒哈拉以南非洲",
+      "abbreviation": "SSA"
+    },
+    {
+      "code": "419",
+      "name": "Latin America and the Caribbean",
+      "nameZh": "拉丁美洲和加勒比地区",
+      "abbreviation": "LAC"
+    }
+  ],
+  "countryOverrides": {
+    "TW": "030"
+  },
+  "overrideRationale": {
+    "TW": "Preserve the existing ISO TW to Eastern Asia mapping. The official M49 overview does not list a separate TW row; this is an explicit application compatibility rule."
+  }
+}
