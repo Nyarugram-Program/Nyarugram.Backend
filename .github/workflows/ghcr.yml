@@ -1,0 +1,86 @@
+name: Backend CI and GHCR
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ghcr-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Build and integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      BOTGRAM_TEST_DLL: ${{ github.workspace }}/bin/Release/net8.0/Botgram.Backend.dll
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build Release
+        run: dotnet build -c Release --nologo
+      - name: Validate pinned M49 data
+        run: node tests/m49.mjs
+      - name: Test GID allocation and persistence
+        run: node tests/gid.mjs
+      - name: Test HTTP and WebSocket integration
+        run: node tests/smoke.mjs
+
+  image:
+    name: Build and publish image
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Normalize GHCR image name
+        id: image
+        shell: bash
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate image tags and labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=sha,format=long
+            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Build image and push outside pull requests
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

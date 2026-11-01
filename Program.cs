@@ -1,13 +1,28 @@
+using System.Net;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.RateLimiting;
 using Botgram.Backend;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 128 * 1024);
+var knownProxies = builder.Configuration.GetSection("ReverseProxy:KnownProxies").Get<string[]>() ?? [];
+if (knownProxies.Length > 0)
+{
+    var proxyAddresses = knownProxies.Select(IPAddress.Parse).ToArray();
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        options.ForwardLimit = 1;
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+        foreach (var address in proxyAddresses) options.KnownProxies.Add(address);
+    });
+}
 builder.Services.AddSingleton<Store>();
 builder.Services.AddHostedService<CallExpiryService>();
 builder.Services.AddRateLimiter(options =>
@@ -21,6 +36,7 @@ builder.Services.AddRateLimiter(options =>
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 300, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
 });
 var app = builder.Build();
+if (knownProxies.Length > 0) app.UseForwardedHeaders();
 // Fail at startup if the database is invalid or already in use.
 _ = app.Services.GetRequiredService<Store>();
 app.Use(async (context, next) =>

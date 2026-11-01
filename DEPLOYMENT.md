@@ -1,9 +1,44 @@
-# 本机部署
+# 公网 HTTPS 部署（Ubuntu 22.04）
+
+公网业务入口为 `https://nyarugram.moe.autos:8521`，事件连接为 `wss://nyarugram.moe.autos:8521/api/ws`。客户端地址未填写端口时默认补齐 **8521**，不使用 HTTPS 的常规默认端口 443。DNS 指向 `43.142.58.20`。
+
+## 端口与代理
+
+- TCP 8521：Caddy TLS 终止、HTTP RPC 与 WebSocket 共用。仅允许 TLS 1.2 / 1.3；使用公共受信任 ACME 证书，不跳过证书或主机名校验。
+- TCP 80：ACME HTTP-01 验证及跳转到 `https://nyarugram.moe.autos:8521`；不提供业务 API。自动续期需要持续允许 CA 访问 80。
+- 此主机原有的 443、6543 和其他网站继续保留，但不是 Botgram 客户端入口。无需为 Botgram 新开放 443 或 UDP 8521。
+- 后端 HTTP 8521 仅在 Docker 网络中使用，没有宿主机端口映射。Caddy 和后端位于 `botgram_edge`，代理地址 `172.28.52.2`，后端 `172.28.52.3`。
+- `ReverseProxy:KnownProxies` 仅信任代理地址，转发头在限流前处理；Caddy 覆盖客户端提交的转发头。不要扩大信任范围。
+
+仓库的 `compose.https.yaml` 提供后端部署定义，`Caddyfile.https` 是追加到现有 Caddyfile 的站点片段，不能覆盖已有网站。服务器现有代理项目位于 `/opt/qslink/releases/d720b78`，其 `compose.ip.yaml` 增量加入 `8521:8521` 及外部网络；后续迁移目录时应以 Docker Compose 实际配置为准。
+
+## 运行、更新与回退
+
+后端部署根目录为 `/opt/botgram`；正式数据目录为 `/opt/botgram/data`，隔离测试数据保留在 `/opt/botgram/validation/data`。正式库不创建测试账号，JSON 文件首次实际写入时才创建。镜像及数据目录由该目录的 `.env` 指定，使用 `compose.https.yaml` 启动。发布程序位于独立 `releases/<hash>`。后端采用非 root 用户、只读根文件系统及可写数据卷；数据目录必须允许 UID 1654 写入。
+
+```bash
+# 查看实际镜像、数据挂载及运行状态（不要公开 .env 或数据库内容）
+docker compose --project-directory /opt/botgram -f /opt/botgram/compose.https.yaml ps
+docker inspect botgram-backend-1 --format '{{json .Mounts}}'
+curl --fail https://nyarugram.moe.autos:8521/health
+
+# 更新镜像或数据目录配置后，只重建后端
+# 先停止服务、备份实际数据卷及 .env，再修改 BOTGRAM_IMAGE
+docker compose --project-directory /opt/botgram -f /opt/botgram/compose.https.yaml up -d --no-deps backend
+```
+
+更新前使用独立数据目录验证镜像，不能向正式数据库创建测试账号。停止后端并确认释放数据库后，再备份实际数据目录和配置；保留原镜像、发布目录及备份。回退时停止新后端、恢复旧镜像配置；若数据格式不兼容，应在停止状态下从升级前快照恢复，不能用旧快照覆盖仍在写入的数据。
+
+Caddy 证书保存在其既有持久卷中，重建代理不能删除卷。配置更新先执行 `docker exec qslink-proxy-1 caddy validate --config /etc/caddy/Caddyfile`，仅配置变化可使用 Caddy reload；新增发布端口需要只重建 proxy，可能短暂影响已有网站。不要对整个既有站点执行 `down` 或删除卷。备份代理配置位于 `/opt/botgram/backups`。
+
+公网隔离测试必须使用测试数据目录，并显式设置 `BOTGRAM_HTTPS_TEST_ISOLATED=1`。服务端测试与 TLS 握手通过不等于 Android 真机安装、前后台切换、定位或端到端页面操作已经验证。
+
+# 本机 Windows 部署（保留）
 
 当前部署位于 `D:\Botgram\Backend`，使用已经发布并通过集成测试的 Release 程序。
 
-- 手机连接同一局域网时，App 登录页填写 `http://192.168.2.200:5080`。
-- 本机地址为 `http://127.0.0.1:5080`。
+- 手机连接同一局域网时，App 登录页填写 `http://192.168.2.200:8521`。
+- 本机地址为 `http://127.0.0.1:8521`。
 - 健康检查为 `GET /health`，未登录访问账号接口返回 401。
 - 正式数据在 `D:\Botgram\Backend\data\botgram.json`，只在实际写入时创建；此文件应备份。
 - 日志在 `D:\Botgram\Backend\logs`；`process.json` 记录当前后台进程与实际监听地址。
@@ -19,7 +54,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File D:\Botgram\Backend\Stop-Botg
 powershell -NoProfile -ExecutionPolicy Bypass -File D:\Botgram\Backend\Start-BotgramBackend.ps1
 ```
 
-防火墙规则 `BotgramBackend-LAN-5080` 仅允许“以太网 5”私有网络的本地子网访问 TCP 5080。未配置公网映射或外网域名。服务启动时读取此网卡的 IPv4 地址；如果电脑地址变化，请根据 `process.json` 更新手机中的地址。
+防火墙规则 `BotgramBackend-LAN-8521` 仅允许“以太网 5”私有网络的本地子网访问 TCP 8521。未配置公网映射或外网域名。服务启动时读取此网卡的 IPv4 地址；如果电脑地址变化，请根据 `process.json` 更新手机中的地址。
 
 部署版已经通过隔离数据与端口的账号、TL 聊天、同步、持久化、权限、重启等集成验证。测试数据位于 `validation`，没有在正式数据库中创建测试账号。手机到服务器的实际连通性尚需在手机上确认。
 

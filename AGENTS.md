@@ -80,7 +80,7 @@ node tests/gid.mjs
 node tests/smoke.mjs
 
 # 发布物通过测试后，按目标主机的部署方式启动服务
-# dotnet artifacts/publish/Botgram.Backend.dll --urls http://127.0.0.1:5080
+# dotnet artifacts/publish/Botgram.Backend.dll --urls http://127.0.0.1:8521
 ```
 
 - 陌生主机只需后端仓库和兼容的 .NET 8 SDK即可构建；运行已发布程序需要对应 .NET 8 ASP.NET Core Runtime。Node 仅用于测试和数据维护。Docker 从后端根目录执行 `docker build -t botgram-backend .`，上下文不得包含其他仓库。

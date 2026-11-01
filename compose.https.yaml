@@ -1,0 +1,32 @@
+# Existing Caddy joins this external network at 172.28.52.2.
+# Do not publish the backend's HTTP port.
+services:
+  backend:
+    image: ${BOTGRAM_IMAGE:?Set BOTGRAM_IMAGE to a verified immutable tag}
+    restart: unless-stopped
+    init: true
+    user: "1654:1654"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: ["/tmp:size=32m,mode=1777"]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DataPath: /data/botgram.json
+      AllowedHosts: nyarugram.moe.autos;localhost
+      ReverseProxy__KnownProxies__0: 172.28.52.2
+    volumes:
+      - ${BOTGRAM_DATA_DIR:?Set BOTGRAM_DATA_DIR}:/data
+    networks:
+      edge:
+        ipv4_address: 172.28.52.3
+        aliases: [botgram-backend]
+    mem_limit: 384m
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+networks:
+  edge:
+    external: true
+    name: botgram_edge

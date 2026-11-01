@@ -1,0 +1,26 @@
+# Append this site to the EXISTING Caddyfile; never replace other sites/global options.
+https://nyarugram.moe.autos:8521 {
+    tls {
+        protocols tls1.2 tls1.3
+        issuer acme {
+            disable_tlsalpn_challenge
+        }
+    }
+    header Strict-Transport-Security "max-age=31536000"
+    request_body {
+        max_size 128KB
+    }
+    reverse_proxy botgram-backend:8521 {
+        # Overwrite untrusted inbound forwarding headers with the direct peer.
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+        header_up -Forwarded
+        header_up -X-Real-IP
+        transport http {
+            dial_timeout 10s
+            response_header_timeout 30s
+        }
+    }
+    # No access log: never persist authenticated URL/header/body data.
+}

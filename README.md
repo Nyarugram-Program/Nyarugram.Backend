@@ -30,17 +30,20 @@ dotnet build
 dotnet run
 ```
 
-默认监听 `http://127.0.0.1:5080`；健康检查 `GET /health`。数据位于工作目录下 `data/botgram.json`。可用环境变量 `DataPath` 指定绝对路径。
+默认监听 `http://127.0.0.1:8521`；健康检查 `GET /health`。数据位于工作目录下 `data/botgram.json`。可用环境变量 `DataPath` 指定绝对路径。
 
-Android 模拟器访问宿主机时使用 `http://10.0.2.2:5080`。真机联调需通过 `dotnet run -- --urls http://0.0.0.0:5080` 开放局域网监听，并配置防火墙。开发版客户端若使用 HTTP，需单独配置 Android 的明文网络策略。对外部署使用 HTTPS／WSS 反向代理。
+Android 模拟器访问宿主机时使用 `http://10.0.2.2:8521`。真机联调需通过 `dotnet run -- --urls http://0.0.0.0:8521` 开放局域网监听，并配置防火墙。开发版客户端若使用 HTTP，需单独配置 Android 的明文网络策略。对外部署使用 HTTPS／WSS 反向代理。
 
 ```powershell
 dotnet build
 node tests/m49.mjs
 node tests/gid.mjs
 node tests/contacts.mjs
+node tests/default-port.mjs
 node tests/smoke.mjs
 ```
+
+`default-port.mjs` 验证未传 `--urls` 时确实监听 8521，须在该端口空闲时运行（例如部署前），数据库仍使用隔离临时目录。其余 HTTP 集成测试自动分配独立端口。
 
 集成测试要求 Node.js 22+，自动启动独立端口及临时数据文件，覆盖账号、越权、群聊、并发去重、分页、已读、事件隔离、WebSocket、通话状态权限、重启持久化和退出失效。测试数据位于忽略的 `obj/smoke-*`，不使用正常服务数据。
 
@@ -52,7 +55,7 @@ M49 固定快照、29 个区域规则、兼容项和校验清单随本仓库保�
 
 ```sh
 dotnet publish -c Release -o artifacts/publish
-dotnet artifacts/publish/Botgram.Backend.dll --urls http://127.0.0.1:5080 --DataPath ./data/botgram.json
+dotnet artifacts/publish/Botgram.Backend.dll --urls http://127.0.0.1:8521 --DataPath ./data/botgram.json
 ```
 
 将 `artifacts/publish` 整个目录复制到目标主机，使用固定工作目录启动，保留持久化数据目录。局域网/公网访问需自行配置监听、防火墙和 HTTPS；`GET /health` 用于检查启动状态。
@@ -61,7 +64,7 @@ Docker（从后端仓库根目录构建，数据挂载必须保留）：
 
 ```sh
 docker build -t botgram-backend .
-docker run --rm -p 5080:8080 -v botgram-data:/data botgram-backend
+docker run --rm -p 8521:8521 -v botgram-data:/data botgram-backend
 ```
 
 ## HTTP 契约
@@ -98,9 +101,9 @@ docker run --rm -p 5080:8080 -v botgram-data:/data botgram-backend
 示例（PowerShell）：
 
 ```powershell
-$alice = Invoke-RestMethod http://127.0.0.1:5080/api/auth/register -Method Post -ContentType application/json -Body '{"username":"alice","displayName":"Alice","password":"change-this-password"}'
+$alice = Invoke-RestMethod http://127.0.0.1:8521/api/auth/register -Method Post -ContentType application/json -Body '{"username":"alice","displayName":"Alice","password":"change-this-password"}'
 $headers = @{ Authorization = "Bearer $($alice.token)" }
-Invoke-RestMethod http://127.0.0.1:5080/api/me -Headers $headers
+Invoke-RestMethod http://127.0.0.1:8521/api/me -Headers $headers
 ```
 
 ## 同步与 WebSocket

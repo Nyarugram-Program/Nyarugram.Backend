@@ -8,7 +8,7 @@ RUN dotnet publish -c Release -o /out --no-restore
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /out .
-ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS=http://+:8521
 ENV DataPath=/data/botgram.json
-EXPOSE 8080
-ENTRYPOINT ["dotnet", "Botgram.Backend.dll", "--urls", "http://+:8080"]
+EXPOSE 8521
+ENTRYPOINT ["dotnet", "Botgram.Backend.dll", "--urls", "http://+:8521"]
