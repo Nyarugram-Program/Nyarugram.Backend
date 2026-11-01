@@ -11,6 +11,7 @@
 
 - 用户名／密码注册登录，PBKDF2-SHA256 密码摘要，30 天随机 Bearer 会话；数据库仅保存令牌摘要；退出使会话失效。
 - 按完整用户名查询用户；单聊及固定成员群聊；重复创建同一双方的单聊返回已有会话。
+- 原 TL `contacts.importContacts` 按 GID 添加联系人，`contacts.resolvePhone` 兼容字段按 GID 查询，`contacts.getContacts` 返回持久化列表。备注姓名按添加者隔离，重复添加更新已有关系，改 GID 后关系保留；不写入手机通讯录。不支持联系人笔记。
 - 文字消息、历史分页、客户端请求 ID 幂等发送、已读游标、未读计数。
 - 持久化事件游标、HTTP 补拉、WebSocket 实时推送；多设备通过同一事件流同步。
 - 一对一 WebRTC 通话信令：呼叫、忙线检查、接听、拒绝、挂断、SDP／ICE 转发。
@@ -37,6 +38,7 @@ Android 模拟器访问宿主机时使用 `http://10.0.2.2:5080`。真机联调�
 dotnet build
 node tests/m49.mjs
 node tests/gid.mjs
+node tests/contacts.mjs
 node tests/smoke.mjs
 ```
 

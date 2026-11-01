@@ -7,6 +7,7 @@ public sealed record Message(long Id, string ConversationId, string SenderId, st
     string? ServiceTitle = null, string[]? ServiceMembers = null, System.Text.Json.JsonElement? TelegramEntities = null,
     long? ReplyToMessageId = null, bool Silent = false);
 public sealed record Receipt(string ConversationId, string UserId, long MessageId);
+public sealed record Contact(string OwnerId, string UserId, string FirstName, string LastName);
 public sealed record Call(string Id, string ConversationId, string CallerId, string CalleeId, string State, DateTimeOffset UpdatedAt);
 public sealed record ChatEvent(long Id, string[] Recipients, string Type, object Payload, DateTimeOffset CreatedAt, DateTimeOffset? ExpiresAt = null);
 public sealed class Database
@@ -16,6 +17,7 @@ public sealed class Database
     public List<Conversation> Conversations { get; set; } = [];
     public List<Message> Messages { get; set; } = [];
     public List<Receipt> Receipts { get; set; } = [];
+    public List<Contact> Contacts { get; set; } = [];
     public List<Call> Calls { get; set; } = [];
     public List<ChatEvent> Events { get; set; } = [];
     public long NextMessageId { get; set; } = 1;

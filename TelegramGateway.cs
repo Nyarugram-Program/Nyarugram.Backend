@@ -47,11 +47,25 @@ public static class TelegramGateway
         db.Conversations.Add(result); db.Emit(members, "conversation.created", result);
         return result;
     }
-    private static JsonObject User(Database db, User user, string uid) => T("TL_user",
-        ("id", UserId(db, user.Id)), ("access_hash", 1L), ("first_name", user.DisplayName), ("last_name", ""),
+    private static JsonObject User(Database db, User user, string uid)
+    {
+        var contact = db.Contacts.FirstOrDefault(c => c.OwnerId == uid && c.UserId == user.Id);
+        bool mutual = contact is not null && db.Contacts.Any(c => c.OwnerId == user.Id && c.UserId == uid);
+        return T("TL_user",
+        ("id", UserId(db, user.Id)), ("access_hash", 1L), ("first_name", contact?.FirstName ?? user.DisplayName), ("last_name", contact?.LastName ?? ""),
         ("username", user.Username), ("phone", user.Gid), ("self", user.Id == uid),
-        ("flags", 1 | 2 | 8 | 16 | 32 | 64 | (user.Id == uid ? 1024 : 0)),
+        ("contact", contact is not null), ("mutual_contact", mutual),
+        ("flags", 1 | 2 | 4 | 8 | 16 | 32 | 64 | (user.Id == uid ? 1024 : 0) | (contact is not null ? 2048 : 0) | (mutual ? 4096 : 0)),
         ("photo", T("TL_userProfilePhotoEmpty")), ("status", T("TL_userStatusEmpty")));
+    }
+
+    private static string ContactGid(string input)
+    {
+        string gid = input.Trim().Replace(" ", "");
+        if (gid.StartsWith('+')) gid = gid[1..];
+        if (!Gids.Valid(gid)) throw new ApiException(400, "PHONE_NUMBER_INVALID");
+        return gid;
+    }
     private static JsonObject Chat(Database db, Conversation c) => T("TL_chat", ("id", ChatId(db, c)), ("title", c.Title),
         ("photo", T("TL_chatPhotoEmpty")), ("participants_count", c.Members.Length), ("date", (int)c.CreatedAt.ToUnixTimeSeconds()), ("version", 1));
     private static JsonObject Message(Database db, Message m, string uid)
@@ -128,7 +142,8 @@ public static class TelegramGateway
     {
         string method = S(request, "$type").Split('$').Last();
         var owned = db.Conversations.Where(c => c.Members.Contains(uid)).ToArray();
-        var users = db.Users.Where(u => u.Id == uid || owned.Any(c => c.Members.Contains(u.Id))).Select(u => User(db, u, uid)).ToArray();
+        var users = db.Users.Where(u => u.Id == uid || owned.Any(c => c.Members.Contains(u.Id)) ||
+            db.Contacts.Any(c => c.OwnerId == uid && c.UserId == u.Id)).Select(u => User(db, u, uid)).ToArray();
         var chats = owned.Where(c => c.Kind == "group").Select(c => Chat(db, c)).ToArray();
         switch (method)
         {
@@ -282,7 +297,47 @@ public static class TelegramGateway
                 return T("Vector", ("objects", db.Users.Where(u => ids.Contains(UserId(db, u.Id))).Select(u => User(db, u, uid)).ToArray()));
             }
             case "TL_contacts_getContacts":
-                return T("TL_contacts_contacts", ("saved_count", 0), ("contacts", Array.Empty<object>()), ("users", Array.Empty<object>()));
+            {
+                var contacts = db.Contacts.Where(c => c.OwnerId == uid).ToArray();
+                return T("TL_contacts_contacts", ("saved_count", contacts.Length),
+                    ("contacts", contacts.Select(c => T("TL_contact", ("user_id", UserId(db, c.UserId)),
+                        ("mutual", db.Contacts.Any(other => other.OwnerId == c.UserId && other.UserId == uid)))).ToArray()),
+                    ("users", contacts.Select(c => User(db, db.Users.Single(u => u.Id == c.UserId), uid)).ToArray()));
+            }
+            case "TL_contacts_resolvePhone":
+            {
+                string gid = ContactGid(S(request, "phone"));
+                var user = db.Users.FirstOrDefault(u => u.Gid == gid) ?? throw new ApiException(400, "PHONE_NOT_OCCUPIED");
+                return T("TL_contacts_resolvedPeer", ("peer", Peer(UserId(db, user.Id))), ("users", new[] { User(db, user, uid) }));
+            }
+            case "TL_contacts_importContacts":
+            {
+                if (request["contacts"] is not JsonArray input || input.Count is 0 or > 100)
+                    throw new ApiException(400, "CONTACTS_TOO_MUCH");
+                var imported = new List<JsonObject>();
+                var found = new HashSet<string>();
+                foreach (var item in input)
+                {
+                    if (item is not JsonObject || S(item, "$type") != "org.telegram.tgnet.TLRPC$TL_inputPhoneContact")
+                        throw new ApiException(400, "CONTACT_INVALID");
+                    string gid = ContactGid(S(item, "phone"));
+                    string first = S(item, "first_name").Trim(), last = S(item, "last_name").Trim();
+                    if (first.Length == 0 || first.Length > 64 || last.Length > 64)
+                        throw new ApiException(400, "FIRSTNAME_INVALID");
+                    // The current GID form has no notes editor; reject unsupported notes explicitly.
+                    if (item?["note"] is not null || N(item, "flags") != 0)
+                        throw new ApiException(501, "BOTGRAM_CONTACT_NOTES_UNSUPPORTED");
+                    var user = db.Users.FirstOrDefault(u => u.Gid == gid);
+                    if (user is null || user.Id == uid) continue;
+                    db.Contacts.RemoveAll(c => c.OwnerId == uid && c.UserId == user.Id);
+                    db.Contacts.Add(new(uid, user.Id, first, last));
+                    imported.Add(T("TL_importedContact", ("user_id", UserId(db, user.Id)), ("client_id", N(item, "client_id"))));
+                    found.Add(user.Id);
+                }
+                return T("TL_contacts_importedContacts", ("imported", imported),
+                    ("retry_contacts", Array.Empty<long>()), ("popular_invites", Array.Empty<object>()),
+                    ("users", db.Users.Where(u => found.Contains(u.Id)).Select(u => User(db, u, uid)).ToArray()));
+            }
             case "TL_messages_createChat":
             {
                 string title = S(request, "title");

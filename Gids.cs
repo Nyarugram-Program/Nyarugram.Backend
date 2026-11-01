@@ -55,7 +55,8 @@ public static class Gids
         var updated = db.Users[index] with { Gid = candidate };
         if (updated.Gid == db.Users[index].Gid) return updated;
         db.Users[index] = updated;
-        var recipients = db.Conversations.Where(c => c.Members.Contains(uid)).SelectMany(c => c.Members).Append(uid).Distinct().ToArray();
+        var recipients = db.Conversations.Where(c => c.Members.Contains(uid)).SelectMany(c => c.Members)
+            .Concat(db.Contacts.Where(c => c.UserId == uid).Select(c => c.OwnerId)).Append(uid).Distinct().ToArray();
         db.Emit(recipients, "user.gid_changed", new { userId = uid, gid = candidate });
         return updated;
     }
