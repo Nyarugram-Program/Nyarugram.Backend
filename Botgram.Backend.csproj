@@ -4,9 +4,19 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <DefaultItemExcludes>$(DefaultItemExcludes);artifacts/**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Protocol.Tests/**/*.cs;Protocol.HttpTests/**/*.cs;Storage.Tests/**/*.cs;Storage.Admin/**/*.cs" />
+    <Content Remove="Storage.Admin/**;Storage.Tests/**;Protocol.Tests/**;Protocol.HttpTests/**" />
+    <None Remove="Storage.Admin/**;Storage.Tests/**;Protocol.Tests/**;Protocol.HttpTests/**" />
+    <PackageReference Include="Google.Protobuf" Version="[3.25.8]" />
+    <PackageReference Include="Npgsql" Version="[8.0.8]" />
+    <PackageReference Include="Confluent.Kafka" Version="[2.6.1]" />
+    <PackageReference Include="CassandraCSharpDriver" Version="[3.22.0]" />
+    <PackageReference Include="Newtonsoft.Json" Version="[13.0.3]" />
+    <PackageReference Include="StackExchange.Redis" Version="[2.8.24]" />
     <Content Remove="Resources/M49/**" />
     <EmbeddedResource Include="Resources/M49/botgram-m49.json" LogicalName="Botgram.M49" />
   </ItemGroup>

@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "protocolMajor": 1,
+  "stage": "P2 policy registry only; not a runtime validator or a claim of implemented protobuf transport",
+  "contract": {
+    "serverDomain": "nyarugram.moe.autos",
+    "domainSource": "Fixed configured authority; never derive from Host, forwarded headers, GID or TL IDs. Tests use an independently configured isolated domain and isolated data, not production.",
+    "identity": "Reuse existing user/group UUIDs and stable TelegramIds mappings; never regenerate identities or substitute GID for UUID.",
+    "nonLocalDomainStatus": 501,
+    "self": "UserSelector.self and PeerRef.self must be true when selected; false is 400, never fall through to another identity.",
+    "unknownOperationStatus": 501,
+    "unknownMustUnderstandEntityStatus": 501,
+    "missingRequiredOneofStatus": 400,
+    "requiredOneofs": ["RpcRequest.operation", "UserSelector.target", "PeerRef.peer", "NotifyTarget.target", "MessageEntity.kind", "RpcResponse.outcome", "Difference.kind", "Update.kind", "Message.body", "ServiceMessage.action"],
+    "presence": "Rebuild TL flags from actual scalar/message/oneof presence and supported booleans; never forward raw TL flags. Unknown required semantics must fail rather than silently disappear.",
+    "time": "Wire timestamps are Unix milliseconds. TL seconds -> milliseconds uses checked multiplication by 1000; wire milliseconds -> TL seconds uses floor division by 1000 then checked int32 conversion, never unchecked casts. Reject overflow with 400.",
+    "messageIds": "Every message_id, message_ids element, offset/min/max/reply/read/message-ID mapping converted to Android TL int32 uses checked conversion; overflow is 400, never truncate. Keep sfixed64 random_id/client_id exact, not JS floating point.",
+    "http": "Preserve HTTP statuses for authentication, permissions, validation, conflict, rate limit and unsupported features; RpcError.http_status matches HTTP, never wrap an error as 200. Preserve existing 128 KiB request-body boundary (131072 bytes, including chunked/streamed bodies); over limit is 413 before business dispatch. No limits are relaxed by protobuf.",
+    "unknownSubclass": "Reject unsupported concrete TL subclasses with 501 even when their fields have default values. Missing required peer/user/reply/entity target is 400. InputPeerEmpty is allowed only as an absent getDialogs offset_peer, not as a business peer.",
+    "defaultDefinition": "Primitive false/0, null or empty string, null or empty collection, and absent message are default. A present optional feature/message is non-default even if its payload scalars are zero; flags are rebuilt separately.",
+    "validation": "Retain existing membership, participant, request size, paging, entity UTF-16 bounds/count/URL, idempotency, GID and persistence validation. Registration here does not implement those validators."
+  },
+  "decisions": {
+    "local": {"action":"ignore","when":"always","reason":"Android-only transport metadata; networkType/disableFree never leave client."},
+    "flags": {"action":"ignore","when":"always","reason":"Rebuild from supported field presence and booleans, not the integer flags."},
+    "selfSender": {"action":"ignore","when":"absent or resolves to authenticated self","rejectOtherwise":{"httpStatus":403,"code":"SEND_AS_PEER_INVALID"},"reason":"Validate explicit sender through supported InputPeer resolution, then omit redundant authenticated-self identity; never allow impersonation."},
+    "sameReplyPeer": {"action":"ignore","when":"absent or resolves to the send target conversation","rejectOtherwise":{"httpStatus":501,"code":"BOTGRAM_REPLY_MODE_UNSUPPORTED"},"reason":"Validate the reply peer matches the enclosing send target before omitting redundant peer; preserve same-conversation replies only."},
+    "searchLimit": {"action":"ignore","when":"always","reason":"Preserve legacy exact-contact search: limit is not used; result is the authorized exact-match set, not an unbounded general search."},
+    "pinnedFolder": {"action":"ignore","when":"always","reason":"Preserve legacy pinned query: all folders return an empty pinned set; this does not implement folder-specific pinning."},
+    "excludePinned": {"action":"ignore","when":"always","reason":"v1 has no pinned dialogs and pinned queries return an empty set; excluding pinned dialogs therefore preserves the result. Revisit when pinning is implemented."},
+    "localDraft": {"action":"ignore","when":"always","reason":"Drafts are local-only in v1; Android SendMessagesHelper clears the local draft on send. No server draft exists to clear; this does not claim cloud draft synchronization."},
+    "cacheHash": {"action":"ignore","when":"always","reason":"No not-modified cache response in v1; always return authorized current data."},
+    "syncDate": {"action":"ignore","when":"always","reason":"SyncService uses per-user pts, not wall-clock date; response time remains authoritative."},
+    "qts": {"action":"ignore","when":"always","reason":"No encrypted-message stream; qts is not a supported cursor, response qts remains zero."},
+    "reject": {"action":"reject","when":"non-default","httpStatus":501,"reason":"Unsupported business intent must not be silently lost, including features the legacy Gateway ignored."},
+    "accessHash": {"action":"ignore","when":"always","reason":"MTProto access_hash is not authorization; Bearer, UUID mapping and membership authorize local references."},
+    "map": {"action":"mapping","when":"present","reason":"Map through the named typed protobuf field; retain existing business validation."}
+  },
+  "inheritedFields": {"networkType":"local","disableFree":"local"},
+  "requests": [
+    {"tl":"TL_updates_getState","javaType":"org.telegram.tgnet.TLRPC$TL_updates_getState","tag":100,"operation":"get_state","message":"GetStateRequest","fields":{}},
+    {"tl":"TL_updates_getDifference","javaType":"org.telegram.tgnet.TLRPC$TL_updates_getDifference","tag":101,"operation":"get_difference","message":"GetDifferenceRequest","fields":{"flags":"flags","pts":{"decision":"map","to":["GetDifferenceRequest.pts"]},"pts_total_limit":"reject","date":"syncDate","qts":"qts"}},
+    {"tl":"TL_messages_getDialogs","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getDialogs","tag":102,"operation":"get_dialogs","message":"GetDialogsRequest","fields":{"flags":"flags","exclude_pinned":"excludePinned","folder_id":{"decision":"map","to":["GetDialogsRequest.folder_id"]},"offset_date":{"decision":"syncDate","reason":"Legacy dialog pagination uses offset_id and offset_peer, not date; intentionally not a wire field."},"offset_id":{"decision":"map","to":["GetDialogsRequest.offset_message_id"]},"offset_peer":{"decision":"map","to":["GetDialogsRequest.offset_peer"],"nested":"InputPeer","reason":"Empty offset means absent peer only here."},"limit":{"decision":"map","to":["GetDialogsRequest.limit"]},"hash":"cacheHash"}},
+    {"tl":"TL_messages_getPinnedDialogs","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getPinnedDialogs","tag":103,"operation":"get_pinned_dialogs","message":"GetPinnedDialogsRequest","fields":{"folder_id":"pinnedFolder"}},
+    {"tl":"TL_messages_getPeerDialogs","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getPeerDialogs","tag":104,"operation":"get_peer_dialogs","message":"GetPeerDialogsRequest","fields":{"peers":{"decision":"map","to":["GetPeerDialogsRequest.peers"],"nested":"InputDialogPeer"}},"wireDefaults":{"GetPeerDialogsRequest.folder_id":0}},
+    {"tl":"TL_messages_getHistory","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getHistory","tag":105,"operation":"get_history","message":"GetHistoryRequest","fields":{"peer":{"decision":"map","to":["GetHistoryRequest.peer"],"nested":"InputPeer"},"offset_id":{"decision":"map","to":["GetHistoryRequest.offset_message_id"]},"offset_date":{"decision":"map","to":["GetHistoryRequest.offset_date_ms"],"conversion":"TL seconds to checked milliseconds; reverse checked int32 seconds"},"add_offset":{"decision":"map","to":["GetHistoryRequest.add_offset"]},"limit":{"decision":"map","to":["GetHistoryRequest.limit"]},"max_id":{"decision":"map","to":["GetHistoryRequest.max_message_id"]},"min_id":{"decision":"map","to":["GetHistoryRequest.min_message_id"]},"hash":"cacheHash"}},
+    {"tl":"TL_messages_getMessages","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getMessages","tag":106,"operation":"get_messages","message":"GetMessagesRequest","fields":{"id":{"decision":"map","to":["GetMessagesRequest.message_ids"],"conversion":"Android ArrayList<Integer> directly to repeated int64, reverse checked int32; NOT objects containing id"}},"legacyMismatch":"TelegramGateway currently selects N(p, id) from object elements, but actual Android uses integer array. Register discrepancy only; do not modify the legacy endpoint in P2."},
+    {"tl":"TL_messages_sendMessage","javaType":"org.telegram.tgnet.TLRPC$TL_messages_sendMessage","tag":107,"operation":"send_message","message":"SendMessageRequest","fields":{"flags":"flags","no_webpage":"reject","silent":{"decision":"map","to":["SendMessageRequest.silent"]},"background":"reject","clear_draft":"localDraft","noforwards":"reject","update_stickersets_order":"reject","invert_media":"reject","allow_paid_floodskip":"reject","peer":{"decision":"map","to":["SendMessageRequest.peer"],"nested":"InputPeer"},"reply_to":{"decision":"map","to":["SendMessageRequest.reply_to_message_id"],"nested":"InputReplyTo"},"message":{"decision":"map","to":["SendMessageRequest.text"]},"random_id":{"decision":"map","to":["SendMessageRequest.random_id"]},"reply_markup":"reject","entities":{"decision":"map","to":["SendMessageRequest.entities"],"nested":"MessageEntity"},"schedule_date":"reject","schedule_repeat_period":"reject","send_as":{"decision":"selfSender","nested":"InputPeer"},"quick_reply_shortcut":"reject","effect":"reject","allow_paid_stars":"reject","suggested_post":"reject","rich_message":"reject","ephemeralReceiverBotId":"reject"}},
+    {"tl":"TL_messages_readHistory","javaType":"org.telegram.tgnet.TLRPC$TL_messages_readHistory","tag":108,"operation":"read_history","message":"ReadHistoryRequest","fields":{"peer":{"decision":"map","to":["ReadHistoryRequest.peer"],"nested":"InputPeer"},"max_id":{"decision":"map","to":["ReadHistoryRequest.max_message_id"]}}},
+    {"tl":"TL_contacts_search","javaType":"org.telegram.tgnet.TLRPC$TL_contacts_search","tag":109,"operation":"search_contacts","message":"SearchContactsRequest","fields":{"flags":"flags","broadcasts":"reject","bots":"reject","q":{"decision":"map","to":["SearchContactsRequest.query"]},"limit":"searchLimit"}},
+    {"tl":"TL_contacts_resolveUsername","javaType":"org.telegram.tgnet.TLRPC$TL_contacts_resolveUsername","tag":110,"operation":"resolve_username","message":"ResolveUsernameRequest","fields":{"flags":"flags","username":{"decision":"map","to":["ResolveUsernameRequest.username"]},"referer":"reject"}},
+    {"tl":"TL_users_getUsers","javaType":"org.telegram.tgnet.TLRPC$TL_users_getUsers","tag":111,"operation":"get_users","message":"GetUsersRequest","fields":{"id":{"decision":"map","to":["GetUsersRequest.users"],"nested":"InputUser"}}},
+    {"tl":"TL_contacts_getContacts","javaType":"org.telegram.tgnet.TLRPC$TL_contacts_getContacts","tag":112,"operation":"get_contacts","message":"GetContactsRequest","fields":{"hash":"cacheHash"}},
+    {"tl":"TL_contacts_resolvePhone","javaType":"org.telegram.tgnet.TLRPC$TL_contacts_resolvePhone","tag":113,"operation":"resolve_gid","message":"ResolveGidRequest","fields":{"phone":{"decision":"map","to":["ResolveGidRequest.gid"],"conversion":"Eleven-digit compatibility GID, not telephone dialing or address-book data"}}},
+    {"tl":"TL_contacts_importContacts","javaType":"org.telegram.tgnet.TLRPC$TL_contacts_importContacts","tag":114,"operation":"import_contacts","message":"ImportContactsRequest","fields":{"contacts":{"decision":"map","to":["ImportContactsRequest.contacts"],"nested":"TL_inputPhoneContact"}}},
+    {"tl":"TL_messages_createChat","javaType":"org.telegram.tgnet.TLRPC$TL_messages_createChat","tag":115,"operation":"create_group","message":"CreateGroupRequest","fields":{"flags":"flags","users":{"decision":"map","to":["CreateGroupRequest.users"],"nested":"InputUser"},"title":{"decision":"map","to":["CreateGroupRequest.title"]},"ttl_period":"reject"}},
+    {"tl":"TL_messages_getPeerSettings","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getPeerSettings","tag":116,"operation":"get_peer_settings","message":"GetPeerSettingsRequest","fields":{"peer":{"decision":"map","to":["GetPeerSettingsRequest.peer"],"nested":"InputPeer"}}},
+    {"tl":"TL_users_getFullUser","javaType":"org.telegram.tgnet.TLRPC$TL_users_getFullUser","tag":117,"operation":"get_full_user","message":"GetFullUserRequest","fields":{"id":{"decision":"map","to":["GetFullUserRequest.user"],"nested":"InputUser"}}},
+    {"tl":"TL_messages_getFullChat","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getFullChat","tag":118,"operation":"get_full_group","message":"GetFullGroupRequest","fields":{"chat_id":{"decision":"map","to":["GetFullGroupRequest.group_id"],"conversion":"Existing stable TL chat ID to group UUID; no new identity allocation"}}},
+    {"tl":"TL_messages_getChats","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getChats","tag":119,"operation":"get_groups","message":"GetGroupsRequest","fields":{"id":{"decision":"map","to":["GetGroupsRequest.group_ids"],"conversion":"Existing stable TL chat IDs to group UUIDs"}}},
+    {"tl":"TL_account_getNotifySettings","javaType":"org.telegram.tgnet.tl.TL_account$getNotifySettings","tag":120,"operation":"get_notify_settings","message":"GetNotifySettingsRequest","fields":{"peer":{"decision":"map","to":["GetNotifySettingsRequest.target"],"nested":"InputNotifyPeer"}},"legacyAlias":"getNotifySettings"}
+  ],
+  "transportOperations": [
+    {
+      "tag": 121,
+      "operation": "resolve_identities",
+      "message": "ResolveIdentitiesRequest",
+      "response": "ResolvedIdentities",
+      "purpose": "Authenticated transport-only bootstrap; not an Android TL class or an additional TL operation.",
+      "validation": "At most 100 combined IDs; each list contains unique positive int64 IDs. Unknown users/groups and nonmember groups return 404. Every response includes authenticated self exactly once and configured canonical server_domain, including an empty request. Missing persisted self mapping returns 404 SELF_IDENTITY_NOT_FOUND without allocating it.",
+      "identity": "Reverse existing TelegramIds user:<uuid>/chat:<uuid> keys only; no allocation or traversal that allocates IDs. Groups require Owned membership. Existing UUIDs, summaries, TelegramIds and NextTelegramId remain stable.",
+      "requestFields": ["ResolveIdentitiesRequest.tl_user_ids", "ResolveIdentitiesRequest.tl_chat_ids"],
+      "responseFields": ["ResolvedIdentities.server_domain", "ResolvedIdentities.users", "ResolvedIdentities.groups"]
+    }
+  ],
+  "featureOperations": [
+    {
+      "tag": 122, "operation": "get_wallpapers", "message": "GetWallpapersRequest", "response": "WallpaperList",
+      "purpose": "Account-private NoFile catalogue and durable revision query; reconnect/login/foreground recovery must query even when EventHint was lost.",
+      "validation": "Optional hash is an account revision, not pts. A hash hit still returns installed state and revision; missing state is unknown, explicit cleared is authoritative.",
+      "requestFields": ["GetWallpapersRequest.hash"],
+      "responseFields": ["WallpaperList.wallpapers", "WallpaperList.installed", "WallpaperList.revision", "WallpaperList.hash", "WallpaperList.not_modified"]
+    },
+    {
+      "tag": 123, "operation": "save_wallpaper", "message": "SaveWallpaperRequest", "response": "WallpaperMutationResult",
+      "purpose": "Persist or remove a private saved NoFile colour/gradient; signed id plus all settings is the key, including id zero.",
+      "validation": "Only typed NoFile accepted; explicit colour presence and settings validation. Idempotent exact replay, no payment or upload side effect. At most 100 saved items, overflow is 409 WALLPAPER_SAVED_LIMIT.",
+      "requestFields": ["SaveWallpaperRequest.wallpaper", "SaveWallpaperRequest.unsave"],
+      "responseFields": ["WallpaperMutationResult.applied", "WallpaperMutationResult.revision", "WallpaperMutationResult.installed"]
+    },
+    {
+      "tag": 124, "operation": "install_wallpaper", "message": "InstallWallpaperRequest", "response": "WallpaperMutationResult",
+      "purpose": "Persist the authenticated account's global default without inventing a chat service message or pts.",
+      "validation": "Explicit wallpaper or clear oneof required; success only after durable commit. NoFile validation shared with save and chat set.",
+      "requestFields": ["InstallWallpaperRequest.wallpaper", "InstallWallpaperRequest.clear"],
+      "responseFields": ["WallpaperMutationResult.applied", "WallpaperMutationResult.revision", "WallpaperMutationResult.installed"]
+    },
+    {
+      "tag": 125, "operation": "set_chat_wallpaper", "message": "SetChatWallpaperRequest", "response": "ChatWallpaperResult",
+      "purpose": "Persist personal overrides or a two-person direct conversation shared wallpaper. New update kind is returned only to this caller, never to legacy pts/difference streams.",
+      "validation": "Membership checked. Groups/saved allow personal view only. for_both requires direct and removes both overrides; revert requires no selection and for_both false. clear explicitly suppresses shared wallpaper. Service-message adoption is 501; no synthetic service message, message sequence or pts.",
+      "requestFields": ["SetChatWallpaperRequest.peer", "SetChatWallpaperRequest.wallpaper", "SetChatWallpaperRequest.clear", "SetChatWallpaperRequest.service_message_id", "SetChatWallpaperRequest.for_both", "SetChatWallpaperRequest.revert"],
+      "responseFields": ["ChatWallpaperResult.updates", "ChatWallpaperResult.state", "ChatWallpaperResult.revision"]
+    }
+  ],
+  "nested": {
+    "InputPeer": {
+      "javaType":"org.telegram.tgnet.TLRPC$InputPeer","unknownSubclassStatus":501,
+      "fields":{"peer":"reject","msg_id":"reject","user_id":"reject","channel_id":"reject","chat_id":"reject","access_hash":"accessHash"},
+      "variants": {
+        "TL_inputPeerUser":{"fields":{"user_id":{"decision":"map","to":["PeerRef.user","UserRef.user_id","UserRef.server_domain"],"conversion":"Stable TL user ID -> existing UUID and configured local domain"}}},
+        "TL_inputPeerChat":{"fields":{"chat_id":{"decision":"map","to":["PeerRef.group_id"],"conversion":"Stable TL chat ID -> existing group UUID"}}},
+        "TL_inputPeerSelf":{"select":"PeerRef.self","value":true,"fields":{}},
+        "TL_inputPeerEmpty":{"only":"getDialogs.offset_peer: default -> absent; all other contexts 400","fields":{}},
+        "TL_inputPeerChannel":{"rejectStatus":501,"fields":{}},
+        "TL_inputPeerChannelFromMessage":{"rejectStatus":501,"fields":{}},
+        "TL_inputPeerUserFromMessage":{"rejectStatus":501,"fields":{}},
+        "TL_inputPeerChannel_layer131":{"rejectStatus":501,"fields":{}},
+        "TL_inputPeerChannelFromMessage_layer131":{"rejectStatus":501,"fields":{}},
+        "TL_inputPeerChat_layer131":{"rejectStatus":501,"fields":{}},
+        "TL_inputPeerUser_layer131":{"rejectStatus":501,"fields":{}},
+        "TL_inputPeerUserFromMessage_layer131":{"rejectStatus":501,"fields":{}}
+      }
+    },
+    "InputUser": {
+      "javaType":"org.telegram.tgnet.TLRPC$InputUser","unknownSubclassStatus":501,
+      "fields":{"user_id":"reject","access_hash":"accessHash"},
+      "variants": {
+        "TL_inputUser":{"fields":{"user_id":{"decision":"map","to":["UserSelector.user","UserRef.user_id","UserRef.server_domain"],"conversion":"Stable TL ID to existing UUID and configured authority"}}},
+        "TL_inputUserSelf":{"select":"UserSelector.self","value":true,"fields":{}},
+        "TL_inputUserEmpty":{"rejectStatus":501,"fields":{}},
+        "TL_inputUserFromMessage":{"rejectStatus":501,"fields":{"peer":"reject","msg_id":"reject"}},
+        "TL_inputUserFromMessage_layer132":{"rejectStatus":501,"fields":{"peer":"reject","msg_id":"reject"}},
+        "TL_inputUser_layer132":{"rejectStatus":501,"fields":{}}
+      }
+    },
+    "InputDialogPeer": {
+      "javaType":"org.telegram.tgnet.TLRPC$InputDialogPeer","unknownSubclassStatus":501,"fields":{},
+      "variants": {
+        "TL_inputDialogPeer":{"fields":{"peer":{"decision":"map","to":["GetPeerDialogsRequest.peers"],"nested":"InputPeer"}}},
+        "TL_inputDialogPeerCommunity":{"rejectStatus":501,"fields":{"community":"reject"}},
+        "TL_inputDialogPeerFolder":{"rejectStatus":501,"fields":{"folder_id":"reject"}}
+      }
+    },
+    "InputReplyTo": {
+      "javaType":"org.telegram.tgnet.TLRPC$InputReplyTo","unknownSubclassStatus":501,
+      "fields":{"flags":"flags","reply_to_msg_id":{"decision":"map","to":["SendMessageRequest.reply_to_message_id"],"conversion":"Same-conversation message only; checked TL int32"},"top_msg_id":"reject","reply_to_peer_id":{"decision":"sameReplyPeer","nested":"InputPeer"},"quote_text":"reject","quote_entities":"reject","quote_offset":"reject","peer":"reject","monoforum_peer_id":"reject","story_id":"reject","todo_item_id":"reject","poll_option":"reject","quote_rich":"reject"},
+      "variants": {
+        "TL_inputReplyToMessage":{"fields":{}},
+        "TL_inputReplyToEphemeralMessage":{"rejectStatus":501,"fields":{"id":"reject"}},
+        "TL_inputReplyToMonoForum":{"rejectStatus":501,"fields":{}},
+        "TL_inputReplyToStory":{"rejectStatus":501,"fields":{}},
+        "TL_inputReplyToMessage_layer166":{"rejectStatus":501,"fields":{}},
+        "TL_inputReplyToMessage_layer203":{"rejectStatus":501,"fields":{}},
+        "TL_inputReplyToMessage_layer207":{"rejectStatus":501,"fields":{}},
+        "TL_inputReplyToMessage_layer223":{"rejectStatus":501,"fields":{}},
+        "TL_inputReplyToMessage_layer231":{"rejectStatus":501,"fields":{}},
+        "TL_inputReplyToStory_layer173":{"rejectStatus":501,"fields":{}}
+      }
+    },
+    "TL_inputPhoneContact": {
+      "javaType":"org.telegram.tgnet.TLRPC$TL_inputPhoneContact","unknownSubclassStatus":501,
+      "fields":{"flags":{"decision":"reject","reason":"Preserve legacy contact-note capability guard: any nonzero flags is unsupported; unlike ordinary structural flags this must not be silently discarded."},"client_id":{"decision":"map","to":["ImportContact.client_id"]},"phone":{"decision":"map","to":["ImportContact.gid"]},"first_name":{"decision":"map","to":["ImportContact.first_name"]},"last_name":{"decision":"map","to":["ImportContact.last_name"]},"note":"reject"},
+      "variants":{}
+    },
+    "InputNotifyPeer": {
+      "javaType":"org.telegram.tgnet.TLRPC$InputNotifyPeer","unknownSubclassStatus":501,"fields":{},
+      "variants": {
+        "TL_inputNotifyPeer":{"fields":{"peer":{"decision":"map","to":["NotifyTarget.peer"],"nested":"InputPeer"}}},
+        "TL_inputNotifyUsers":{"select":"NotifyTarget.all_users","fields":{}},
+        "TL_inputNotifyChats":{"select":"NotifyTarget.all_groups","fields":{}},
+        "TL_inputNotifyBroadcasts":{"select":"NotifyTarget.all_broadcasts","fields":{}},
+        "TL_inputNotifyCommunity":{"rejectStatus":501,"fields":{"community":"reject"}},
+        "TL_inputNotifyForumTopic":{"rejectStatus":501,"fields":{"peer":"reject","top_msg_id":"reject"}}
+      }
+    },
+    "MessageEntity": {
+      "javaType":"org.telegram.tgnet.TLRPC$MessageEntity","unknownSubclassStatus":501,
+      "fields":{"flags":"flags","collapsed":"reject","offset":{"decision":"map","to":["MessageEntity.offset_utf16"],"conversion":"UTF-16 code units, bounds checked against text; no UTF-8 byte offsets"},"length":{"decision":"map","to":["MessageEntity.length_utf16"]},"url":"reject","language":"reject"},
+      "variants": {
+        "TL_messageEntityBold":{"select":"MessageEntity.bold","fields":{}},
+        "TL_messageEntityItalic":{"select":"MessageEntity.italic","fields":{}},
+        "TL_messageEntityPre":{"select":"MessageEntity.pre","fields":{"language":{"decision":"map","to":["PreEntity.language"]}}},
+        "TL_messageEntityTextUrl":{"select":"MessageEntity.text_url","fields":{"url":{"decision":"map","to":["TextUrlEntity.url"]}}},
+        "TL_messageEntityUnderline":{"select":"MessageEntity.underline","fields":{}},
+        "TL_messageEntityStrike":{"select":"MessageEntity.strike","fields":{}},
+        "TL_messageEntitySpoiler":{"select":"MessageEntity.spoiler","fields":{}},
+        "TL_messageEntityCode":{"select":"MessageEntity.code","fields":{}},
+        "TL_messageEntityUrl":{"select":"MessageEntity.url","fields":{}},
+        "TL_messageEntityEmail":{"select":"MessageEntity.email","fields":{}},
+        "TL_messageEntityPhone":{"select":"MessageEntity.phone","fields":{}},
+        "TL_messageEntityMention":{"select":"MessageEntity.mention","fields":{}},
+        "TL_messageEntityHashtag":{"select":"MessageEntity.hashtag","fields":{}},
+        "TL_messageEntityCashtag":{"select":"MessageEntity.cashtag","fields":{}},
+        "TL_messageEntityBotCommand":{"select":"MessageEntity.bot_command","fields":{}},
+        "TL_inputMessageEntityMentionName":{"rejectStatus":501,"fields":{"user_id":"reject"}},
+        "TL_messageEntityBankCard":{"rejectStatus":501,"fields":{}},
+        "TL_messageEntityBlockquote":{"rejectStatus":501,"fields":{}},
+        "TL_messageEntityCustomEmoji":{"rejectStatus":501,"fields":{"document_id":"reject","document":"reject"}},
+        "TL_messageEntityDiffDelete":{"rejectStatus":501,"fields":{}},
+        "TL_messageEntityDiffInsert":{"rejectStatus":501,"fields":{}},
+        "TL_messageEntityDiffReplace":{"rejectStatus":501,"fields":{"old_text":"reject"}},
+        "TL_messageEntityFormattedDate":{"rejectStatus":501,"fields":{"relative":"reject","short_time":"reject","long_time":"reject","short_date":"reject","long_date":"reject","day_of_week":"reject","date":"reject"}},
+        "TL_messageEntityMentionName":{"rejectStatus":501,"fields":{"user_id":"reject"}},
+        "TL_messageEntityUnknown":{"rejectStatus":501,"fields":{}},
+        "TL_messageEntityTonAddress":{"rejectStatus":501,"fields":{}},
+        "TL_messageEntityBlockquote_layer180":{"rejectStatus":501,"fields":{}},
+        "TL_messageEntityMentionName_layer131":{"rejectStatus":501,"fields":{"user_id":"reject"}}
+      }
+    }
+  }
+}

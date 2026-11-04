@@ -1,0 +1,240 @@
+syntax = "proto3";
+package botgram.rpc.prewallpaper;
+option java_package = "org.telegram.botgram.protocol.prewallpaper";
+option java_outer_classname = "PreWallpaperRpc";
+option csharp_namespace = "Botgram.Protocol.Compat.PreWallpaper";
+
+// Frozen from the pre-wallpaper full-migration baseline, original SHA-256
+// 295935768e4285332b3e6a0fe63703035e57a545716621873763641b640251f1.
+// Only the package and generated language namespaces above differ from that snapshot.
+
+// v1: local authority only. UUID user_id and group_id never derive from GID/TL IDs.
+// All timestamps are Unix milliseconds; offsets/lengths are UTF-16 code units.
+message RpcRequest {
+  uint32 protocol_major = 1;
+  string request_id = 2;
+  oneof operation {
+    GetStateRequest get_state = 100;
+    GetDifferenceRequest get_difference = 101;
+    GetDialogsRequest get_dialogs = 102;
+    GetPinnedDialogsRequest get_pinned_dialogs = 103;
+    GetPeerDialogsRequest get_peer_dialogs = 104;
+    GetHistoryRequest get_history = 105;
+    GetMessagesRequest get_messages = 106;
+    SendMessageRequest send_message = 107;
+    ReadHistoryRequest read_history = 108;
+    SearchContactsRequest search_contacts = 109;
+    ResolveUsernameRequest resolve_username = 110;
+    GetUsersRequest get_users = 111;
+    GetContactsRequest get_contacts = 112;
+    ResolveGidRequest resolve_gid = 113;
+    ImportContactsRequest import_contacts = 114;
+    CreateGroupRequest create_group = 115;
+    GetPeerSettingsRequest get_peer_settings = 116;
+    GetFullUserRequest get_full_user = 117;
+    GetFullGroupRequest get_full_group = 118;
+    GetGroupsRequest get_groups = 119;
+    GetNotifySettingsRequest get_notify_settings = 120;
+    ResolveIdentitiesRequest resolve_identities = 121;
+  }
+}
+message RpcResponse {
+  uint32 protocol_major = 1;
+  string request_id = 2;
+  oneof outcome {
+    RpcError error = 10;
+    SyncState get_state = 100;
+    Difference get_difference = 101;
+    DialogPage get_dialogs = 102;
+    PeerDialogs get_pinned_dialogs = 103;
+    PeerDialogs get_peer_dialogs = 104;
+    MessagePage get_history = 105;
+    MessagePage get_messages = 106;
+    MessageSent send_message = 107;
+    AffectedMessages read_history = 108;
+    FoundPeers search_contacts = 109;
+    ResolvedPeer resolve_username = 110;
+    UserList get_users = 111;
+    ContactList get_contacts = 112;
+    ResolvedPeer resolve_gid = 113;
+    ImportedContacts import_contacts = 114;
+    GroupCreated create_group = 115;
+    PeerSettingsResult get_peer_settings = 116;
+    UserFullResult get_full_user = 117;
+    GroupFullResult get_full_group = 118;
+    GroupList get_groups = 119;
+    NotifySettings get_notify_settings = 120;
+    ResolvedIdentities resolve_identities = 121;
+  }
+}
+message RpcError {
+  string code = 1;
+  string message = 2;
+  bool retryable = 3;
+  optional uint32 retry_after_ms = 4;
+  // HTTP status is also retained on the HTTP response, not replaced by 200.
+  uint32 http_status = 5;
+}
+// WSS subprotocol botgram.event-hint.v1.protobuf. Only a wakeup watermark;
+// cursor is an event ID, never a Telegram pts or a consumed-message checkpoint.
+message EventHint {
+  uint32 protocol_major = 1;
+  int64 cursor = 2;
+}
+message Empty {}
+message UserRef { string server_domain = 1; string user_id = 2; }
+message UserSelector { oneof target { UserRef user = 1; bool self = 2; } }
+message PeerRef { oneof peer { UserRef user = 1; string group_id = 2; bool self = 3; } }
+message UserSummary {
+  UserRef identity = 1;
+  int64 tl_user_id = 2;
+  string username = 3;
+  string display_name = 4;
+  string first_name = 5;
+  string last_name = 6;
+  string gid = 7;
+  bool is_self = 8;
+  bool is_contact = 9;
+  bool is_mutual_contact = 10;
+}
+message Contact { UserRef user = 1; bool mutual = 2; }
+message GroupSummary {
+  string group_id = 1;
+  int64 tl_chat_id = 2;
+  string title = 3;
+  int32 participant_count = 4;
+  int64 created_at_ms = 5;
+  int32 version = 6;
+}
+message Participant { UserRef user = 1; UserRef inviter = 2; int64 joined_at_ms = 3; }
+message MessageEntity {
+  uint32 offset_utf16 = 1;
+  uint32 length_utf16 = 2;
+  oneof kind {
+    Empty bold = 10;
+    Empty italic = 11;
+    PreEntity pre = 12;
+    TextUrlEntity text_url = 13;
+    Empty underline = 14;
+    Empty strike = 15;
+    Empty spoiler = 16;
+    Empty code = 17;
+    Empty url = 18;
+    Empty email = 19;
+    Empty phone = 20;
+    Empty mention = 21;
+    Empty hashtag = 22;
+    Empty cashtag = 23;
+    Empty bot_command = 24;
+  }
+}
+message PreEntity { string language = 1; }
+message TextUrlEntity { string url = 1; }
+message ReplyRef { int64 message_id = 1; }
+message TextMessage {
+  string text = 1;
+  repeated MessageEntity entities = 2;
+  ReplyRef reply = 3;
+  bool silent = 4;
+}
+message GroupCreatedAction { string title = 1; repeated UserRef members = 2; }
+message ServiceMessage { oneof action { GroupCreatedAction group_created = 1; } }
+message Message {
+  int64 message_id = 1;
+  PeerRef peer = 2;
+  UserRef sender = 3;
+  int64 created_at_ms = 4;
+  bool outgoing = 5;
+  bool unread = 6;
+  oneof body { TextMessage text = 10; ServiceMessage service = 11; }
+}
+message NotifySettings {
+  optional bool show_previews = 1;
+  optional bool silent = 2;
+  optional int64 mute_until_ms = 3;
+}
+message PeerSettings {}
+message Dialog {
+  PeerRef peer = 1;
+  int64 top_message_id = 2;
+  int64 read_inbox_max_id = 3;
+  int64 read_outbox_max_id = 4;
+  int32 unread_count = 5;
+  NotifySettings notify_settings = 6;
+}
+message SyncState { int32 pts = 1; int32 qts = 2; int64 date_ms = 3; int32 seq = 4; int32 unread_count = 5; }
+message ReadReceipt { PeerRef peer = 1; int64 max_message_id = 2; int32 pts = 3; int32 pts_count = 4; }
+message MessageIdMapping { sfixed64 random_id = 1; int64 message_id = 2; }
+message NewMessage { Message message = 1; int32 pts = 2; int32 pts_count = 3; }
+message GidChanged { UserRef user = 1; string gid = 2; }
+message Update {
+  oneof kind {
+    NewMessage new_message = 1;
+    MessageIdMapping message_id = 2;
+    ReadReceipt read_inbox = 3;
+    ReadReceipt read_outbox = 4;
+    GidChanged gid_changed = 5;
+  }
+}
+message Updates { repeated Update updates = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; int64 date_ms = 4; int32 seq = 5; }
+message DifferenceEmpty { int64 date_ms = 1; int32 seq = 2; }
+message DifferenceTooLong { int32 pts = 1; }
+message DifferencePage {
+  repeated Message messages = 1;
+  repeated Update updates = 2;
+  repeated UserSummary users = 3;
+  repeated GroupSummary groups = 4;
+  SyncState state = 5;
+}
+message Difference {
+  oneof kind {
+    DifferenceEmpty empty = 1;
+    DifferenceTooLong too_long = 2;
+    DifferencePage complete = 3;
+    DifferencePage slice = 4;
+  }
+}
+message DialogPage { repeated Dialog dialogs = 1; repeated Message messages = 2; repeated UserSummary users = 3; repeated GroupSummary groups = 4; int32 total_count = 5; bool is_slice = 6; }
+message PeerDialogs { repeated Dialog dialogs = 1; repeated Message messages = 2; repeated UserSummary users = 3; repeated GroupSummary groups = 4; SyncState state = 5; }
+message MessagePage { repeated Message messages = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; }
+message MessageSent { Message message = 1; MessageIdMapping mapping = 2; Updates updates = 3; }
+message AffectedMessages { int32 pts = 1; int32 pts_count = 2; }
+message FoundPeers { repeated PeerRef results = 1; repeated PeerRef my_results = 2; repeated UserSummary users = 3; repeated GroupSummary groups = 4; }
+message ResolvedPeer { PeerRef peer = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; }
+message UserList { repeated UserSummary users = 1; }
+message ContactList { repeated Contact contacts = 1; repeated UserSummary users = 2; int32 saved_count = 3; }
+message ImportedContact { UserRef user = 1; sfixed64 client_id = 2; }
+message PopularInvite { sfixed64 client_id = 1; int32 importers = 2; }
+message ImportedContacts { repeated ImportedContact imported = 1; repeated UserSummary users = 2; repeated sfixed64 retry_contacts = 3; repeated PopularInvite popular_invites = 4; }
+message MissingInvitee { UserRef user = 1; bool premium_would_allow_invite = 2; bool premium_required_for_pm = 3; }
+message GroupCreated { GroupSummary group = 1; Updates updates = 2; repeated MissingInvitee missing_invitees = 3; }
+message PeerSettingsResult { PeerSettings settings = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; }
+message UserFullResult { UserRef user = 1; PeerSettings settings = 2; NotifySettings notify_settings = 3; string about = 4; int32 common_groups_count = 5; bool phone_calls_available = 6; bool phone_calls_private = 7; repeated UserSummary users = 8; repeated GroupSummary groups = 9; }
+message GroupFullResult { GroupSummary group = 1; string about = 2; repeated Participant participants = 3; int32 participants_version = 4; NotifySettings notify_settings = 5; repeated UserSummary users = 6; repeated GroupSummary groups = 7; }
+message GroupList { repeated GroupSummary groups = 1; }
+message GetStateRequest {}
+message GetDifferenceRequest { int32 pts = 1; }
+message GetDialogsRequest { optional int32 limit = 1; int64 offset_message_id = 2; PeerRef offset_peer = 3; int32 folder_id = 4; }
+message GetPinnedDialogsRequest {}
+message GetPeerDialogsRequest { repeated PeerRef peers = 1; int32 folder_id = 2; }
+message GetHistoryRequest { PeerRef peer = 1; int64 offset_message_id = 2; int64 offset_date_ms = 3; int32 add_offset = 4; int64 min_message_id = 5; int64 max_message_id = 6; optional int32 limit = 7; }
+message GetMessagesRequest { repeated int64 message_ids = 1; }
+message SendMessageRequest { PeerRef peer = 1; sfixed64 random_id = 2; string text = 3; repeated MessageEntity entities = 4; optional int64 reply_to_message_id = 5; bool silent = 6; }
+message ReadHistoryRequest { PeerRef peer = 1; int64 max_message_id = 2; }
+message SearchContactsRequest { string query = 1; }
+message ResolveUsernameRequest { string username = 1; }
+message GetUsersRequest { repeated UserSelector users = 1; }
+message GetContactsRequest {}
+message ResolveGidRequest { string gid = 1; }
+message ImportContact { sfixed64 client_id = 1; string gid = 2; string first_name = 3; string last_name = 4; }
+message ImportContactsRequest { repeated ImportContact contacts = 1; }
+message CreateGroupRequest { string title = 1; repeated UserSelector users = 2; }
+message GetPeerSettingsRequest { PeerRef peer = 1; }
+message GetFullUserRequest { UserSelector user = 1; }
+message GetFullGroupRequest { string group_id = 1; }
+message GetGroupsRequest { repeated string group_ids = 1; }
+message NotifyTarget { oneof target { PeerRef peer = 1; Empty all_users = 2; Empty all_groups = 3; Empty all_broadcasts = 4; } }
+message GetNotifySettingsRequest { NotifyTarget target = 1; }
+// Authenticated bootstrap of existing persisted TL identities, never ID allocation.
+message ResolveIdentitiesRequest { repeated int64 tl_user_ids = 1; repeated int64 tl_chat_ids = 2; }
+message ResolvedIdentities { string server_domain = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; }

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import net from 'node:net';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const fixtureRoot = process.env.BOTGRAM_TEST_ROOT ?? path.join(root, 'obj');
 const temp = await mkdtemp(path.join(process.env.BOTGRAM_TEST_ROOT ?? path.join(root, 'obj'), 'contacts-'));
 const database = path.join(temp, 'db.json');
 const socket = net.createServer().listen(0, '127.0.0.1');
@@ -35,11 +36,15 @@ async function req(method, route, token, body, status = 200) {
     headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
     body: body === undefined ? undefined : JSON.stringify(body) });
   const data = await response.json();
+  if (route === '/api/telegram/rpc') rpcFixtures.push({
+    requestType: body.$type, request: body, status: response.status, expectedStatus: status, response: data
+  });
   assert.equal(response.status, status, `${method} ${route}: ${JSON.stringify(data)}`);
   return data;
 }
 const type = name => 'org.telegram.tgnet.TLRPC$' + name;
 const fixtures = [];
+const rpcFixtures = [];
 async function rpc(token, method, fields = {}, status = 200) {
   const response = await req('POST', '/api/telegram/rpc', token, { $type: type(method), ...fields }, status);
   if (status === 200) fixtures.push({ requestType: type(method), response });
@@ -113,7 +118,9 @@ try {
   await rpc(alice.token, 'TL_messages_sendMessage', { peer, message: 'contact hello', random_id: 73001 });
   assert.equal((await rpc(alice.token, 'TL_messages_getHistory', { peer, limit: 10 })).messages[0].message, 'contact hello');
   await stop(); await start();
-  assert.deepEqual(await list(alice.token), after);
+  // Presence expires is derived from wall-clock time, so compare everything except that volatile field.
+  const persisted = value => JSON.parse(JSON.stringify(value), (key, v) => key === 'expires' ? undefined : v);
+  assert.deepEqual(persisted(await list(alice.token)), persisted(after));
   assert.equal((await list(carol.token)).users[0].first_name, 'Carol alias');
   await stop();
   // Old snapshots lacking the new collection remain readable.
@@ -122,6 +129,9 @@ try {
   await writeFile(database, JSON.stringify(legacy));
   await start();
   assert.equal((await list(alice.token)).contacts.length, 0);
-  await writeFile(path.join(root, 'obj/contact-tl-fixtures.json'), JSON.stringify(fixtures));
+  await writeFile(path.join(fixtureRoot, 'contact-tl-fixtures.json'), JSON.stringify(fixtures));
   console.log(`PASS: GID import/resolve/list, aliases and owner isolation, mutual flags, duplicates, invalid/missing/self, atomic rollback, GID changes, messaging, restart and legacy snapshot; ${fixtures.length} TL fixtures`);
-} finally { await stop(); }
+} finally {
+  await stop();
+  await writeFile(path.join(fixtureRoot, 'contacts-rpc-fixtures.json'), JSON.stringify(rpcFixtures, null, 2));
+}

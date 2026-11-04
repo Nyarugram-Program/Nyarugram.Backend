@@ -14,19 +14,20 @@ public static class TelegramGateway
     private static JsonObject T(string name, params (string Key, object? Value)[] fields)
     {
         string className = name == "Vector" ? "org.telegram.tgnet.Vector" :
+            name.StartsWith("TL_phone$", StringComparison.Ordinal) ? "org.telegram.tgnet.tl." + name :
             name is "TL_updateMessageID" or "TL_updateNewMessage" or "TL_updateReadHistoryInbox" or "TL_updateReadHistoryOutbox" or "TL_updateUserPhone"
+                or "TL_updateUserStatus" or "TL_updatePhoneCall" or "TL_updatePhoneCallSignalingData"
                 ? "org.telegram.tgnet.tl.TL_update$" + name : "org.telegram.tgnet.TLRPC$" + name;
         var result = new JsonObject { ["$type"] = className };
         foreach (var (key, value) in fields) result[key] = JsonSerializer.SerializeToNode(value, Store.Json);
         return result;
     }
+    private static JsonObject Bytes(byte[]? data) => new() { ["$bytes"] = Convert.ToBase64String(data ?? []) };
     private static long N(JsonNode? node, string name, long fallback = 0) => node?[name]?.GetValue<long>() ?? fallback;
     private static string S(JsonNode? node, string name) => node?[name]?.GetValue<string>() ?? "";
     private static int I(long number) => checked((int)number);
-    private static long UserId(Database db, string id) => db.TelegramId("user:" + id);
-    private static long ChatId(Database db, Conversation c) => db.TelegramId("chat:" + c.Id);
-    private static User FindUser(Database db, long id) => db.Users.FirstOrDefault(u => UserId(db, u.Id) == id)
-        ?? throw new ApiException(404, "USER_ID_INVALID");
+    private static long UserId(Database db, string id) => IdentityService.UserId(db, id);
+    private static long ChatId(Database db, Conversation c) => IdentityService.ChatId(db, c);
     private static long PeerId(JsonNode? peer, Database db, string uid)
     {
         if (S(peer, "$type").EndsWith("Self", StringComparison.Ordinal)) return UserId(db, uid);
@@ -34,149 +35,305 @@ public static class TelegramGateway
         return -N(peer, "chat_id");
     }
     private static JsonObject Peer(long id) => id > 0 ? T("TL_peerUser", ("user_id", id)) : T("TL_peerChat", ("chat_id", -id));
-    private static long DialogId(Database db, Conversation c, string uid) => c.Kind == "group" ? -ChatId(db, c) :
-        c.Kind == "saved" ? UserId(db, uid) : UserId(db, c.Members.First(m => m != uid));
+    private static long DialogId(Database db, Conversation c, string uid) => IdentityService.DialogId(db, c, uid);
     private static Conversation FindConversation(Database db, long peer, string uid, bool create = false)
+        => ConversationMessageService.FindByPeer(db, peer, uid, create);
+    // Presence is derived from the last authenticated request seen for that account.
+    private static JsonObject UserStatus(UserProfile user)
     {
-        var result = db.Conversations.FirstOrDefault(c => c.Members.Contains(uid) && DialogId(db, c, uid) == peer);
-        if (result is not null) return result;
-        if (!create || peer <= 0) throw new ApiException(404, "PEER_ID_INVALID");
-        var other = FindUser(db, peer);
-        var members = new[] { uid, other.Id }.Distinct().Order().ToArray();
-        result = new(Guid.NewGuid().ToString("N"), other.Id == uid ? "saved" : "direct", "", members, DateTimeOffset.UtcNow);
-        db.Conversations.Add(result); db.Emit(members, "conversation.created", result);
-        return result;
+        if (user.IsSelf) return T("TL_userStatusOnline", ("expires", Now + 60));
+        if (user.LastSeen is not { } seen) return T("TL_userStatusEmpty");
+        if (DateTimeOffset.UtcNow - seen <= PresenceService.OnlineWindow) return T("TL_userStatusOnline", ("expires", Now + 60));
+        return T("TL_userStatusOffline", ("was_online", (int)seen.ToUnixTimeSeconds()));
     }
-    private static JsonObject User(Database db, User user, string uid)
-    {
-        var contact = db.Contacts.FirstOrDefault(c => c.OwnerId == uid && c.UserId == user.Id);
-        bool mutual = contact is not null && db.Contacts.Any(c => c.OwnerId == user.Id && c.UserId == uid);
-        return T("TL_user",
-        ("id", UserId(db, user.Id)), ("access_hash", 1L), ("first_name", contact?.FirstName ?? user.DisplayName), ("last_name", contact?.LastName ?? ""),
-        ("username", user.Username), ("phone", user.Gid), ("self", user.Id == uid),
-        ("contact", contact is not null), ("mutual_contact", mutual),
-        ("flags", 1 | 2 | 4 | 8 | 16 | 32 | 64 | (user.Id == uid ? 1024 : 0) | (contact is not null ? 2048 : 0) | (mutual ? 4096 : 0)),
-        ("photo", T("TL_userProfilePhotoEmpty")), ("status", T("TL_userStatusEmpty")));
-    }
+    public static JsonObject User(UserProfile user) => T("TL_user",
+        ("id", user.TelegramId), ("access_hash", 1L), ("first_name", user.FirstName), ("last_name", user.LastName),
+        ("username", user.Username), ("phone", user.Gid), ("self", user.IsSelf),
+        ("contact", user.IsContact), ("mutual_contact", user.IsMutual),
+        ("premium", user.Premium),
+        ("flags", 1 | 2 | 4 | 8 | 16 | 32 | 64 | (user.IsSelf ? 1024 : 0) | (user.IsContact ? 2048 : 0) | (user.IsMutual ? 4096 : 0)
+            | (user.Premium ? 1 << 28 : 0)),
+        ("photo", T("TL_userProfilePhotoEmpty")), ("status", UserStatus(user)));
 
-    private static string ContactGid(string input)
-    {
-        string gid = input.Trim().Replace(" ", "");
-        if (gid.StartsWith('+')) gid = gid[1..];
-        if (!Gids.Valid(gid)) throw new ApiException(400, "PHONE_NUMBER_INVALID");
-        return gid;
-    }
     private static JsonObject Chat(Database db, Conversation c) => T("TL_chat", ("id", ChatId(db, c)), ("title", c.Title),
         ("photo", T("TL_chatPhotoEmpty")), ("participants_count", c.Members.Length), ("date", (int)c.CreatedAt.ToUnixTimeSeconds()), ("version", 1));
     private static JsonObject Message(Database db, Message m, string uid)
     {
-        var conversation = Auth.Conversation(db, m.ConversationId, uid);
-        var read = db.Receipts.FirstOrDefault(r => r.ConversationId == conversation.Id && r.UserId == uid)?.MessageId ?? 0;
+        var view = ConversationQueryService.DescribeMessage(db, m, uid);
         if (m.ServiceTitle is not null)
             return T("TL_messageService", ("id", I(m.Id)), ("date", (int)m.CreatedAt.ToUnixTimeSeconds()),
-                ("out", m.SenderId == uid), ("flags", 256 | (m.SenderId == uid ? 2 : 0)),
-                ("from_id", Peer(UserId(db, m.SenderId))), ("peer_id", Peer(DialogId(db, conversation, uid))),
-                ("action", T("TL_messageActionChatCreate", ("title", m.ServiceTitle), ("users", (m.ServiceMembers ?? []).Select(id => UserId(db, id)).ToArray()))));
+                ("out", view.Out), ("flags", 256 | (view.Out ? 2 : 0)),
+                ("from_id", Peer(view.SenderId)), ("peer_id", Peer(view.PeerId)),
+                ("action", T("TL_messageActionChatCreate", ("title", m.ServiceTitle), ("users", view.ServiceMembers))));
         return T("TL_message", ("id", I(m.Id)), ("date", (int)m.CreatedAt.ToUnixTimeSeconds()),
-            ("message", m.Text), ("out", m.SenderId == uid), ("unread", m.SenderId != uid && m.Id > read),
-            ("flags", 256 | 512 | (m.SenderId == uid ? 2 : 0) | (m.TelegramEntities is not null ? 128 : 0) | (m.ReplyToMessageId is not null ? 8 : 0) | (m.Silent ? 8192 : 0)),
+            ("message", m.Text), ("out", view.Out), ("unread", view.Unread),
+            ("flags", 256 | 512 | (view.Out ? 2 : 0) | (m.TelegramEntities is not null ? 128 : 0) | (m.ReplyToMessageId is not null ? 8 : 0) | (m.Silent ? 8192 : 0)),
             ("silent", m.Silent), ("entities", m.TelegramEntities),
             ("reply_to", m.ReplyToMessageId is null ? null : T("TL_messageReplyHeader", ("flags", 16), ("reply_to_msg_id", I(m.ReplyToMessageId.Value)))),
-            ("from_id", Peer(UserId(db, m.SenderId))), ("peer_id", Peer(DialogId(db, conversation, uid))),
-            ("dialog_id", DialogId(db, conversation, uid)), ("media", T("TL_messageMediaEmpty")));
+            ("from_id", Peer(view.SenderId)), ("peer_id", Peer(view.PeerId)),
+            ("dialog_id", view.PeerId), ("media", T("TL_messageMediaEmpty")));
     }
-    private static IEnumerable<ChatEvent> Stream(Database db, string uid) => db.Events.Where(e => e.Recipients.Contains(uid) && e.Type is "message.created" or "receipt.updated" or "user.gid_changed");
-    // Telegram treats pts=0 as uninitialized. Start at 1 so the first received message is not skipped.
-    private static int Pts(Database db, string uid) => 1 + Stream(db, uid).Count();
+    private static int Pts(Database db, string uid) => SyncService.Pts(db, uid);
     private static JsonObject State(Database db, string uid, int? pts = null) => T("TL_updates_state", ("pts", pts ?? Pts(db, uid)), ("qts", 0), ("date", Now), ("seq", 0), ("unread_count", 0));
-    private static JsonObject Dialog(Database db, Conversation c, string uid)
-    {
-        long inbox = db.Receipts.FirstOrDefault(r => r.ConversationId == c.Id && r.UserId == uid)?.MessageId ?? 0;
-        long outbox = db.Receipts.Where(r => r.ConversationId == c.Id && r.UserId != uid).Select(r => r.MessageId).DefaultIfEmpty(0).Max();
-        return T("TL_dialog", ("id", DialogId(db, c, uid)), ("peer", Peer(DialogId(db, c, uid))),
-            ("top_message", I(db.Messages.LastOrDefault(m => m.ConversationId == c.Id)?.Id ?? 0)),
-            ("read_inbox_max_id", I(inbox)), ("read_outbox_max_id", I(outbox)),
-            ("unread_count", db.Messages.Count(m => m.ConversationId == c.Id && m.SenderId != uid && m.Id > inbox)),
-            ("notify_settings", T("TL_peerNotifySettings")));
-    }
+    private static JsonObject Dialog(DialogView view) => T("TL_dialog", ("id", view.PeerId), ("peer", Peer(view.PeerId)),
+        ("top_message", I(view.LastMessage?.Id ?? 0)),
+        ("read_inbox_max_id", I(view.Inbox)), ("read_outbox_max_id", I(view.Outbox)),
+        ("unread_count", view.UnreadCount), ("notify_settings", T("TL_peerNotifySettings")));
     private static JsonObject Updates(Database db, string uid, IEnumerable<JsonObject> updates, IEnumerable<Conversation>? conversations = null)
         => T("TL_updates", ("updates", updates.ToArray()), ("date", Now), ("seq", 0),
-            ("users", db.Users.Where(u => u.Id == uid || db.Conversations.Any(c => c.Members.Contains(uid) && c.Members.Contains(u.Id))).Select(u => User(db, u, uid)).ToArray()),
-            ("chats", (conversations ?? db.Conversations.Where(c => c.Members.Contains(uid))).Where(c => c.Kind == "group").Select(c => Chat(db, c)).ToArray()));
-    public static JsonObject CurrentUser(Database db, string uid) => User(db, db.Users.Single(u => u.Id == uid), uid);
+            ("users", UserQueryService.Related(db, uid, false).Select(User).ToArray()),
+            ("chats", (conversations ?? ConversationQueryService.Owned(db, uid)).Where(c => c.Kind == "group").Select(c => Chat(db, c)).ToArray()));
+    public static JsonObject CurrentUser(Database db, string uid) => User(UserQueryService.Current(db, uid));
 
-    private static JsonElement? Entities(JsonObject request, string text)
+    private static MessageEntity[]? Entities(JsonObject request, string text)
     {
         if (request["entities"] is not JsonArray input || input.Count == 0) return null;
-        if (input.Count > 100) throw new ApiException(400, "ENTITIES_TOO_LONG");
-        var result = new List<JsonObject>();
+        MessageEntityService.ValidateCount(input.Count);
+        var result = new List<MessageEntity>();
         foreach (var entity in input)
         {
-            string name = S(entity, "$type").Split('$').Last();
-            if (name is not ("TL_messageEntityBold" or "TL_messageEntityItalic" or "TL_messageEntityUnderline" or
-                "TL_messageEntityStrike" or "TL_messageEntitySpoiler" or "TL_messageEntityCode" or "TL_messageEntityPre" or
-                "TL_messageEntityUrl" or "TL_messageEntityTextUrl" or "TL_messageEntityEmail" or "TL_messageEntityPhone" or
-                "TL_messageEntityMention" or "TL_messageEntityHashtag" or "TL_messageEntityCashtag" or "TL_messageEntityBotCommand"))
-                throw new ApiException(501, "BOTGRAM_ENTITY_UNSUPPORTED");
-            int offset = I(N(entity, "offset")), length = I(N(entity, "length"));
-            if (offset < 0 || length <= 0 || length > text.Length || offset > text.Length - length)
-                throw new ApiException(400, "ENTITY_BOUNDS_INVALID");
-            int end = offset + length;
-            if ((offset > 0 && char.IsLowSurrogate(text[offset]) && char.IsHighSurrogate(text[offset - 1])) ||
-                (end < text.Length && char.IsLowSurrogate(text[end]) && char.IsHighSurrogate(text[end - 1])))
-                throw new ApiException(400, "ENTITY_BOUNDS_INVALID");
-            var normalized = T(name, ("offset", offset), ("length", length));
-            if (name == "TL_messageEntityPre") normalized["language"] = S(entity, "language");
-            if (name == "TL_messageEntityTextUrl")
-            {
-                string url = S(entity, "url");
-                if (url.Length is 0 or > 2048) throw new ApiException(400, "ENTITY_URL_INVALID");
-                normalized["url"] = url;
-            }
-            result.Add(normalized);
+            var kind = MessageEntityJsonConverter.ParseKind(S(entity, "$type"));
+            MessageEntityService.ValidateKind(kind);
+            var value = new MessageEntity(kind, I(N(entity, "offset")), I(N(entity, "length")));
+            MessageEntityService.ValidateBounds(text, value.Offset, value.Length);
+            if (kind == MessageEntityKind.Pre) value = value with { Language = S(entity, "language") };
+            if (kind == MessageEntityKind.TextUrl) value = value with { Url = S(entity, "url") };
+            result.Add(MessageEntityService.Validate(text, value));
         }
-        return JsonSerializer.SerializeToElement(result, Store.Json);
+        return result.ToArray();
+    }
+
+    // ---------- phone.* (1:1 calls) ----------
+    // Telegram's 2048-bit DH prime; clients derive the voice-call auth key from p/g and the exchanged g_a/g_b.
+    private static readonly byte[] DhPrime = Convert.FromHexString(
+        "c71caeb9c6b1c9048e6c522f70f13f73980d40238e3e21c14934d037563d930f" +
+        "48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c3720" +
+        "fd51f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f64247" +
+        "7fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3c4f3a9060bee67cf9a4a4a" +
+        "695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754fd17" +
+        "ed950d5965b4b9dd46582db1178d169c6bc465b0d6ff9ca3928fef5b9ae4e418" +
+        "fc15e83ebea0f87fa9ff5eed70050ded2849f47bf959d956850ce929851f0d8115" +
+        "f635b105ee2e4e15d04b2454bf6f4fadf034b10403119cd8e3b92fcc5b");
+    private static byte[] B(JsonNode? node) => S(node, "$bytes") is { Length: > 0 } text ? Convert.FromBase64String(text) : [];
+    private static JsonObject DefaultProtocol() => T("TL_phone$TL_phoneCallProtocol",
+        ("flags", 3), ("udp_p2p", true), ("udp_reflector", true), ("min_layer", 65), ("max_layer", 92),
+        ("library_versions", new[] { "10.0.0" }));
+    private static JsonObject? Protocol(JsonNode? node) => node is JsonObject value ? (JsonObject)value.DeepClone() : null;
+    private static Call? FindTelegramCall(Database db, long id) =>
+        id == 0 ? null : db.Calls.FirstOrDefault(call => call.TelegramId == id);
+    private static Call RequireCall(Database db, JsonNode? peer, string uid)
+    {
+        var call = FindTelegramCall(db, N(peer, "id")) ?? throw new ApiException(400, "CALL_NOT_FOUND");
+        if (call.AccessHash != N(peer, "access_hash") || (call.CallerId != uid && call.CalleeId != uid))
+            throw new ApiException(400, "CALL_NOT_FOUND");
+        return call;
+    }
+    private static void SaveCall(Database db, Call call)
+    {
+        int index = db.Calls.FindIndex(existing => existing.Id == call.Id);
+        if (index < 0) db.Calls.Add(call); else db.Calls[index] = call;
+    }
+    private static JsonObject[] PhoneConnections()
+    {
+        var result = new List<JsonObject>();
+        long id = 1;
+        foreach (var relay in CallService.Relays)
+            result.Add(T("TL_phoneConnectionWebrtc", ("flags", relay.Turn ? 1 : 2), ("id", id++),
+                ("ip", relay.Host), ("ipv6", ""), ("port", relay.Port), ("turn", relay.Turn), ("stun", !relay.Turn),
+                ("username", relay.Turn ? relay.Username : ""), ("password", relay.Turn ? relay.Password : "")));
+        return result.ToArray();
+    }
+    private static JsonObject CallJson(Database db, Call call, string uid)
+    {
+        long admin = UserId(db, call.CallerId), participant = UserId(db, call.CalleeId);
+        var protocol = call.Protocol ?? DefaultProtocol();
+        int videoFlag = call.Video ? 64 : 0;
+        if (call.State == "ringing" && call.CallerId == uid)
+            return T("TL_phone$TL_phoneCallWaiting", ("flags", videoFlag | (call.ReceiveDate != 0 ? 1 : 0)),
+                ("video", call.Video), ("id", call.TelegramId), ("access_hash", call.AccessHash), ("date", call.Date),
+                ("admin_id", admin), ("participant_id", participant), ("protocol", protocol), ("receive_date", call.ReceiveDate));
+        if (call.State == "ringing")
+            return T("TL_phone$phoneCallRequested", ("flags", videoFlag), ("video", call.Video),
+                ("id", call.TelegramId), ("access_hash", call.AccessHash), ("date", call.Date),
+                ("admin_id", admin), ("participant_id", participant), ("g_a_hash", Bytes(call.GAHash)), ("protocol", protocol));
+        if (call.State == "accepted")
+            return T("TL_phone$TL_phoneCallAccepted", ("flags", videoFlag), ("video", call.Video),
+                ("id", call.TelegramId), ("access_hash", call.AccessHash), ("date", call.Date),
+                ("admin_id", admin), ("participant_id", participant), ("g_b", Bytes(call.GB)), ("protocol", protocol));
+        if (call.State == "active")
+            return T("TL_phone$TL_phoneCall", ("flags", videoFlag | (CallService.P2p ? 32 : 0)), ("video", call.Video),
+                ("p2p_allowed", CallService.P2p), ("id", call.TelegramId), ("access_hash", call.AccessHash), ("date", call.Date),
+                ("admin_id", admin), ("participant_id", participant), ("g_a_or_b", Bytes(call.GA)),
+                ("key_fingerprint", call.KeyFingerprint), ("protocol", protocol),
+                ("connections", (call.Connections ?? []).ToArray()), ("start_date", call.StartDate));
+        return T("TL_phone$TL_phoneCallDiscarded", ("flags", videoFlag | 1 | 2), ("video", call.Video),
+            ("id", call.TelegramId), ("reason", T("TL_phoneCallDiscardReason" + call.Reason)),
+            ("duration", call.Duration));
+    }
+    private static JsonObject PhoneResult(Database db, Call call, string uid)
+    {
+        string other = call.CallerId == uid ? call.CalleeId : call.CallerId;
+        return T("TL_phone$TL_phone_phoneCall", ("phone_call", CallJson(db, call, uid)),
+            ("users", new[] { User(UserQueryService.Find(db, UserId(db, other), uid)) }));
+    }
+    private static string ReasonName(string type) =>
+        type.EndsWith("Missed", StringComparison.Ordinal) ? "Missed" :
+        type.EndsWith("Busy", StringComparison.Ordinal) ? "Busy" :
+        type.EndsWith("Disconnect", StringComparison.Ordinal) ? "Disconnect" : "Hangup";
+    private static JsonObject RequestCall(Database db, string uid, JsonObject request)
+    {
+        long peerId = PeerId(request["user_id"], db, uid);
+        var callee = IdentityService.FindUser(db, peerId);
+        if (callee.Id == uid) throw new ApiException(400, "CALL_PEER_INVALID");
+        if (!AccountPrivacyService.Allowed(db, callee.Id, uid, Botgram.Protocol.V1.PrivacyKey.PhoneCall))
+            throw new ApiException(403, "USER_PRIVACY_RESTRICTED");
+        int randomId = I(N(request, "random_id"));
+        var replay = db.Calls.FirstOrDefault(call => call.TelegramId != 0 && call.CallerId == uid && call.RandomId == randomId);
+        if (replay is not null && CallService.InProgress(replay.State)) return PhoneResult(db, replay, uid);
+        var conversation = ConversationMessageService.FindByPeer(db, peerId, uid, create: true);
+        CallService.ValidateCallee(conversation, uid, callee.Id);
+        if (db.Calls.Any(call => CallService.InProgress(call.State) &&
+            (call.CallerId == uid || call.CalleeId == uid || call.CallerId == callee.Id || call.CalleeId == callee.Id)))
+            throw new ApiException(409, "CALL_BUSY");
+        if (db.NextCallId == 0) db.NextCallId = 1_000_000_000;
+        // Kept within the IEEE-754 safe integer range so the TL-JSON field round-trips
+        // unchanged through the app and generic JSON tooling.
+        long accessHash = BitConverter.ToInt64(System.Security.Cryptography.RandomNumberGenerator.GetBytes(8)) & 0x1FFFFFFFFFFFFF;
+        if (accessHash == 0) accessHash = 1;
+        var created = new Call(Guid.NewGuid().ToString("N"), conversation.Id, uid, callee.Id, "ringing", DateTimeOffset.UtcNow,
+            TelegramId: db.NextCallId++, AccessHash: accessHash, RandomId: randomId,
+            Video: request["video"]?.GetValue<bool>() ?? false, Protocol: Protocol(request["protocol"]) ?? DefaultProtocol(),
+            GAHash: B(request["g_a_hash"]), Date: Now);
+        SaveCall(db, created);
+        db.Emit([created.CallerId, created.CalleeId], "call.updated", created);
+        return PhoneResult(db, created, uid);
+    }
+    private static JsonObject ExecutePhone(Database db, string uid, string method, JsonObject request)
+    {
+        switch (method)
+        {
+            case "requestCall": return RequestCall(db, uid, request);
+            case "receivedCall":
+            {
+                var call = RequireCall(db, request["peer"], uid);
+                if (call.CalleeId != uid) throw new ApiException(400, "CALL_NOT_FOUND");
+                if (call.State == "ringing" && call.ReceiveDate == 0)
+                {
+                    var updated = call with { ReceiveDate = Now };
+                    SaveCall(db, updated);
+                    db.Emit([call.CallerId], "call.updated", updated);
+                }
+                return T("TL_boolTrue");
+            }
+            case "acceptCall":
+            {
+                var call = RequireCall(db, request["peer"], uid);
+                if (call.CalleeId != uid) throw new ApiException(400, "CALL_NOT_FOUND");
+                if (call.State != "ringing") throw new ApiException(400, "CALL_ALREADY_ACCEPTED");
+                var updated = call with
+                {
+                    State = "accepted", GB = B(request["g_b"]), UpdatedAt = DateTimeOffset.UtcNow,
+                    Protocol = Protocol(request["protocol"]) ?? call.Protocol
+                };
+                SaveCall(db, updated);
+                db.Emit([call.CallerId], "call.updated", updated);
+                return PhoneResult(db, updated, uid);
+            }
+            case "confirmCall":
+            {
+                var call = RequireCall(db, request["peer"], uid);
+                if (call.CallerId != uid) throw new ApiException(400, "CALL_NOT_FOUND");
+                if (call.State != "accepted") throw new ApiException(400, "CALL_NOT_ACCEPTED");
+                var updated = call with
+                {
+                    State = "active", GA = B(request["g_a"]), KeyFingerprint = N(request, "key_fingerprint"),
+                    StartDate = Now, UpdatedAt = DateTimeOffset.UtcNow, Connections = PhoneConnections(),
+                    Protocol = Protocol(request["protocol"]) ?? call.Protocol
+                };
+                SaveCall(db, updated);
+                db.Emit([call.CalleeId], "call.updated", updated);
+                return PhoneResult(db, updated, uid);
+            }
+            case "discardCall":
+            {
+                var call = RequireCall(db, request["peer"], uid);
+                string reason = ReasonName(S(request["reason"], "$type"));
+                int duration = I(N(request, "duration"));
+                if (duration <= 0 && call.StartDate != 0) duration = Math.Max(0, Now - call.StartDate);
+                var updated = call with { State = "ended", Reason = reason, Duration = duration, UpdatedAt = DateTimeOffset.UtcNow };
+                SaveCall(db, updated);
+                db.Emit([call.CallerId, call.CalleeId], "call.updated", updated);
+                return Updates(db, uid, new[] { T("TL_updatePhoneCall", ("phone_call", CallJson(db, updated, uid))) });
+            }
+            case "sendSignalingData":
+            {
+                var call = RequireCall(db, request["peer"], uid);
+                if (call.State != "active") throw new ApiException(400, "CALL_NOT_ACTIVE");
+                string other = call.CallerId == uid ? call.CalleeId : call.CallerId;
+                db.Emit([other], "call.tl_signal", new CallSignal(call.Id, uid, "tl", Convert.ToBase64String(B(request["data"]))));
+                return T("TL_boolTrue");
+            }
+            case "getCallConfig": return T("TL_dataJSON", ("data", "{}"));
+            case "saveCallDebug": return T("TL_boolTrue");
+            default: throw new ApiException(501, "BOTGRAM_RPC_UNSUPPORTED:" + method);
+        }
     }
 
     public static JsonObject Execute(Database db, string uid, JsonObject request)
     {
+        using var diagnostic = RpcDiagnosticStage.Start("json_mapper_ms");
         string method = S(request, "$type").Split('$').Last();
-        var owned = db.Conversations.Where(c => c.Members.Contains(uid)).ToArray();
-        var users = db.Users.Where(u => u.Id == uid || owned.Any(c => c.Members.Contains(u.Id)) ||
-            db.Contacts.Any(c => c.OwnerId == uid && c.UserId == u.Id)).Select(u => User(db, u, uid)).ToArray();
+        // Every authenticated RPC carries presence; the outer write transaction persists it.
+        PresenceService.Touch(db, uid);
+        var owned = ConversationQueryService.Owned(db, uid);
+        var users = UserQueryService.Related(db, uid, true).Select(User).ToArray();
         var chats = owned.Where(c => c.Kind == "group").Select(c => Chat(db, c)).ToArray();
         switch (method)
         {
             case "TL_updates_getState": return State(db, uid);
             case "TL_updates_getDifference":
             {
-                int after = Math.Max(0, I(N(request, "pts")) - 1);
-                var stream = Stream(db, uid).ToArray();
-                if (after > stream.Length) return T("TL_updates_differenceTooLong", ("pts", Pts(db, uid)));
-                var page = stream.Skip(after).Take(100).ToArray();
-                if (page.Length == 0) return T("TL_updates_differenceEmpty", ("date", Now), ("seq", 0));
+                var difference = SyncService.Difference(db, uid, I(N(request, "pts")));
+                int after = difference.PreviousCount;
+                var page = difference.Events;
+                if (difference.Kind == DifferenceKind.TooLong) return T("TL_updates_differenceTooLong", ("pts", difference.Pts));
+                if (difference.Kind == DifferenceKind.Empty) return T("TL_updates_differenceEmpty", ("date", Now), ("seq", 0));
                 var messages = new List<JsonObject>(); var updates = new List<JsonObject>();
                 foreach (var e in page)
                 {
-                    var value = JsonSerializer.SerializeToElement(e.Payload, Store.Json);
-                    if (e.Type == "message.created")
+                    if (e.Payload is Message m)
                     {
-                        var m = value.Deserialize<Message>(Store.Json)!; messages.Add(Message(db, m, uid));
+                        messages.Add(Message(db, m, uid));
                     }
-                    else if (e.Type == "user.gid_changed")
+                    else if (e.Payload is GidChanged changed)
                     {
-                        var changedId = value.GetProperty("userId").GetString()!;
-                        updates.Add(T("TL_updateUserPhone", ("user_id", UserId(db, changedId)), ("phone", db.Users.Single(u => u.Id == changedId).Gid)));
+                        var changedUser = UserQueryService.Find(db, UserId(db, changed.UserId), uid);
+                        updates.Add(T("TL_updateUserPhone", ("user_id", changedUser.TelegramId), ("phone", changedUser.Gid)));
                     }
-                    else
+                    else if (e.Payload is PresenceChanged presence)
                     {
-                        var r = value.Deserialize<Receipt>(Store.Json)!;
+                        var changedUser = UserQueryService.Find(db, UserId(db, presence.UserId), uid);
+                        updates.Add(T("TL_updateUserStatus", ("user_id", changedUser.TelegramId), ("status", UserStatus(changedUser))));
+                    }
+                    else if (e.Payload is Receipt r)
+                    {
                         var c = Auth.Conversation(db, r.ConversationId, uid);
                         updates.Add(T(r.UserId == uid ? "TL_updateReadHistoryInbox" : "TL_updateReadHistoryOutbox",
                             ("peer", Peer(DialogId(db, c, uid))), ("max_id", I(r.MessageId)), ("pts", after + messages.Count + updates.Count + 2), ("pts_count", 1)));
                     }
+                    else if (e.Payload is Call call && call.TelegramId != 0 && (call.CallerId == uid || call.CalleeId == uid))
+                    {
+                        updates.Add(T("TL_updatePhoneCall", ("phone_call", CallJson(db, call, uid))));
+                    }
+                    else if (e.Payload is CallSignal signal && signal.SenderId != uid)
+                    {
+                        var tlCall = db.Calls.FirstOrDefault(item => item.Id == signal.CallId && item.TelegramId != 0);
+                        if (tlCall is not null)
+                            updates.Add(T("TL_updatePhoneCallSignalingData",
+                                ("phone_call_id", tlCall.TelegramId), ("data", Bytes(Convert.FromBase64String(signal.Data)))));
+                    }
                 }
-                bool more = after + page.Length < stream.Length;
+                bool more = difference.Kind == DifferenceKind.Slice;
                 return T(more ? "TL_updates_differenceSlice" : "TL_updates_difference", ("new_messages", messages),
                     ("other_updates", updates), ("users", users), ("chats", chats),
                     (more ? "intermediate_state" : "state", State(db, uid, after + page.Length + 1)));
@@ -185,50 +342,33 @@ public static class TelegramGateway
             case "TL_messages_getPinnedDialogs":
             case "TL_messages_getPeerDialogs":
             {
-                var selected = owned.AsEnumerable();
-                if (method == "TL_messages_getPinnedDialogs" || N(request, "folder_id") != 0) selected = [];
-                if (method == "TL_messages_getPeerDialogs")
-                {
-                    var peers = (request["peers"] as JsonArray ?? []).Select(p => PeerId(p?["peer"], db, uid)).ToHashSet();
-                    selected = selected.Where(c => peers.Contains(DialogId(db, c, uid)));
-                }
-                selected = selected.OrderByDescending(c => db.Messages.LastOrDefault(m => m.ConversationId == c.Id)?.Id ?? 0).ThenBy(c => c.Id);
-                if (method == "TL_messages_getDialogs")
-                {
-                    long offset = N(request, "offset_id");
-                    long offsetPeer = PeerId(request["offset_peer"], db, uid);
-                    if (offsetPeer != 0 && selected.Any(c => DialogId(db, c, uid) == offsetPeer))
-                        selected = selected.SkipWhile(c => DialogId(db, c, uid) != offsetPeer).Skip(1);
-                    else if (offset != 0) selected = selected.Where(c => (db.Messages.LastOrDefault(m => m.ConversationId == c.Id)?.Id ?? 0) < offset);
-                    selected = selected.Take(Math.Clamp(I(N(request, "limit", 100)), 1, 100));
-                }
-                var array = selected.ToArray();
-                string responseType = method != "TL_messages_getDialogs" ? "TL_messages_peerDialogs" : array.Length < owned.Length ? "TL_messages_dialogsSlice" : "TL_messages_dialogs";
-                return T(responseType, ("count", owned.Length),
-                    ("dialogs", array.Select(c => Dialog(db, c, uid)).ToArray()), ("users", users), ("chats", chats), ("state", State(db, uid)),
-                    ("messages", array.Select(c => db.Messages.LastOrDefault(m => m.ConversationId == c.Id)).Where(m => m is not null).Select(m => Message(db, m!, uid)).ToArray()));
+                var selection = method == "TL_messages_getPinnedDialogs" ? DialogSelection.Pinned :
+                    method == "TL_messages_getPeerDialogs" ? DialogSelection.Peers : DialogSelection.All;
+                long folder = selection == DialogSelection.Pinned ? 0 : N(request, "folder_id");
+                var peers = selection == DialogSelection.Peers
+                    ? (request["peers"] as JsonArray ?? []).Select(p => PeerId(p?["peer"], db, uid)).ToArray() : null;
+                long offset = selection == DialogSelection.All ? N(request, "offset_id") : 0;
+                long offsetPeer = selection == DialogSelection.All ? PeerId(request["offset_peer"], db, uid) : 0;
+                int limit = selection == DialogSelection.All ? I(N(request, "limit", 100)) : 100;
+                var page = ConversationQueryService.Dialogs(db, uid, new DialogQuery(selection, folder == 0 ? 0 : 1, offset, offsetPeer, limit, peers));
+                string responseType = method != "TL_messages_getDialogs" ? "TL_messages_peerDialogs" : page.IsSlice ? "TL_messages_dialogsSlice" : "TL_messages_dialogs";
+                return T(responseType, ("count", page.TotalCount),
+                    ("dialogs", page.Dialogs.Select(Dialog).ToArray()), ("users", users), ("chats", chats), ("state", State(db, uid)),
+                    ("messages", page.Dialogs.Select(d => d.LastMessage).Where(m => m is not null).Select(m => Message(db, m!, uid)).ToArray()));
             }
             case "TL_messages_getHistory":
             {
                 var c = FindConversation(db, PeerId(request["peer"], db, uid), uid, true);
-                long before = N(request, "offset_id");
-                // Around-message/forward pagination requires a separate contract; fail rather than return a misleading page.
-                var history = db.Messages.Where(m => m.ConversationId == c.Id).OrderByDescending(m => m.Id).ToArray();
-                int anchor = before != 0 ? Array.FindIndex(history, m => m.Id < before) :
-                    N(request, "offset_date") != 0 ? Array.FindIndex(history, m => m.CreatedAt.ToUnixTimeSeconds() < N(request, "offset_date")) : 0;
-                if (anchor < 0) anchor = history.Length;
-                int start = Math.Clamp(anchor + I(N(request, "add_offset")), 0, history.Length);
-                var values = history.Skip(start).Where(m => (N(request, "min_id") == 0 || m.Id > N(request, "min_id")) &&
-                    (N(request, "max_id") == 0 || m.Id < N(request, "max_id"))).Take(Math.Clamp(I(N(request, "limit", 50)), 1, 100));
-                var participants = db.Users.Where(u => c.Members.Contains(u.Id)).Select(u => User(db, u, uid)).ToArray();
+                var values = ConversationMessageService.History(db, c, new(N(request, "offset_id"), N(request, "offset_date"),
+                    I(N(request, "add_offset")), N(request, "min_id"), N(request, "max_id"), I(N(request, "limit", 50))));
+                var participants = UserQueryService.Participants(db, c, uid).Select(User).ToArray();
                 return T("TL_messages_messages", ("messages", values.Select(m => Message(db, m, uid)).ToArray()), ("users", participants), ("chats", chats));
             }
             case "TL_messages_getMessages":
             {
-                var ids = (request["id"] as JsonArray ?? []).Select(p => N(p, "id")).ToHashSet();
-                var conversationIds = owned.Select(c => c.Id).ToHashSet();
+                var ids = (request["id"] as JsonArray ?? []).Select(p => N(p, "id")).ToArray();
                 return T("TL_messages_messages", ("users", users), ("chats", chats),
-                    ("messages", db.Messages.Where(m => ids.Contains(m.Id) && conversationIds.Contains(m.ConversationId)).Select(m => Message(db, m, uid)).ToArray()));
+                    ("messages", ConversationQueryService.Messages(db, uid, ids).Select(m => Message(db, m, uid)).ToArray()));
             }
             case "TL_messages_sendMessage":
             {
@@ -241,7 +381,7 @@ public static class TelegramGateway
                 var c = FindConversation(db, PeerId(request["peer"], db, uid), uid, true);
                 string text = S(request, "message"), key = "tl:" + N(request, "random_id");
                 if (string.IsNullOrWhiteSpace(text) || text.Length > 16000) throw new ApiException(400, "MESSAGE_EMPTY");
-                JsonElement? entities = Entities(request, text);
+                MessageEntity[]? entities = Entities(request, text);
                 long? replyId = null;
                 if (request["reply_to"] is JsonObject reply)
                 {
@@ -249,133 +389,100 @@ public static class TelegramGateway
                         S(reply, "quote_text").Length != 0 || (reply["reply_to_peer_id"] is not null && PeerId(reply["reply_to_peer_id"], db, uid) != DialogId(db, c, uid)))
                         throw new ApiException(501, "BOTGRAM_REPLY_MODE_UNSUPPORTED");
                     replyId = N(reply, "reply_to_msg_id");
-                    if (!db.Messages.Any(m => m.ConversationId == c.Id && m.Id == replyId)) throw new ApiException(400, "REPLY_MESSAGE_ID_INVALID");
                 }
                 bool silent = request["silent"]?.GetValue<bool>() ?? false;
-                var message = db.Messages.FirstOrDefault(m => m.ConversationId == c.Id && m.SenderId == uid && m.ClientMessageId == key);
-                if (message is not null && (message.Text != text || message.ReplyToMessageId != replyId || message.Silent != silent ||
-                    message.TelegramEntities?.GetRawText() != entities?.GetRawText())) throw new ApiException(409, "RANDOM_ID_DUPLICATE");
-                if (message is null)
-                {
-                    message = new(db.NextMessageId++, c.Id, uid, key, text, DateTimeOffset.UtcNow,
-                        TelegramEntities: entities, ReplyToMessageId: replyId, Silent: silent);
-                    db.Messages.Add(message); db.Emit(c.Members, "message.created", message);
-                }
+                var message = ConversationMessageService.Send(db, c, uid, new(key, text, entities, replyId, silent), MessageWriteContract.Telegram);
                 return Updates(db, uid, [T("TL_updateMessageID", ("id", I(message.Id)), ("random_id", N(request, "random_id"))),
                     T("TL_updateNewMessage", ("message", Message(db, message, uid)), ("pts", Pts(db, uid)), ("pts_count", 1))]);
             }
             case "TL_messages_readHistory":
             {
                 var c = FindConversation(db, PeerId(request["peer"], db, uid), uid);
-                long max = db.Messages.Where(m => m.ConversationId == c.Id && m.Id <= N(request, "max_id")).Select(m => m.Id).DefaultIfEmpty(0).Max();
-                if (max == 0) return T("TL_messages_affectedMessages", ("pts", Pts(db, uid)), ("pts_count", 0));
-                var previous = db.Receipts.FirstOrDefault(r => r.ConversationId == c.Id && r.UserId == uid);
-                bool changed = previous is null || previous.MessageId < max;
-                if (changed)
-                {
-                    if (previous is not null) db.Receipts.Remove(previous);
-                    var receipt = new Receipt(c.Id, uid, max); db.Receipts.Add(receipt); db.Emit(c.Members, "receipt.updated", receipt);
-                }
-                return T("TL_messages_affectedMessages", ("pts", Pts(db, uid)), ("pts_count", changed ? 1 : 0));
+                var result = ConversationMessageService.ReadThrough(db, c, uid, N(request, "max_id"));
+                return T("TL_messages_affectedMessages", ("pts", Pts(db, uid)), ("pts_count", result.Changed ? 1 : 0));
             }
             case "TL_contacts_search":
             {
-                string query = S(request, "q").TrimStart('@');
-                var found = db.Users.Where(u => u.Username.Equals(query, StringComparison.OrdinalIgnoreCase)).ToArray();
-                return T("TL_contacts_found", ("users", found.Select(u => User(db, u, uid)).ToArray()),
-                    ("results", found.Select(u => Peer(UserId(db, u.Id))).ToArray()));
+                var found = ContactService.Search(db, S(request, "q"), uid);
+                return T("TL_contacts_found", ("users", found.Select(User).ToArray()),
+                    ("results", found.Select(u => Peer(u.TelegramId)).ToArray()));
             }
             case "TL_contacts_resolveUsername":
             {
-                var user = db.Users.FirstOrDefault(u => u.Username.Equals(S(request, "username"), StringComparison.OrdinalIgnoreCase))
-                    ?? throw new ApiException(400, "USERNAME_NOT_OCCUPIED");
-                return T("TL_contacts_resolvedPeer", ("peer", Peer(UserId(db, user.Id))), ("users", new[] { User(db, user, uid) }));
+                var user = ContactService.ResolveUsername(db, S(request, "username"), uid);
+                return T("TL_contacts_resolvedPeer", ("peer", Peer(user.TelegramId)), ("users", new[] { User(user) }));
             }
             case "TL_users_getUsers":
             {
-                var ids = (request["id"] as JsonArray ?? []).Select(p => PeerId(p, db, uid)).ToHashSet();
-                return T("Vector", ("objects", db.Users.Where(u => ids.Contains(UserId(db, u.Id))).Select(u => User(db, u, uid)).ToArray()));
+                var ids = (request["id"] as JsonArray ?? []).Select(p => PeerId(p, db, uid)).ToArray();
+                return T("Vector", ("objects", UserQueryService.ByIds(db, ids, uid).Select(User).ToArray()));
             }
             case "TL_contacts_getContacts":
             {
-                var contacts = db.Contacts.Where(c => c.OwnerId == uid).ToArray();
+                var contacts = ContactService.List(db, uid);
                 return T("TL_contacts_contacts", ("saved_count", contacts.Length),
-                    ("contacts", contacts.Select(c => T("TL_contact", ("user_id", UserId(db, c.UserId)),
-                        ("mutual", db.Contacts.Any(other => other.OwnerId == c.UserId && other.UserId == uid)))).ToArray()),
-                    ("users", contacts.Select(c => User(db, db.Users.Single(u => u.Id == c.UserId), uid)).ToArray()));
+                    ("contacts", contacts.Select(c => T("TL_contact", ("user_id", c.User.TelegramId),
+                        ("mutual", c.Mutual))).ToArray()),
+                    ("users", contacts.Select(c => User(c.User)).ToArray()));
             }
             case "TL_contacts_resolvePhone":
             {
-                string gid = ContactGid(S(request, "phone"));
-                var user = db.Users.FirstOrDefault(u => u.Gid == gid) ?? throw new ApiException(400, "PHONE_NOT_OCCUPIED");
-                return T("TL_contacts_resolvedPeer", ("peer", Peer(UserId(db, user.Id))), ("users", new[] { User(db, user, uid) }));
+                var user = ContactService.ResolveGid(db, S(request, "phone"), uid);
+                return T("TL_contacts_resolvedPeer", ("peer", Peer(user.TelegramId)), ("users", new[] { User(user) }));
             }
             case "TL_contacts_importContacts":
             {
                 if (request["contacts"] is not JsonArray input || input.Count is 0 or > 100)
                     throw new ApiException(400, "CONTACTS_TOO_MUCH");
-                var imported = new List<JsonObject>();
-                var found = new HashSet<string>();
-                foreach (var item in input)
+                var commands = input.Select(item =>
                 {
                     if (item is not JsonObject || S(item, "$type") != "org.telegram.tgnet.TLRPC$TL_inputPhoneContact")
                         throw new ApiException(400, "CONTACT_INVALID");
-                    string gid = ContactGid(S(item, "phone"));
-                    string first = S(item, "first_name").Trim(), last = S(item, "last_name").Trim();
-                    if (first.Length == 0 || first.Length > 64 || last.Length > 64)
-                        throw new ApiException(400, "FIRSTNAME_INVALID");
-                    // The current GID form has no notes editor; reject unsupported notes explicitly.
-                    if (item?["note"] is not null || N(item, "flags") != 0)
-                        throw new ApiException(501, "BOTGRAM_CONTACT_NOTES_UNSUPPORTED");
-                    var user = db.Users.FirstOrDefault(u => u.Gid == gid);
-                    if (user is null || user.Id == uid) continue;
-                    db.Contacts.RemoveAll(c => c.OwnerId == uid && c.UserId == user.Id);
-                    db.Contacts.Add(new(uid, user.Id, first, last));
-                    imported.Add(T("TL_importedContact", ("user_id", UserId(db, user.Id)), ("client_id", N(item, "client_id"))));
-                    found.Add(user.Id);
-                }
-                return T("TL_contacts_importedContacts", ("imported", imported),
+                    return new ImportContactCommand(N(item, "client_id"), S(item, "phone"), S(item, "first_name"),
+                        S(item, "last_name"), item["note"] is not null || N(item, "flags") != 0);
+                });
+                var result = ContactService.Import(db, uid, input.Count, commands);
+                return T("TL_contacts_importedContacts", ("imported", result.Imported.Select(c =>
+                        T("TL_importedContact", ("user_id", UserId(db, c.UserId)), ("client_id", c.ClientId))).ToArray()),
                     ("retry_contacts", Array.Empty<long>()), ("popular_invites", Array.Empty<object>()),
-                    ("users", db.Users.Where(u => found.Contains(u.Id)).Select(u => User(db, u, uid)).ToArray()));
+                    ("users", result.Users.Select(User).ToArray()));
+            }
+            case "TL_contacts_addContact":
+            {
+                ContactService.Add(db, uid, PeerId(request["id"], db, uid), S(request, "first_name"), S(request, "last_name"),
+                    request["note"] is JsonObject || (N(request, "flags") & 2) != 0);
+                // The client only persists the new contact from response users, so include contacts here.
+                return T("TL_updates", ("updates", Array.Empty<object>()), ("date", Now), ("seq", 0),
+                    ("users", UserQueryService.Related(db, uid, true).Select(User).ToArray()),
+                    ("chats", Array.Empty<object>()));
             }
             case "TL_messages_createChat":
             {
                 string title = S(request, "title");
-                var ids = (request["users"] as JsonArray ?? []).Select(p => FindUser(db, PeerId(p, db, uid)).Id).Append(uid).Distinct().Order().ToArray();
-                if (ids.Length is < 2 or > 100 || string.IsNullOrWhiteSpace(title) || title.Length > 100) throw new ApiException(400, "CHAT_TITLE_EMPTY");
-                var c = new Conversation(Guid.NewGuid().ToString("N"), "group", title, ids, DateTimeOffset.UtcNow);
-                db.Conversations.Add(c); db.Emit(ids, "conversation.created", c);
-                var service = new Message(db.NextMessageId++, c.Id, uid, "service:" + c.Id, "", DateTimeOffset.UtcNow, title, ids);
-                db.Messages.Add(service); db.Emit(ids, "message.created", service);
+                var ids = (request["users"] as JsonArray ?? []).Select(p => UserQueryService.Find(db, PeerId(p, db, uid), uid).Id).Append(uid).Distinct().Order().ToArray();
+                var (c, service) = ConversationMessageService.CreateGroup(db, uid, title, ids);
                 // The real createChat response in this checkout wraps Updates in invitedUsers.
                 return T("TL_messages_invitedUsers", ("updates", Updates(db, uid,
                     [T("TL_updateNewMessage", ("message", Message(db, service, uid)), ("pts", Pts(db, uid)), ("pts_count", 1))], [c])));
             }
             case "TL_messages_getPeerSettings":
             {
-                long peer = PeerId(request["peer"], db, uid);
-                if (peer > 0)
-                {
-                    var user = FindUser(db, peer);
-                    return T("TL_messages_peerSettings", ("settings", T("TL_peerSettings")),
-                        ("users", new[] { User(db, user, uid) }), ("chats", Array.Empty<JsonObject>()));
-                }
-                var c = FindConversation(db, peer, uid);
+                var details = ConversationQueryService.PeerSettings(db, uid, PeerId(request["peer"], db, uid));
                 return T("TL_messages_peerSettings", ("settings", T("TL_peerSettings")),
-                    ("users", db.Users.Where(u => c.Members.Contains(u.Id)).Select(u => User(db, u, uid)).ToArray()),
-                    ("chats", new[] { Chat(db, c) }));
+                    ("users", details.Users.Select(User).ToArray()),
+                    ("chats", details.Chats.Select(c => Chat(db, c)).ToArray()));
             }
             case "TL_users_getFullUser":
             {
-                var user = FindUser(db, PeerId(request["id"], db, uid));
-                return T("TL_users_userFull", ("users", new[] { User(db, user, uid) }),
-                    ("full_user", T("TL_userFull", ("id", UserId(db, user.Id)), ("settings", T("TL_peerSettings")),
+                var user = UserQueryService.Find(db, PeerId(request["id"], db, uid), uid);
+                return T("TL_users_userFull", ("users", new[] { User(user) }),
+                    ("full_user", T("TL_userFull", ("id", user.TelegramId), ("flags", 16 | 8192), ("settings", T("TL_peerSettings")),
                         ("notify_settings", T("TL_peerNotifySettings")), ("about", ""), ("common_chats_count", 0),
-                        ("phone_calls_available", false), ("phone_calls_private", false))));
+                        ("phone_calls_available", true), ("video_calls_available", true), ("phone_calls_private", false))));
             }
             case "TL_messages_getFullChat":
             {
-                var c = FindConversation(db, -N(request, "chat_id"), uid);
+                var c = ConversationMessageService.FindByPeer(db, -N(request, "chat_id"), uid);
                 return T("TL_messages_chatFull", ("users", users), ("chats", new[] { Chat(db, c) }),
                     ("full_chat", T("TL_chatFull", ("id", ChatId(db, c)), ("about", ""),
                         ("participants", T("TL_chatParticipants", ("chat_id", ChatId(db, c)), ("version", 1),
@@ -384,11 +491,38 @@ public static class TelegramGateway
             }
             case "TL_messages_getChats":
             {
-                var ids = (request["id"] as JsonArray ?? []).Select(p => p!.GetValue<long>()).ToHashSet();
-                return T("TL_messages_chats", ("chats", owned.Where(c => c.Kind == "group" && ids.Contains(ChatId(db, c))).Select(c => Chat(db, c)).ToArray()));
+                var ids = (request["id"] as JsonArray ?? []).Select(p => p!.GetValue<long>()).ToArray();
+                return T("TL_messages_chats", ("chats", ConversationQueryService.Chats(db, uid, ids).Select(c => Chat(db, c)).ToArray()));
             }
             case "TL_account_getNotifySettings":
             case "getNotifySettings": return T("TL_peerNotifySettings");
+            case "TL_messages_getDhConfig":
+                return T("TL_messages_dhConfig", ("g", 3), ("p", Bytes(DhPrime)), ("version", 1),
+                    ("random", Bytes(System.Security.Cryptography.RandomNumberGenerator.GetBytes(256))));
+            case "requestCall":
+            case "receivedCall":
+            case "acceptCall":
+            case "confirmCall":
+            case "discardCall":
+            case "sendSignalingData":
+            case "getCallConfig":
+            case "saveCallDebug":
+                return ExecutePhone(db, uid, method, request);
+            // No sticker catalogue exists on this server. Returning valid empty results keeps the
+            // client's sticker bootstrap from retrying unsupported methods and exhausting the rate limit.
+            case "TL_messages_getStickerSet":
+                return T("TL_messages_stickerSet",
+                    ("set", T("TL_stickerSet", ("id", 0L), ("access_hash", 0L), ("title", ""), ("short_name", ""), ("count", 0), ("hash", 0))),
+                    ("packs", Array.Empty<object>()), ("keywords", Array.Empty<object>()), ("documents", Array.Empty<object>()));
+            case "TL_messages_getFeaturedStickers":
+            case "TL_messages_getFeaturedEmojiStickers":
+                return T("TL_messages_featuredStickersNotModified", ("count", 0));
+            case "TL_messages_getArchivedStickers":
+                return T("TL_messages_archivedStickers", ("count", 0), ("sets", Array.Empty<object>()));
+            case "TL_messages_getEmojiStickers":
+            case "TL_messages_getAllStickers":
+            case "TL_messages_getMaskStickers":
+                return T("TL_messages_allStickers", ("hash2", 0L), ("sets", Array.Empty<object>()));
             default: throw new ApiException(501, "BOTGRAM_RPC_UNSUPPORTED:" + method);
         }
     }

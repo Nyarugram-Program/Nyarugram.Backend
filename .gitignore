@@ -3,3 +3,4 @@ obj/
 data/
 *.user
 artifacts/
+/Protocol.HttpTests/.m5-invalid-drive-cache

@@ -1,0 +1,11 @@
+syntax = "proto3";
+package botgram.compat.new;
+option java_package = "org.telegram.botgram.protocol.compat";
+option java_outer_classname = "CompatV2";
+option csharp_namespace = "Botgram.Protocol.Compat.New";
+message Envelope {
+  string id = 1;
+  enum Status { UNKNOWN = 0; READY = 1; FUTURE = 7; }
+  Status status = 2;
+  string extra = 20;
+}

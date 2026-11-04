@@ -1,0 +1,23 @@
+{
+  "scope": "isolated local P7 validation",
+  "redis": {
+    "version": "7.4.2",
+    "image": "redis@sha256:fbdbaea47b9ae4ecc2082ecdb4e1cea81e32176ffb1dcf643d422ad07427e5d9",
+    "imageId": "sha256:65750d044ac86b73a473c01a854d5f7f2b55a77b43f007d0e10a5db5dd1d926f"
+  },
+  "scylla": {
+    "version": "6.2.3",
+    "image": "scylladb/scylla@sha256:a9d904089abe9a4f8b5b893ebb5b5bf8b5a1bd0dc6658921cf05f89d3712289c",
+    "imageId": "sha256:4c75bccdbb7f843e5ab894c3171ecd24b1ec018dc1154a6e9625b7fa520da36d"
+  },
+  "postgres": {
+    "version": "17.11",
+    "imageId": "sha256:ab20e934b27ba3ff927c1b4c9ff8cf6c32f315f743efe68dd3441182a87fb085",
+    "provenance": "Copied from the existing local postgres:17-alpine image. No registry digest was available."
+  },
+  "kafka": {
+    "version": "3.9.0",
+    "commitId": "a60e31147e6b01ee",
+    "provenance": "Existing pinned D-drive toolchain, native Linux Java 17"
+  }
+}

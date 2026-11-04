@@ -9,6 +9,7 @@ import net from 'node:net';
 import { randomBytes } from 'node:crypto';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const fixtureRoot = process.env.BOTGRAM_TEST_ROOT ?? path.join(root, 'obj');
 const temp = await mkdtemp(path.join(process.env.BOTGRAM_TEST_ROOT ?? path.join(root, 'obj'), 'smoke-'));
 const database = path.join(temp, 'db.json');
 const listener = net.createServer();
@@ -18,6 +19,7 @@ const port = listener.address().port;
 await new Promise(resolve => listener.close(resolve));
 const base = `http://127.0.0.1:${port}`;
 const fixtures = [];
+const rpcFixtures = [];
 let server;
 let logs = '';
 async function start() {
@@ -42,6 +44,10 @@ async function request(method, route, token, body, status = 200) {
     body: body === undefined ? undefined : JSON.stringify(body)
   });
   const text = await response.text();
+  if (route === '/api/telegram/rpc') rpcFixtures.push({
+    requestType: body.$type, request: body, status: response.status, expectedStatus: status,
+    response: text ? JSON.parse(text) : null
+  });
   assert.equal(response.status, status, `${method} ${route}: ${text}`);
   return text ? JSON.parse(text) : null;
 }
@@ -91,6 +97,17 @@ try {
     if (status === 200) fixtures.push({ requestType, response: result });
     return result;
   };
+  const assertSafeUserDetails = value => {
+    if (value === null || typeof value !== 'object') return;
+    for (const [key, item] of Object.entries(value)) {
+      assert(!['salt', 'passwordHash', 'token', 'tokenHash'].includes(key), `private user field: ${key}`);
+      assertSafeUserDetails(item);
+    }
+  };
+  const me = await request('GET', '/api/me', alice.token);
+  assert.deepEqual(Object.keys(me).sort(), ['displayName', 'gid', 'id', 'username']);
+  assert.deepEqual(me, alice.user);
+  assertSafeUserDetails(me);
   const aliceTl = await request('GET', '/api/telegram/me', alice.token);
   const bobTl = await request('GET', '/api/telegram/me', bob.token);
   assert.equal(aliceTl.$type, 'org.telegram.tgnet.TLRPC$TL_user');
@@ -109,6 +126,19 @@ try {
   const route = `/api/conversations/${conv.id}`;
   const userVector = await rpc(alice.token, 'TL_users_getUsers', { id: [tl('TL_inputUser', { user_id: bobTl.id })] });
   assert.equal(userVector.objects[0].id, bobTl.id);
+  const unknownUser = tl('TL_inputUser', { user_id: 2147483647 });
+  const duplicateUsers = await rpc(alice.token, 'TL_users_getUsers', {
+    id: [tl('TL_inputUser', { user_id: bobTl.id }), unknownUser,
+      tl('TL_inputUserSelf'), tl('TL_inputUser', { user_id: bobTl.id })]
+  });
+  assert.deepEqual(duplicateUsers.objects.map(u => u.id), [aliceTl.id, bobTl.id]);
+  assert.equal(duplicateUsers.objects[0].self, true);
+  assert.equal(duplicateUsers.objects[1].self, false);
+  const unknownUsers = await rpc(alice.token, 'TL_users_getUsers', { id: [unknownUser] });
+  assert.deepEqual(unknownUsers.objects, []);
+  assertSafeUserDetails(duplicateUsers);
+  assertSafeUserDetails(aliceTl);
+  assertSafeUserDetails(bobTl);
   const selfPeer = tl('TL_inputPeerSelf');
   const saved = await rpc(alice.token, 'TL_messages_sendMessage', { peer: selfPeer, random_id: 987654, message: '收藏夹笔记' });
   assert.equal(saved.updates[1].message.peer_id.user_id, aliceTl.id);
@@ -116,8 +146,28 @@ try {
   assert.equal(savedHistory.messages[0].message, '收藏夹笔记');
   const found = await rpc(alice.token, 'TL_contacts_search', { q: 'bob', limit: 20 });
   assert.equal(found.users[0].id, bobTl.id);
+  const resolved = await rpc(alice.token, 'TL_contacts_resolveUsername', { username: 'BOB' });
+  assert.equal(resolved.peer.user_id, bobTl.id);
+  assert.equal((await rpc(alice.token, 'TL_contacts_resolveUsername', { username: 'missing-user' }, 400)).error, 'USERNAME_NOT_OCCUPIED');
+  assert.equal((await rpc(null, 'TL_updates_getState', {}, 401)).error, 'unauthorized');
+  const addedContact = await rpc(alice.token, 'TL_contacts_addContact', {
+    id: tl('TL_inputUser', { user_id: bobTl.id }), first_name: 'Bob', last_name: 'B', phone: '+00100000000',
+    flags: 0, add_phone_privacy_exception: false
+  });
+  assert.equal(addedContact.$type, 'org.telegram.tgnet.TLRPC$TL_updates');
+  assert.equal(addedContact.users.find(u => u.id === bobTl.id)?.contact, true, 'added contact must be returned with contact=true');
+  const aliceContacts = await rpc(alice.token, 'TL_contacts_getContacts', { hash: 0 });
+  assert(aliceContacts.users.some(u => u.id === bobTl.id && u.contact), 'added contact must be persisted');
+  const alicePresenceBase = await rpc(alice.token, 'TL_updates_getState');
   const state = await rpc(bob.token, 'TL_updates_getState');
   assert.equal(state.pts, 1, 'fresh accounts require a nonzero initial pts');
+  const presenceDiff = await rpc(alice.token, 'TL_updates_getDifference', {
+    pts: alicePresenceBase.pts, date: alicePresenceBase.date, qts: 0
+  });
+  const statusUpdate = presenceDiff.other_updates.find(u => u.$type.endsWith('$TL_updateUserStatus'));
+  assert.equal(statusUpdate?.$type, 'org.telegram.tgnet.tl.TL_update$TL_updateUserStatus',
+    'presence updates must use the Android class namespace');
+  assert.equal(statusUpdate.user_id, bobTl.id);
   const sendFields = { peer, random_id: 12345678, message: '原 Telegram 页面消息',
     send_as: tl('TL_inputPeerUser', { user_id: aliceTl.id, access_hash: 1 }) };
   await rpc(alice.token, 'TL_messages_sendMessage', { ...sendFields, send_as: peer }, 403);
@@ -126,6 +176,7 @@ try {
   assert.equal(sent.updates[0].id, duplicateTl.updates[0].id);
   assert.equal(sent.updates[1].$type, 'org.telegram.tgnet.tl.TL_update$TL_updateNewMessage');
   const diff = await rpc(bob.token, 'TL_updates_getDifference', { pts: state.pts, date: state.date, qts: 0 });
+  assert.equal(diff.$type, 'org.telegram.tgnet.TLRPC$TL_updates_difference');
   assert(diff.new_messages.some(m => m.message === sendFields.message && m.out === false));
   assert.equal(diff.state.pts, state.pts + 1);
   const history = await rpc(alice.token, 'TL_messages_getHistory', { peer, offset_id: 0, add_offset: 0, limit: 50 });
@@ -159,6 +210,9 @@ try {
   assert.equal(full.full_chat.participants.participants.length, 2);
   const fullUser = await rpc(alice.token, 'TL_users_getFullUser', { id: tl('TL_inputUser', { user_id: bobTl.id }) });
   assert.equal(fullUser.full_user.id, bobTl.id);
+  assertSafeUserDetails(fullUser);
+  assertSafeUserDetails(full);
+  assertSafeUserDetails(peerSettings);
   await rpc(alice.token, 'TL_messages_getChats', { id: [chat.id] });
   const emptyDiff = await rpc(bob.token, 'TL_updates_getDifference', { pts: groupDiff.state.pts, date: state.date, qts: 0 });
   assert(emptyDiff.$type.endsWith('$TL_updates_differenceEmpty'));
@@ -167,15 +221,60 @@ try {
   assert(dialogs.dialogs.some(d => d.peer.user_id === bobTl.id));
   const dialogPage = await rpc(alice.token, 'TL_messages_getDialogs', { limit: 1 });
   assert(dialogPage.$type.endsWith('$TL_messages_dialogsSlice'));
+  const dialogPeers = value => value.dialogs.map(d => d.peer.user_id ?? -d.peer.chat_id);
+  assert.deepEqual(dialogPeers(dialogs), [-chat.id, bobTl.id, aliceTl.id]);
+  assert.equal(dialogPage.count, 3);
+  assert.deepEqual(dialogPeers(dialogPage), [-chat.id]);
+  const offsetPeerPage = await rpc(alice.token, 'TL_messages_getDialogs', {
+    offset_peer: groupPeer, offset_id: saved.updates[0].id, limit: 1
+  });
+  assert.deepEqual(dialogPeers(offsetPeerPage), [bobTl.id]);
+  assert.equal(offsetPeerPage.count, 3);
+  const offsetPeerTail = await rpc(alice.token, 'TL_messages_getDialogs', { offset_peer: peer, limit: 100 });
+  assert.deepEqual(dialogPeers(offsetPeerTail), [aliceTl.id]);
+  const offsetIdPage = await rpc(alice.token, 'TL_messages_getDialogs', {
+    offset_id: reply.updates[0].id, limit: 100
+  });
+  assert.deepEqual(dialogPeers(offsetIdPage), [aliceTl.id]);
+  const unknownOffsetPage = await rpc(alice.token, 'TL_messages_getDialogs', {
+    offset_peer: tl('TL_inputPeerUser', { user_id: unknownUser.user_id }),
+    offset_id: reply.updates[0].id, limit: 100
+  });
+  assert.deepEqual(dialogPeers(unknownOffsetPage), [aliceTl.id]);
+  const lastDialogPage = await rpc(alice.token, 'TL_messages_getDialogs', { offset_peer: selfPeer, limit: 100 });
+  assert.deepEqual(lastDialogPage.dialogs, []);
+  assert.deepEqual(lastDialogPage.messages, []);
+  const folderDialogs = await rpc(alice.token, 'TL_messages_getDialogs', { folder_id: 1, limit: 100 });
+  assert.deepEqual(folderDialogs.dialogs, []);
+  assert.deepEqual(folderDialogs.messages, []);
+  assert.equal(folderDialogs.count, 3);
   const peerDialogs = await rpc(alice.token, 'TL_messages_getPeerDialogs', { peers: [tl('TL_inputDialogPeer', { peer })] });
   assert.equal(peerDialogs.dialogs.length, 1);
-  await rpc(alice.token, 'TL_messages_getPinnedDialogs', { folder_id: 0 });
+  assert.deepEqual(dialogPeers(peerDialogs), [bobTl.id]);
+  assert.deepEqual(peerDialogs.messages.map(m => m.id), [reply.updates[0].id]);
+  const selectedDialogs = await rpc(alice.token, 'TL_messages_getPeerDialogs', {
+    peers: [tl('TL_inputDialogPeer', { peer: selfPeer }), tl('TL_inputDialogPeer', { peer: groupPeer }),
+      tl('TL_inputDialogPeer', { peer: groupPeer }),
+      tl('TL_inputDialogPeer', { peer: tl('TL_inputPeerUser', { user_id: unknownUser.user_id }) })]
+  });
+  assert.deepEqual(dialogPeers(selectedDialogs), [-chat.id, aliceTl.id]);
+  assert.deepEqual(selectedDialogs.messages.map(m => m.id), [styled.updates[0].id, saved.updates[0].id]);
+  const hiddenDialogs = await rpc(outsider.token, 'TL_messages_getPeerDialogs', {
+    peers: [tl('TL_inputDialogPeer', { peer: groupPeer })]
+  });
+  assert.deepEqual(hiddenDialogs.dialogs, []);
+  assert.deepEqual(hiddenDialogs.messages, []);
+  const pinnedDialogs = await rpc(alice.token, 'TL_messages_getPinnedDialogs', { folder_id: 0 });
+  assert(pinnedDialogs.$type.endsWith('$TL_messages_peerDialogs'));
+  assert.deepEqual(pinnedDialogs.dialogs, []);
+  assert.deepEqual(pinnedDialogs.messages, []);
   await rpc(alice.token, 'org.telegram.tgnet.tl.TL_account$getNotifySettings', { peer: tl('TL_inputNotifyPeer', { peer }) });
   const reloaded = await rpc(alice.token, 'TL_messages_getMessages', { id: [tl('TL_inputMessageID', { id: sent.updates[0].id })] });
   assert.equal(reloaded.messages[0].id, sent.updates[0].id);
   const hiddenReload = await rpc(outsider.token, 'TL_messages_getMessages', { id: [tl('TL_inputMessageID', { id: sent.updates[0].id })] });
   assert.equal(hiddenReload.messages.length, 0);
-  await rpc(alice.token, 'TL_messages_deleteMessages', { id: [1] }, 501);
+  assert.equal((await rpc(alice.token, 'TL_messages_deleteMessages', { id: [1] }, 501)).error,
+    'BOTGRAM_RPC_UNSUPPORTED:TL_messages_deleteMessages');
   await request('GET', `${route}/messages`, outsider.token, undefined, 404);
   await request('POST', `${route}/messages`, outsider.token, { clientMessageId: 'attack', text: 'no' }, 404);
   const sends = await Promise.all(Array.from({ length: 5 }, () => request('POST', `${route}/messages`, alice.token, { clientMessageId: 'once', text: '你好 Bob' })));
@@ -186,6 +285,27 @@ try {
   await request('POST', `${route}/read`, bob.token, { messageId: message.id });
   assert.equal((await request('GET', '/api/conversations', bob.token)).find(c => c.conversation.id === conv.id).unreadCount, 0);
   const second = await request('POST', `${route}/messages`, bob.token, { clientMessageId: 'reply', text: '你好 Alice' });
+  const bobConversations = await request('GET', '/api/conversations', bob.token);
+  const directSummary = bobConversations.find(c => c.conversation.id === conv.id);
+  for (const item of bobConversations) {
+    assert.deepEqual(Object.keys(item).sort(), ['conversation', 'lastMessage', 'receipts', 'unreadCount', 'users']);
+    assert(item.conversation.members.includes(bob.user.id));
+    assert.deepEqual(item.users.map(u => u.id).sort(), [...item.conversation.members].sort());
+    for (const user of item.users) {
+      assert.deepEqual(Object.keys(user).sort(), ['displayName', 'gid', 'id', 'username']);
+      assertSafeUserDetails(user);
+    }
+  }
+  assert.deepEqual(directSummary.users.map(u => u.id).sort(), [alice.user.id, bob.user.id].sort());
+  assert.deepEqual(directSummary.lastMessage, second);
+  assert.equal(directSummary.unreadCount, 0);
+  assert.deepEqual(directSummary.receipts, [{ conversationId: conv.id, userId: bob.user.id, messageId: message.id }]);
+  const aliceSummary = (await request('GET', '/api/conversations', alice.token)).find(c => c.conversation.id === conv.id);
+  assert.deepEqual(aliceSummary.lastMessage, second);
+  assert.equal(aliceSummary.unreadCount, 2);
+  assert.deepEqual(aliceSummary.receipts, directSummary.receipts);
+  const outsiderConversations = await request('GET', '/api/conversations', outsider.token);
+  assert.deepEqual(outsiderConversations, []);
   const page = await request('GET', `${route}/messages?before=${second.id}&limit=1`, alice.token);
   assert.deepEqual(page.map(m => m.id), [message.id]);
   const groups = await request('POST', '/api/conversations', alice.token, { kind: 'group', title: '测试群', memberIds: [bob.user.id, outsider.user.id] });
@@ -239,9 +359,13 @@ try {
   assert(timeoutEvent, 'background service must expire ringing calls without a write request');
   await request('POST', '/api/auth/logout', alice.token, undefined, 204);
   await request('GET', '/api/me', alice.token, undefined, 401);
-  await writeFile(path.join(root, 'obj/tl-fixtures.json'), JSON.stringify(fixtures));
+  assert.equal((await rpc(alice.token, 'TL_updates_getState', {}, 401)).error, 'session_expired');
+  await writeFile(path.join(fixtureRoot, 'tl-fixtures.json'), JSON.stringify(fixtures));
   console.log('PASS: auth, TL identity/dialogs/messages/groups/replies/entities/difference, isolation, concurrent idempotency, history, receipts, replay, WebSocket, REST call signals, restart persistence, expiry, logout');
 } catch (error) {
   console.error(logs);
   throw error;
-} finally { await stop(); }
+} finally {
+  await stop();
+  await writeFile(path.join(fixtureRoot, 'smoke-rpc-fixtures.json'), JSON.stringify(rpcFixtures, null, 2));
+}

@@ -1,0 +1,444 @@
+syntax = "proto3";
+package botgram.rpc.v1;
+option java_package = "org.telegram.botgram.protocol.v1";
+option java_outer_classname = "BotgramRpc";
+option csharp_namespace = "Botgram.Protocol.V1";
+
+// v1: local authority only. UUID user_id and group_id never derive from GID/TL IDs.
+// All timestamps are Unix milliseconds; offsets/lengths are UTF-16 code units.
+message RpcRequest {
+  uint32 protocol_major = 1;
+  string request_id = 2;
+  oneof operation {
+    GetStateRequest get_state = 100;
+    GetDifferenceRequest get_difference = 101;
+    GetDialogsRequest get_dialogs = 102;
+    GetPinnedDialogsRequest get_pinned_dialogs = 103;
+    GetPeerDialogsRequest get_peer_dialogs = 104;
+    GetHistoryRequest get_history = 105;
+    GetMessagesRequest get_messages = 106;
+    SendMessageRequest send_message = 107;
+    ReadHistoryRequest read_history = 108;
+    SearchContactsRequest search_contacts = 109;
+    ResolveUsernameRequest resolve_username = 110;
+    GetUsersRequest get_users = 111;
+    GetContactsRequest get_contacts = 112;
+    ResolveGidRequest resolve_gid = 113;
+    ImportContactsRequest import_contacts = 114;
+    CreateGroupRequest create_group = 115;
+    GetPeerSettingsRequest get_peer_settings = 116;
+    GetFullUserRequest get_full_user = 117;
+    GetFullGroupRequest get_full_group = 118;
+    GetGroupsRequest get_groups = 119;
+    GetNotifySettingsRequest get_notify_settings = 120;
+    ResolveIdentitiesRequest resolve_identities = 121;
+    GetWallpapersRequest get_wallpapers = 122;
+    SaveWallpaperRequest save_wallpaper = 123;
+    InstallWallpaperRequest install_wallpaper = 124;
+    SetChatWallpaperRequest set_chat_wallpaper = 125;
+    AccountPrivacyRequest account_privacy = 126;
+  }
+}
+message RpcResponse {
+  uint32 protocol_major = 1;
+  string request_id = 2;
+  oneof outcome {
+    RpcError error = 10;
+    SyncState get_state = 100;
+    Difference get_difference = 101;
+    DialogPage get_dialogs = 102;
+    PeerDialogs get_pinned_dialogs = 103;
+    PeerDialogs get_peer_dialogs = 104;
+    MessagePage get_history = 105;
+    MessagePage get_messages = 106;
+    MessageSent send_message = 107;
+    AffectedMessages read_history = 108;
+    FoundPeers search_contacts = 109;
+    ResolvedPeer resolve_username = 110;
+    UserList get_users = 111;
+    ContactList get_contacts = 112;
+    ResolvedPeer resolve_gid = 113;
+    ImportedContacts import_contacts = 114;
+    GroupCreated create_group = 115;
+    PeerSettingsResult get_peer_settings = 116;
+    UserFullResult get_full_user = 117;
+    GroupFullResult get_full_group = 118;
+    GroupList get_groups = 119;
+    NotifySettings get_notify_settings = 120;
+    ResolvedIdentities resolve_identities = 121;
+    WallpaperList get_wallpapers = 122;
+    WallpaperMutationResult save_wallpaper = 123;
+    WallpaperMutationResult install_wallpaper = 124;
+    ChatWallpaperResult set_chat_wallpaper = 125;
+    AccountPrivacyResponse account_privacy = 126;
+  }
+}
+message RpcError {
+  string code = 1;
+  string message = 2;
+  bool retryable = 3;
+  optional uint32 retry_after_ms = 4;
+  // HTTP status is also retained on the HTTP response, not replaced by 200.
+  uint32 http_status = 5;
+}
+// WSS subprotocol botgram.event-hint.v1.protobuf. Only a wakeup watermark;
+// cursor is an event ID, never a Telegram pts or a consumed-message checkpoint.
+message EventHint {
+  uint32 protocol_major = 1;
+  int64 cursor = 2;
+  // Independent account wallpaper revision; never a message pts. Presence opts
+  // clients into refreshing wallpaper state rather than inventing chat updates.
+  optional int64 wallpaper_revision = 3;
+}
+message Empty {}
+// Settings use domain references and explicit rules, with ownership checked by
+// the same authenticated account as other RPC operations.
+message AccountPrivacyRequest {
+  oneof operation {
+    PrivacyKeyRequest get_rules = 1;
+    PrivacyRuleSet set_rules = 2;
+    Empty get_global = 3;
+    GlobalPrivacySettings set_global = 4;
+    Empty get_account_ttl = 5;
+    AccountTtl set_account_ttl = 6;
+    Empty get_default_history_ttl = 7;
+    HistoryTtl set_default_history_ttl = 8;
+    BlockedPageRequest get_blocked = 9;
+    UserRef block_user = 10;
+    UserRef unblock_user = 11;
+    Empty get_authorizations = 12;
+    AuthorizationId reset_authorization = 13;
+    Empty reset_other_authorizations = 14;
+    Empty get_password = 15;
+    SrpProof get_password_settings = 16;
+    PasswordUpdate update_password_settings = 17;
+    PrivacyUsers delete_contacts = 18;
+    Empty reset_saved_contacts = 19;
+    bool toggle_top_peers = 20;
+    Empty get_web_authorizations = 21;
+    AuthorizationId reset_web_authorization = 22;
+    Empty reset_web_authorizations = 23;
+    ClearPaymentInfo clear_payment_info = 24;
+    Empty get_passkeys = 25;
+  }
+}
+enum PrivacyKey {
+  PRIVACY_KEY_UNSPECIFIED = 0;
+  STATUS_TIMESTAMP = 1;
+  CHAT_INVITE = 2;
+  PHONE_CALL = 3;
+  PHONE_P2P = 4;
+  PROFILE_PHOTO = 5;
+  FORWARDS = 6;
+  PHONE_NUMBER = 7;
+  ADDED_BY_PHONE = 8;
+  VOICE_MESSAGES = 9;
+  ABOUT = 10;
+  BIRTHDAY = 11;
+  STAR_GIFTS_AUTO_SAVE = 12;
+  SAVED_MUSIC = 13;
+  NO_PAID_MESSAGES = 14;
+}
+enum PrivacyRuleKind {
+  PRIVACY_RULE_KIND_UNSPECIFIED = 0;
+  ALLOW_ALL = 1;
+  DISALLOW_ALL = 2;
+  ALLOW_CONTACTS = 3;
+  DISALLOW_CONTACTS = 4;
+  ALLOW_USERS = 5;
+  DISALLOW_USERS = 6;
+  ALLOW_CHAT_PARTICIPANTS = 7;
+  DISALLOW_CHAT_PARTICIPANTS = 8;
+  ALLOW_PREMIUM = 9;
+  ALLOW_BOTS = 10;
+  DISALLOW_BOTS = 11;
+  ALLOW_CLOSE_FRIENDS = 12;
+}
+message PrivacyKeyRequest { PrivacyKey key = 1; }
+message PrivacyRule {
+  PrivacyRuleKind kind = 1;
+  repeated UserRef users = 2;
+  repeated string group_ids = 3;
+}
+message PrivacyRuleSet { PrivacyKey key = 1; repeated PrivacyRule rules = 2; }
+message GlobalPrivacySettings {
+  bool archive_and_mute_new_noncontact_peers = 1;
+  bool keep_archived_unmuted = 2;
+  bool keep_archived_folders = 3;
+  bool hide_read_marks = 4;
+  bool new_noncontact_peers_require_premium = 5;
+  bool display_gifts_button = 6;
+  int64 noncontact_peers_paid_stars = 7;
+  bool disallowed_gifts_unlimited = 8;
+  bool disallowed_gifts_limited = 9;
+  bool disallowed_gifts_unique = 10;
+  bool disallowed_gifts_premium = 11;
+  bool disallowed_gifts_from_channels = 12;
+}
+message AccountTtl { int32 days = 1; }
+message HistoryTtl { int32 seconds = 1; }
+message BlockedPageRequest { int32 offset = 1; int32 limit = 2; }
+message BlockedUser { UserRef user = 1; int64 blocked_at_ms = 2; }
+message BlockedUsers { int32 count = 1; repeated BlockedUser blocked = 2; }
+message AuthorizationId { int64 hash = 1; }
+message AuthorizationInfo {
+  int64 hash = 1;
+  bool current = 2;
+  string device_model = 3;
+  string platform = 4;
+  string system_version = 5;
+  string app_name = 6;
+  string app_version = 7;
+  int64 created_at_ms = 8;
+  int64 active_at_ms = 9;
+  string ip = 10;
+}
+message Authorizations { repeated AuthorizationInfo sessions = 1; int32 authorization_ttl_days = 2; }
+message PasswordKdf { bytes salt1 = 1; bytes salt2 = 2; int32 g = 3; bytes p = 4; }
+message SrpProof { int64 srp_id = 1; bytes a = 2; bytes m1 = 3; bool empty = 4; }
+message PasswordInfo {
+  bool has_password = 1;
+  PasswordKdf current_algo = 2;
+  bytes srp_b = 3;
+  int64 srp_id = 4;
+  string hint = 5;
+  PasswordKdf new_algo = 6;
+  bytes new_secure_salt = 7;
+  bytes secure_random = 8;
+}
+message PasswordUpdate {
+  SrpProof proof = 1;
+  bool change_password = 2;
+  PasswordKdf new_algo = 3;
+  bytes new_password_hash = 4;
+  string hint = 5;
+  bool change_email = 6;
+  string email = 7;
+  bool change_secure_settings = 8;
+}
+message PasswordSettings { string email = 1; }
+message PrivacyUsers { repeated UserRef users = 1; }
+message ClearPaymentInfo { bool credentials = 1; bool info = 2; }
+message AccountPrivacyResponse {
+  repeated UserSummary users = 1;
+  repeated GroupSummary groups = 2;
+  oneof result {
+    PrivacyRuleSet rules = 10;
+    GlobalPrivacySettings global = 11;
+    AccountTtl account_ttl = 12;
+    HistoryTtl history_ttl = 13;
+    BlockedUsers blocked = 14;
+    bool applied = 15;
+    Authorizations authorizations = 16;
+    PasswordInfo password = 17;
+    PasswordSettings password_settings = 18;
+    Empty contacts_deleted = 19;
+    Empty web_authorizations = 20;
+    Empty passkeys = 21;
+  }
+}
+message UserRef { string server_domain = 1; string user_id = 2; }
+message UserSelector { oneof target { UserRef user = 1; bool self = 2; } }
+message PeerRef { oneof peer { UserRef user = 1; string group_id = 2; bool self = 3; } }
+message UserSummary {
+  UserRef identity = 1;
+  int64 tl_user_id = 2;
+  string username = 3;
+  string display_name = 4;
+  string first_name = 5;
+  string last_name = 6;
+  string gid = 7;
+  bool is_self = 8;
+  bool is_contact = 9;
+  bool is_mutual_contact = 10;
+  optional bool nyarugram_premium = 11;
+}
+message Contact { UserRef user = 1; bool mutual = 2; }
+message GroupSummary {
+  string group_id = 1;
+  int64 tl_chat_id = 2;
+  string title = 3;
+  int32 participant_count = 4;
+  int64 created_at_ms = 5;
+  int32 version = 6;
+}
+message Participant { UserRef user = 1; UserRef inviter = 2; int64 joined_at_ms = 3; }
+message MessageEntity {
+  uint32 offset_utf16 = 1;
+  uint32 length_utf16 = 2;
+  oneof kind {
+    Empty bold = 10;
+    Empty italic = 11;
+    PreEntity pre = 12;
+    TextUrlEntity text_url = 13;
+    Empty underline = 14;
+    Empty strike = 15;
+    Empty spoiler = 16;
+    Empty code = 17;
+    Empty url = 18;
+    Empty email = 19;
+    Empty phone = 20;
+    Empty mention = 21;
+    Empty hashtag = 22;
+    Empty cashtag = 23;
+    Empty bot_command = 24;
+  }
+}
+message PreEntity { string language = 1; }
+message TextUrlEntity { string url = 1; }
+message ReplyRef { int64 message_id = 1; }
+message TextMessage {
+  string text = 1;
+  repeated MessageEntity entities = 2;
+  ReplyRef reply = 3;
+  bool silent = 4;
+}
+message GroupCreatedAction { string title = 1; repeated UserRef members = 2; }
+message ServiceMessage { oneof action { GroupCreatedAction group_created = 1; } }
+message Message {
+  int64 message_id = 1;
+  PeerRef peer = 2;
+  UserRef sender = 3;
+  int64 created_at_ms = 4;
+  bool outgoing = 5;
+  bool unread = 6;
+  oneof body { TextMessage text = 10; ServiceMessage service = 11; }
+}
+message NotifySettings {
+  optional bool show_previews = 1;
+  optional bool silent = 2;
+  optional int64 mute_until_ms = 3;
+}
+message PeerSettings {}
+message Dialog {
+  PeerRef peer = 1;
+  int64 top_message_id = 2;
+  int64 read_inbox_max_id = 3;
+  int64 read_outbox_max_id = 4;
+  int32 unread_count = 5;
+  NotifySettings notify_settings = 6;
+}
+message SyncState { int32 pts = 1; int32 qts = 2; int64 date_ms = 3; int32 seq = 4; int32 unread_count = 5; }
+message ReadReceipt { PeerRef peer = 1; int64 max_message_id = 2; int32 pts = 3; int32 pts_count = 4; }
+message MessageIdMapping { sfixed64 random_id = 1; int64 message_id = 2; }
+message NewMessage { Message message = 1; int32 pts = 2; int32 pts_count = 3; }
+message GidChanged { UserRef user = 1; string gid = 2; }
+message Update {
+  oneof kind {
+    NewMessage new_message = 1;
+    MessageIdMapping message_id = 2;
+    ReadReceipt read_inbox = 3;
+    ReadReceipt read_outbox = 4;
+    GidChanged gid_changed = 5;
+    // Returned only to set_chat_wallpaper callers, never in the durable pts stream.
+    PeerWallpaperChanged peer_wallpaper_changed = 6;
+  }
+}
+message Updates { repeated Update updates = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; int64 date_ms = 4; int32 seq = 5; }
+message DifferenceEmpty { int64 date_ms = 1; int32 seq = 2; }
+message DifferenceTooLong { int32 pts = 1; }
+message DifferencePage {
+  repeated Message messages = 1;
+  repeated Update updates = 2;
+  repeated UserSummary users = 3;
+  repeated GroupSummary groups = 4;
+  SyncState state = 5;
+}
+message Difference {
+  oneof kind {
+    DifferenceEmpty empty = 1;
+    DifferenceTooLong too_long = 2;
+    DifferencePage complete = 3;
+    DifferencePage slice = 4;
+  }
+}
+message DialogPage { repeated Dialog dialogs = 1; repeated Message messages = 2; repeated UserSummary users = 3; repeated GroupSummary groups = 4; int32 total_count = 5; bool is_slice = 6; }
+message PeerDialogs { repeated Dialog dialogs = 1; repeated Message messages = 2; repeated UserSummary users = 3; repeated GroupSummary groups = 4; SyncState state = 5; }
+message MessagePage { repeated Message messages = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; }
+message MessageSent { Message message = 1; MessageIdMapping mapping = 2; Updates updates = 3; }
+message AffectedMessages { int32 pts = 1; int32 pts_count = 2; }
+message FoundPeers { repeated PeerRef results = 1; repeated PeerRef my_results = 2; repeated UserSummary users = 3; repeated GroupSummary groups = 4; }
+message ResolvedPeer { PeerRef peer = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; }
+message UserList { repeated UserSummary users = 1; }
+message ContactList { repeated Contact contacts = 1; repeated UserSummary users = 2; int32 saved_count = 3; }
+message ImportedContact { UserRef user = 1; sfixed64 client_id = 2; }
+message PopularInvite { sfixed64 client_id = 1; int32 importers = 2; }
+message ImportedContacts { repeated ImportedContact imported = 1; repeated UserSummary users = 2; repeated sfixed64 retry_contacts = 3; repeated PopularInvite popular_invites = 4; }
+message MissingInvitee { UserRef user = 1; bool premium_would_allow_invite = 2; bool premium_required_for_pm = 3; }
+message GroupCreated { GroupSummary group = 1; Updates updates = 2; repeated MissingInvitee missing_invitees = 3; }
+message PeerSettingsResult { PeerSettings settings = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; }
+message UserFullResult { UserRef user = 1; PeerSettings settings = 2; NotifySettings notify_settings = 3; string about = 4; int32 common_groups_count = 5; bool phone_calls_available = 6; bool phone_calls_private = 7; repeated UserSummary users = 8; repeated GroupSummary groups = 9; WallpaperState wallpaper = 10; }
+message GroupFullResult { GroupSummary group = 1; string about = 2; repeated Participant participants = 3; int32 participants_version = 4; NotifySettings notify_settings = 5; repeated UserSummary users = 6; repeated GroupSummary groups = 7; WallpaperState wallpaper = 8; }
+message GroupList { repeated GroupSummary groups = 1; }
+message GetStateRequest {}
+message GetDifferenceRequest { int32 pts = 1; }
+message GetDialogsRequest { optional int32 limit = 1; int64 offset_message_id = 2; PeerRef offset_peer = 3; int32 folder_id = 4; }
+message GetPinnedDialogsRequest {}
+message GetPeerDialogsRequest { repeated PeerRef peers = 1; int32 folder_id = 2; }
+message GetHistoryRequest { PeerRef peer = 1; int64 offset_message_id = 2; int64 offset_date_ms = 3; int32 add_offset = 4; int64 min_message_id = 5; int64 max_message_id = 6; optional int32 limit = 7; }
+message GetMessagesRequest { repeated int64 message_ids = 1; }
+message SendMessageRequest { PeerRef peer = 1; sfixed64 random_id = 2; string text = 3; repeated MessageEntity entities = 4; optional int64 reply_to_message_id = 5; bool silent = 6; }
+message ReadHistoryRequest { PeerRef peer = 1; int64 max_message_id = 2; }
+message SearchContactsRequest { string query = 1; }
+message ResolveUsernameRequest { string username = 1; }
+message GetUsersRequest { repeated UserSelector users = 1; }
+message GetContactsRequest {}
+message ResolveGidRequest { string gid = 1; }
+message ImportContact { sfixed64 client_id = 1; string gid = 2; string first_name = 3; string last_name = 4; }
+message ImportContactsRequest { repeated ImportContact contacts = 1; }
+message CreateGroupRequest { string title = 1; repeated UserSelector users = 2; }
+message GetPeerSettingsRequest { PeerRef peer = 1; }
+message GetFullUserRequest { UserSelector user = 1; }
+message GetFullGroupRequest { string group_id = 1; }
+message GetGroupsRequest { repeated string group_ids = 1; }
+message NotifyTarget { oneof target { PeerRef peer = 1; Empty all_users = 2; Empty all_groups = 3; Empty all_broadcasts = 4; } }
+message GetNotifySettingsRequest { NotifyTarget target = 1; }
+// Authenticated bootstrap of existing persisted TL identities, never ID allocation.
+message ResolveIdentitiesRequest { repeated int64 tl_user_ids = 1; repeated int64 tl_chat_ids = 2; }
+message ResolvedIdentities { string server_domain = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; }
+
+// No file/slug/upload is implied by this extension. Signed IDs include native
+// no-file ID 0 and client-generated negative IDs; they are not user or TL IDs.
+message WallpaperSettings {
+  optional uint32 background_color = 1;
+  optional uint32 second_background_color = 2;
+  optional uint32 third_background_color = 3;
+  optional uint32 fourth_background_color = 4;
+  optional int32 rotation = 5;
+  optional int32 intensity = 6;
+  bool blur = 7;
+  bool motion = 8;
+  optional string emoticon = 9;
+}
+message NoFileWallpaper { WallpaperSettings settings = 1; bool dark = 2; bool is_default = 3; }
+message Wallpaper { sfixed64 id = 1; oneof kind { NoFileWallpaper no_file = 10; } }
+// Missing WallpaperState means an older server did not supply this state.
+// Only an explicit cleared value authorizes clearing a client's cached wallpaper.
+message WallpaperState { oneof value { Wallpaper wallpaper = 1; Empty cleared = 2; } bool overridden = 3; }
+message GetWallpapersRequest { optional sfixed64 hash = 1; }
+message WallpaperList {
+  repeated Wallpaper wallpapers = 1;
+  WallpaperState installed = 2;
+  int64 revision = 3;
+  sfixed64 hash = 4;
+  bool not_modified = 5;
+}
+message SaveWallpaperRequest { Wallpaper wallpaper = 1; bool unsave = 2; }
+message InstallWallpaperRequest { oneof selection { Wallpaper wallpaper = 1; Empty clear = 2; } }
+message WallpaperMutationResult { bool applied = 1; int64 revision = 2; WallpaperState installed = 3; }
+message SetChatWallpaperRequest {
+  PeerRef peer = 1;
+  oneof selection {
+    Wallpaper wallpaper = 2;
+    Empty clear = 3;
+    // Reserved for a future real wallpaper-service-message implementation.
+    // Current servers explicitly reject this operation, never synthesize adoption.
+    int64 service_message_id = 4;
+  }
+  bool for_both = 5;
+  // Remove only the caller's override and reveal shared/default state.
+  // Requires no selection and for_both=false.
+  bool revert = 6;
+}
+message PeerWallpaperChanged { PeerRef peer = 1; WallpaperState state = 2; }
+message ChatWallpaperResult { Updates updates = 1; WallpaperState state = 2; int64 revision = 3; }

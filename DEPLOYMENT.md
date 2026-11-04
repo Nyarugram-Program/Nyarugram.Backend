@@ -1,5 +1,11 @@
 # 公网 HTTPS 部署（Ubuntu 22.04）
 
+## 验证器密钥的持久化
+
+TOTP 账号密钥由 ASP.NET Core Data Protection 加密保存到账号隐私状态。LegacyOnly 默认将密钥环保存在实际 `DataPath` 加 `.keys` 的目录。PostgreSQL 部署应显式设置 `Privacy:KeyDirectory` 为持久化的受限目录，所有处理同一数据库的实例使用同一密钥环和应用标识。Windows 密钥环使用当前运行用户的 DPAPI 保护。Linux 应通过部署的文件权限和数据卷访问控制保护密钥环。
+
+备份与迁移必须同时保留账号数据和密钥环。仅搬迁 PostgreSQL 隐私状态不会搬迁解密密钥。更换 Windows 运行用户时需要事先安排密钥保护迁移。新恢复码为 10 个八位数字，只保存带版本前缀的 HMAC-SHA256 校验值，使用受保护的 TOTP 密钥计算。既有 SHA-256 格式恢复码继续可用，每个码成功使用后在同一事务中移除。明文只在生成时返回，邮件找回服务当前未配置。
+
 公网业务入口为 `https://nyarugram.moe.autos:8521`，事件连接为 `wss://nyarugram.moe.autos:8521/api/ws`。客户端地址未填写端口时默认补齐 **8521**，不使用 HTTPS 的常规默认端口 443。DNS 指向 `43.142.58.20`。
 
 ## 端口与代理

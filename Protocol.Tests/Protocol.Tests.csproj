@@ -1,0 +1,29 @@
+<Project>
+  <PropertyGroup>
+    <ProtobufBuildRoot>D:/BotgramBuild/protobuf</ProtobufBuildRoot>
+    <ProtocolTestRunRoot Condition="'$(ProtocolTestRunRoot)' == ''">$(ProtobufBuildRoot)</ProtocolTestRunRoot>
+    <BaseIntermediateOutputPath>$(ProtocolTestRunRoot)/obj/Protocol.Tests/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(ProtocolTestRunRoot)/bin/Protocol.Tests/</BaseOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestorePackagesPath>$(ProtobufBuildRoot)/nuget/packages</RestorePackagesPath>
+    <RestoreSources>$(ProtobufBuildRoot)/downloads</RestoreSources>
+    <NuGetAudit>false</NuGetAudit>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.25.8" />
+    <Compile Include="$(ProtobufBuildRoot)/generated/csharp/**/*.cs" Link="Generated/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(ProtobufBuildRoot)/compat/csharp/**/*.cs" Link="Compat/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <Target Name="RequireGeneratedProtocol" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('$(ProtobufBuildRoot)/generated/csharp/BotgramRpc.cs')" Text="Run tools/protobuf.ps1 -Action Generate before building Protocol.Tests." />
+  </Target>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import net from 'node:net';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const fixtureRoot = process.env.BOTGRAM_TEST_ROOT ?? path.join(root, 'obj');
 const temp = await mkdtemp(path.join(process.env.BOTGRAM_TEST_ROOT ?? path.join(root, 'obj'), 'gid-'));
 const database = path.join(temp, 'db.json');
 const socket = net.createServer().listen(0, '127.0.0.1');
@@ -15,6 +16,7 @@ const port = socket.address().port;
 await new Promise(resolve => socket.close(resolve));
 const base = `http://127.0.0.1:${port}`;
 let server, logs = '';
+const rpcFixtures = [];
 async function start() {
   server = spawn('dotnet', [process.env.BOTGRAM_TEST_DLL ?? path.join(root, 'bin/Debug/net8.0/Botgram.Backend.dll'), '--urls', base], {
     cwd: root, env: { ...process.env, DataPath: database }, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe']
@@ -35,6 +37,9 @@ async function req(method, route, token, body, status = 200) {
     headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
     body: body === undefined ? undefined : JSON.stringify(body) });
   const data = await response.json();
+  if (route === '/api/telegram/rpc') rpcFixtures.push({
+    requestType: body.$type, request: body, status: response.status, expectedStatus: status, response: data
+  });
   assert.equal(response.status, status, `${method} ${route}: ${JSON.stringify(data)}`);
   return data;
 }
@@ -60,9 +65,13 @@ try {
   const diff = await rpc(bob.token,'TL_updates_getDifference',{pts:before.pts,date:before.date,qts:0});
   assert(diff.other_updates.some(x => x.$type === 'org.telegram.tgnet.tl.TL_update$TL_updateUserPhone' && x.phone === updated.phone));
   assert(diff.users.some(x => x.phone === updated.phone));
-  await writeFile(path.join(root,'obj/gid-tl-fixtures.json'), JSON.stringify([
+  const fetched = await rpc(bob.token, 'TL_users_getUsers', {
+    id: [{ $type: 'org.telegram.tgnet.TLRPC$TL_inputUser', user_id: updated.id }]
+  });
+  assert.equal(fetched.objects[0].phone, updated.phone);
+  await writeFile(path.join(fixtureRoot,'gid-tl-fixtures.json'), JSON.stringify([
     {requestType:'org.telegram.tgnet.TLRPC$TL_updates_getDifference',response:diff},
-    {requestType:'org.telegram.tgnet.TLRPC$TL_users_getUsers',response:{ $type:'org.telegram.tgnet.Vector',objects:[updated] }}
+    {requestType:'org.telegram.tgnet.TLRPC$TL_users_getUsers',response:fetched}
   ]));
   await req('PUT','/api/me/gid',alice.token,{regionCode:'030',number:'12345678'}); // Own GID is allowed.
   for (const [regionCode,number] of [['001','12345678'],['156','12345678'],['030','00000000'],['030','1234567'],['030','123456789'],['03','012345678'],['030','１２３４５６７８']]) {
@@ -86,4 +95,7 @@ try {
   await stop(); await start();
   for (const [i,x] of accounts.entries()) assert.equal((await req('GET','/api/me',x.token)).gid,migrated[i].gid);
   console.log('PASS: regional registration/fallback, 29 regions, GID validation, same-owner update, collisions and concurrent claim, TL updates, persistence, legacy migration with stable accounts/sessions/chats');
-} finally { await stop(); }
+} finally {
+  await stop();
+  await writeFile(path.join(fixtureRoot, 'gid-rpc-fixtures.json'), JSON.stringify(rpcFixtures, null, 2));
+}

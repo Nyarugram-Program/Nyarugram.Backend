@@ -3,16 +3,29 @@ using System.Text.Json;
 namespace Botgram.Backend;
 
 // Single-process store. Writes are serialized and atomically replace the snapshot.
-public sealed class Store
+public sealed class Store : IDisposable
 {
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
     private readonly object gate = new();
-    private readonly string path;
-    private Database db;
-    private readonly FileStream lease;
+    private readonly string path = "";
+    private Database db = new();
+    private readonly FileStream? lease;
+    private readonly PostgresValidationStore? validation;
+    #region debug-point store-stages
+    private readonly bool diagnostic;
+    #endregion
 
     public Store(IConfiguration config, IHostEnvironment environment)
     {
+        #region debug-point store-stages
+        diagnostic = config.GetValue<bool>("Protocol:DiagnosticStages");
+        #endregion
+        var policy = StoragePolicy.Load(config, environment);
+        if (policy.Mode == StorageMode.NewStorageValidation)
+        {
+            validation = new PostgresValidationStore(config);
+            return;
+        }
         path = Path.GetFullPath(config["DataPath"] ?? Path.Combine(environment.ContentRootPath, "data", "botgram.json"));
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         // Refuse a second process using the same database.
@@ -24,37 +37,85 @@ public sealed class Store
         else Gids.Migrate(db);
     }
 
-    public T Read<T>(Func<Database, T> action) { lock (gate) return action(db); }
+    public T Read<T>(Func<Database, T> action) { if (validation is not null) return validation.Read(action); lock (gate) return action(db); }
+
+    public void Dispose() { validation?.Dispose(); lease?.Dispose(); }
+
+    internal static void Maintain(Database database)
+    {
+        var now = DateTimeOffset.UtcNow;
+        database.Sessions.RemoveAll(s => s.ExpiresAt <= now);
+        database.Events.RemoveAll(e => e.ExpiresAt <= now);
+        PresenceService.Expire(database);
+        foreach (var call in database.Calls.Where(c => CallService.InProgress(c.State)).ToArray())
+        {
+            if (!CallService.Expired(call, now)) continue;
+            var ended = call with { State = "ended", UpdatedAt = now };
+            database.Calls[database.Calls.IndexOf(call)] = ended;
+            database.Emit([call.CallerId, call.CalleeId], "call.updated", ended);
+        }
+    }
 
     public T Write<T>(Func<Database, T> action)
     {
+        if (validation is not null) return validation.Write(action);
+        #region debug-point store-stages
+        var stage = diagnostic ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
+        #endregion
         lock (gate)
         {
-            var previous = JsonSerializer.Serialize(db, Json);
+            #region debug-point store-stages
+            if (diagnostic) System.Diagnostics.Activity.Current?.SetTag("diag.lock_ms", System.Diagnostics.Stopwatch.GetElapsedTime(stage).TotalMilliseconds);
+            if (diagnostic) stage = System.Diagnostics.Stopwatch.GetTimestamp();
+            #endregion
             try
             {
-                var now = DateTimeOffset.UtcNow;
-                db.Sessions.RemoveAll(s => s.ExpiresAt <= now);
-                db.Events.RemoveAll(e => e.ExpiresAt <= now);
-                foreach (var call in db.Calls.Where(c => c.State is "ringing" or "active").ToArray())
-                {
-                    var timeout = call.State == "ringing" ? TimeSpan.FromSeconds(60) : TimeSpan.FromHours(2);
-                    if (now - call.UpdatedAt <= timeout) continue;
-                    var ended = call with { State = "ended", UpdatedAt = now };
-                    db.Calls[db.Calls.IndexOf(call)] = ended;
-                    db.Emit([call.CallerId, call.CalleeId], "call.updated", ended);
-                }
+                Maintain(db);
+                #region debug-point store-stages
+                if (diagnostic) System.Diagnostics.Activity.Current?.SetTag("diag.maintenance_ms", System.Diagnostics.Stopwatch.GetElapsedTime(stage).TotalMilliseconds);
+                if (diagnostic) stage = System.Diagnostics.Stopwatch.GetTimestamp();
+                #endregion
                 var result = action(db);
+                #region debug-point store-stages
+                if (diagnostic) System.Diagnostics.Activity.Current?.SetTag("diag.action_ms", System.Diagnostics.Stopwatch.GetElapsedTime(stage).TotalMilliseconds);
+                if (diagnostic) stage = System.Diagnostics.Stopwatch.GetTimestamp();
+                #endregion
                 using (var file = new FileStream(path + ".tmp", FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     JsonSerializer.Serialize(file, db, Json);
+                    #region debug-point store-stages
+                    if (diagnostic) System.Diagnostics.Activity.Current?.SetTag("diag.persist_encode_ms", System.Diagnostics.Stopwatch.GetElapsedTime(stage).TotalMilliseconds);
+                    if (diagnostic) stage = System.Diagnostics.Stopwatch.GetTimestamp();
+                    #endregion
                     file.Flush(true);
+                    #region debug-point store-stages
+                    if (diagnostic) System.Diagnostics.Activity.Current?.SetTag("diag.flush_ms", System.Diagnostics.Stopwatch.GetElapsedTime(stage).TotalMilliseconds);
+                    if (diagnostic) stage = System.Diagnostics.Stopwatch.GetTimestamp();
+                    #endregion
                 }
                 File.Move(path + ".tmp", path, true);
+                #region debug-point store-stages
+                if (diagnostic) System.Diagnostics.Activity.Current?.SetTag("diag.replace_ms", System.Diagnostics.Stopwatch.GetElapsedTime(stage).TotalMilliseconds);
+                #endregion
                 GC.KeepAlive(lease);
                 return result;
             }
-            catch { db = JsonSerializer.Deserialize<Database>(previous, Json)!; throw; }
+            catch (Exception failure)
+            {
+                // The on-disk snapshot is still the pre-transaction state: reading it back is
+                // equivalent to the former in-memory copy, without serializing the whole database
+                // on every request.
+                try
+                {
+                    db = File.Exists(path) ? JsonSerializer.Deserialize<Database>(File.ReadAllText(path), Json)
+                        ?? throw new InvalidDataException("Invalid database") : new Database();
+                }
+                catch (Exception restore)
+                {
+                    throw new AggregateException("Failed write could not be rolled back", failure, restore);
+                }
+                throw;
+            }
         }
     }
 }

@@ -1,0 +1,24 @@
+<Project>
+  <PropertyGroup>
+    <ProtobufBuildRoot>D:/BotgramBuild/protobuf</ProtobufBuildRoot>
+    <BaseIntermediateOutputPath>$(ProtobufBuildRoot)/http-tests/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(ProtobufBuildRoot)/http-tests/bin/</BaseOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestorePackagesPath>$(ProtobufBuildRoot)/nuget/packages</RestorePackagesPath>
+    <RestoreSources>$(ProtobufBuildRoot)/downloads</RestoreSources>
+    <NuGetAudit>false</NuGetAudit>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Botgram.Backend.csproj" />
+    <PackageReference Include="Google.Protobuf" Version="3.25.8" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

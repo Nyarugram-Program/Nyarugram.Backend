@@ -1,0 +1,26 @@
+syntax = "proto3";
+package botgram.compat.old;
+option java_package = "org.telegram.botgram.protocol.compat";
+option java_outer_classname = "CompatV1";
+option csharp_namespace = "Botgram.Protocol.Compat.Old";
+message Envelope {
+  string id = 1;
+  enum Status { UNKNOWN = 0; READY = 1; }
+  Status status = 2;
+}
+message UserRef {
+  string server_domain = 1;
+  string user_id = 2;
+}
+message UserSummary {
+  UserRef identity = 1;
+  int64 tl_user_id = 2;
+  string username = 3;
+  string display_name = 4;
+  string first_name = 5;
+  string last_name = 6;
+  string gid = 7;
+  bool is_self = 8;
+  bool is_contact = 9;
+  bool is_mutual_contact = 10;
+}

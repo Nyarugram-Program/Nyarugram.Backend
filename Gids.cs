@@ -17,12 +17,15 @@ public static class Gids
     public static bool Valid(string gid) => Regex.IsMatch(gid, "^[0-9]{11}$")
         && Data.Regions.Any(r => r.Code == gid[..3]) && gid[3..] != "00000000";
 
+    internal static string Candidate(string region) =>
+        region + RandomNumberGenerator.GetInt32(1, 100_000_000).ToString("D8");
+
     // Caller holds Store's write lock: allocation and persistence are one transaction.
     public static string Allocate(Database db, string region)
     {
         for (var attempt = 0; attempt < 1024; attempt++)
         {
-            var candidate = region + RandomNumberGenerator.GetInt32(1, 100_000_000).ToString("D8");
+            var candidate = Candidate(region);
             if (db.Users.All(u => u.Gid != candidate)) return candidate;
         }
         throw new ApiException(503, "gid_allocation_busy");
@@ -37,7 +40,7 @@ public static class Gids
                 db.Users[i] = db.Users[i] with { Gid = Allocate(db, "001") };
                 var user = db.Users[i];
                 var recipients = db.Conversations.Where(c => c.Members.Contains(user.Id)).SelectMany(c => c.Members).Append(user.Id).Distinct().ToArray();
-                db.Emit(recipients, "user.gid_changed", new { userId = user.Id, gid = user.Gid });
+                db.Emit(recipients, "user.gid_changed", new GidChanged(user.Id, user.Gid));
             }
             else if (!Valid(db.Users[i].Gid)) throw new InvalidDataException("Invalid stored GID");
         }
@@ -47,9 +50,7 @@ public static class Gids
 
     public static User Change(Database db, string uid, ChangeGidInput input)
     {
-        var candidate = (input.RegionCode ?? "") + (input.Number ?? "");
-        if (input.RegionCode is not { Length: 3 } || input.Number is not { Length: 8 }
-            || !Valid(candidate) || input.RegionCode == "001") throw new ApiException(400, "invalid_gid");
+        var candidate = ValidateChange(input);
         if (db.Users.Any(u => u.Id != uid && u.Gid == candidate)) throw new ApiException(409, "gid_taken");
         var index = db.Users.FindIndex(u => u.Id == uid);
         var updated = db.Users[index] with { Gid = candidate };
@@ -57,7 +58,15 @@ public static class Gids
         db.Users[index] = updated;
         var recipients = db.Conversations.Where(c => c.Members.Contains(uid)).SelectMany(c => c.Members)
             .Concat(db.Contacts.Where(c => c.UserId == uid).Select(c => c.OwnerId)).Append(uid).Distinct().ToArray();
-        db.Emit(recipients, "user.gid_changed", new { userId = uid, gid = candidate });
+        db.Emit(recipients, "user.gid_changed", new GidChanged(uid, candidate));
         return updated;
+    }
+
+    public static string ValidateChange(ChangeGidInput input)
+    {
+        var candidate = (input.RegionCode ?? "") + (input.Number ?? "");
+        if (input.RegionCode is not { Length: 3 } || input.Number is not { Length: 8 }
+            || !Valid(candidate) || input.RegionCode == "001") throw new ApiException(400, "invalid_gid");
+        return candidate;
     }
 }

@@ -1,0 +1,22 @@
+{
+  "protocVersion": "25.8",
+  "runtimeVersion": "3.25.8",
+  "hashProvenance": "SHA-256 pinned from the initial HTTPS downloads for this toolchain; not independently verified upstream signatures.",
+  "artifacts": [
+    {
+      "name": "protoc-25.8-win64.zip",
+      "url": "https://github.com/protocolbuffers/protobuf/releases/download/v25.8/protoc-25.8-win64.zip",
+      "sha256": "a04c32f7ad5dc6bc1d33b6e3092c367fe5b638a809d4c290ee59c6f5252fee74"
+    },
+    {
+      "name": "protobuf-javalite-3.25.8.jar",
+      "url": "https://repo.maven.apache.org/maven2/com/google/protobuf/protobuf-javalite/3.25.8/protobuf-javalite-3.25.8.jar",
+      "sha256": "918bcc959cc0f5cb58798cec347a15d41cee9a1b8101c352954fd18d44e2e1c7"
+    },
+    {
+      "name": "google.protobuf.3.25.8.nupkg",
+      "url": "https://api.nuget.org/v3-flatcontainer/google.protobuf/3.25.8/google.protobuf.3.25.8.nupkg",
+      "sha256": "05f9270782ab3da60afdf764731d519100822e9b89381ebae8b2c2a6f2b07b6b"
+    }
+  ]
+}

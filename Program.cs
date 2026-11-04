@@ -1,3 +1,4 @@
+using Google.Protobuf;
 using System.Net;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
@@ -7,8 +8,13 @@ using System.Threading.RateLimiting;
 using Botgram.Backend;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+// Validate before resolving Store or creating any legacy data/lease files.
+var storagePolicy = StoragePolicy.Load(builder.Configuration, builder.Environment);
+CallService.Configure(builder.Configuration);
+builder.Services.AddSingleton(storagePolicy);
 builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 128 * 1024);
 var knownProxies = builder.Configuration.GetSection("ReverseProxy:KnownProxies").Get<string[]>() ?? [];
 if (knownProxies.Length > 0)
@@ -23,8 +29,40 @@ if (knownProxies.Length > 0)
         foreach (var address in proxyAddresses) options.KnownProxies.Add(address);
     });
 }
-builder.Services.AddSingleton<Store>();
-builder.Services.AddHostedService<CallExpiryService>();
+var relationalValidation = storagePolicy.Mode == StorageMode.NewStorageValidation &&
+    builder.Configuration["Storage:ValidationBackend"] == "RelationalThreeRpc";
+var relationalBackend = storagePolicy.Mode == StorageMode.NewStorageValidation &&
+    builder.Configuration["Storage:ValidationBackend"] is "RelationalBackend" or "FourComponent";
+var fourComponent = builder.Configuration["Storage:ValidationBackend"] == "FourComponent";
+var privacyKeys = builder.Configuration["Privacy:KeyDirectory"];
+if (relationalBackend && string.IsNullOrWhiteSpace(privacyKeys) && string.IsNullOrWhiteSpace(builder.Configuration["DataPath"]))
+    throw new InvalidOperationException("Privacy:KeyDirectory is required for durable authenticator keys in relational mode");
+privacyKeys ??= Path.GetFullPath(builder.Configuration["DataPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "data", "botgram.json")) + ".keys";
+var dataProtection = builder.Services.AddDataProtection().SetApplicationName("Botgram.AccountSecurity.v1")
+    .PersistKeysToFileSystem(new DirectoryInfo(privacyKeys));
+if (OperatingSystem.IsWindows()) dataProtection.ProtectKeysWithDpapi();
+builder.Services.AddSingleton<AccountTotpService>();
+if (fourComponent)
+{
+    builder.Services.AddSingleton(Botgram.Backend.Storage.FourComponentOptions.Load(builder.Configuration));
+    builder.Services.AddSingleton<Botgram.Backend.Storage.FourComponentRuntime>();
+    builder.Services.AddSingleton<Botgram.Backend.Storage.FourComponentReads>();
+    builder.Services.AddHostedService(services => services.GetRequiredService<Botgram.Backend.Storage.FourComponentRuntime>());
+}
+if (!relationalBackend) builder.Services.AddSingleton<Store>();
+if (relationalValidation || relationalBackend)
+{
+    var connection = new Npgsql.NpgsqlConnectionStringBuilder(PostgresValidationStore.Validate(builder.Configuration)) { Pooling = true };
+    builder.Services.AddSingleton(_ => Npgsql.NpgsqlDataSource.Create(connection.ConnectionString));
+    if (relationalValidation) builder.Services.AddSingleton<PostgresRelationalValidation>();
+    else
+    {
+        builder.Services.AddSingleton<Botgram.Backend.Storage.PostgresBackend>();
+        builder.Services.AddHostedService<Botgram.Backend.Storage.RelationalMaintenanceService>();
+    }
+}
+builder.Services.AddSingleton<ProtocolUsage>();
+if (!relationalValidation && !relationalBackend) builder.Services.AddHostedService<CallExpiryService>();
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = 429;
@@ -35,70 +73,186 @@ builder.Services.AddRateLimiter(options =>
         context.Items["uid"]?.ToString() ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 300, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
 });
+var serverDomain = builder.Configuration["Protocol:ServerDomain"];
+if (string.IsNullOrWhiteSpace(serverDomain) || Uri.CheckHostName(serverDomain) != UriHostNameType.Dns ||
+    serverDomain != serverDomain.ToLowerInvariant() || serverDomain.EndsWith('.'))
+    throw new InvalidOperationException("Protocol:ServerDomain must be an explicit lowercase DNS authority without port");
+var protocolPolicy = ProtocolPolicy.Load(builder.Configuration);
+var protobufPercent = protocolPolicy.ProtobufRolloutPercent;
+var legacyJsonEnabled = protocolPolicy.LegacyJsonRpcEnabled;
+var auditRpc = builder.Configuration.GetValue<bool>("Protocol:AuditRpc");
 var app = builder.Build();
 if (knownProxies.Length > 0) app.UseForwardedHeaders();
+app.Use((context, next) => app.Services.GetRequiredService<ProtocolUsage>().Observe(context, next));
 // Fail at startup if the database is invalid or already in use.
-_ = app.Services.GetRequiredService<Store>();
+if (relationalBackend)
+    await app.Services.GetRequiredService<Botgram.Backend.Storage.PostgresBackend>().VerifySchemaAsync();
+else if (relationalValidation)
+{
+    var relational = app.Services.GetRequiredService<PostgresRelationalValidation>();
+    await relational.InitializeAsync();
+    var seedPath = builder.Configuration["Storage:ValidationSeedPath"];
+    if (seedPath is not null)
+    {
+        var seed = JsonSerializer.Deserialize<Database>(await File.ReadAllTextAsync(seedPath), Store.Json)
+            ?? throw new InvalidDataException("Invalid relational validation seed");
+        await relational.SeedAsync(seed);
+    }
+}
+else _ = app.Services.GetRequiredService<Store>();
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.TrimEnd('/');
+    bool protobuf = string.Equals(path, ProtobufRpcEndpoint.Path, StringComparison.OrdinalIgnoreCase);
+    bool legacy = string.Equals(path, "/api/telegram/rpc", StringComparison.OrdinalIgnoreCase);
+    if (!builder.Configuration.GetValue<bool>("Protocol:AuditRpc") || (!protobuf && !legacy))
+    {
+        await next(context);
+        return;
+    }
+    var started = System.Diagnostics.Stopwatch.GetTimestamp();
+    var diagnosticStages = builder.Configuration.GetValue<bool>("Protocol:DiagnosticStages");
+    if (diagnosticStages) System.Diagnostics.Activity.Current?.SetTag("diag.enabled", true);
+    var gcBefore = diagnosticStages ? new[] { GC.CollectionCount(0), GC.CollectionCount(1), GC.CollectionCount(2) } : null;
+    var originalRequestBody = context.Request.Body;
+    var originalResponseBody = context.Response.Body;
+    if (diagnosticStages)
+    {
+        context.Request.Body = new RpcDiagnosticStream(originalRequestBody, "request_body_read_ms");
+        context.Response.Body = new RpcDiagnosticStream(originalResponseBody, "response_body_write_ms");
+    }
+    bool completed = false;
+    try { await next(context); completed = true; }
+    finally
+    {
+        if (diagnosticStages)
+        {
+            context.Request.Body = originalRequestBody;
+            context.Response.Body = originalResponseBody;
+            if (context.Items["diag.json_result_ready"] is long ready)
+                System.Diagnostics.Activity.Current?.SetTag("diag.json_encode_write_ms", System.Diagnostics.Stopwatch.GetElapsedTime(ready).TotalMilliseconds);
+        }
+        #region debug-point request-stages
+        if (diagnosticStages)
+            app.Logger.LogInformation("RPC_STAGES trace={Trace} request_id={RequestId} elapsed_ms={Elapsed} stages={Stages} process_gc0_delta={Gc0} process_gc1_delta={Gc1} process_gc2_delta={Gc2} pending={Pending}",
+                context.TraceIdentifier, context.Items["rpc_request_id"] ?? "-", System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                string.Join(";", System.Diagnostics.Activity.Current?.TagObjects.Where(t => t.Key.StartsWith("diag.")).Select(t => t.Key + "=" + t.Value) ?? []),
+                GC.CollectionCount(0) - gcBefore![0], GC.CollectionCount(1) - gcBefore[1], GC.CollectionCount(2) - gcBefore[2], System.Threading.ThreadPool.PendingWorkItemCount);
+        #endregion
+        app.Logger.LogInformation("RPC_AUDIT protocol={Protocol} operation={Operation} request_id={RequestId} peer_kind={PeerKind} max_id={MaxId} error={Error} status={Status} elapsed_ms={ElapsedMs} completed={Completed} aborted={Aborted}",
+            protobuf ? "protobuf" : "json", context.Items["rpc_operation"] ?? "unparsed",
+            context.Items["rpc_request_id"] ?? "-", context.Items["rpc_peer_kind"] ?? "-",
+            context.Items["rpc_max_id"] ?? "-", context.Items["rpc_error"] ?? "none", context.Response.StatusCode, System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+            completed, context.RequestAborted.IsCancellationRequested);
+    }
+});
 app.Use(async (context, next) =>
 {
     try { await next(context); }
     catch (ApiException ex)
     {
+        context.Items["rpc_error"] = ex.Message;
         context.Response.StatusCode = ex.Status;
         await context.Response.WriteAsJsonAsync(new { error = ex.Message });
     }
     catch (BadHttpRequestException)
     {
+        context.Items["rpc_error"] = "invalid_request";
         context.Response.StatusCode = 400;
         await context.Response.WriteAsJsonAsync(new { error = "invalid_request" });
     }
+    catch (Npgsql.NpgsqlException) when (fourComponent)
+    {
+        context.Response.StatusCode = 503;
+        await context.Response.WriteAsJsonAsync(new { error = "storage_unavailable" });
+    }
+});
+if (relationalValidation) app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.TrimEnd('/');
+    if (!string.Equals(path, "/health", StringComparison.OrdinalIgnoreCase) &&
+        !string.Equals(path, ProtobufRpcEndpoint.Path, StringComparison.OrdinalIgnoreCase))
+        throw new ApiException(501, "BOTGRAM_RELATIONAL_ROUTE_UNSUPPORTED");
+    await next(context);
 });
 app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(20) });
 app.UseRouting();
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path;
-    if (path.StartsWithSegments("/api") && path != "/api/auth/register" && path != "/api/auth/login")
+    if (fourComponent && path.StartsWithSegments("/api"))
+        await context.RequestServices.GetRequiredService<Botgram.Backend.Storage.FourComponentRuntime>()
+            .EnsureOwnershipAsync(context.RequestAborted);
+    if (path.StartsWithSegments("/api") && path != "/api/auth/register" && path != "/api/auth/login" && path != "/api/auth/password")
     {
-        var session = Auth.Require(context, context.RequestServices.GetRequiredService<Store>());
+        var session = relationalBackend
+            ? await Botgram.Backend.Storage.RelationalHttpRoutes.RequireAsync(context)
+            : relationalValidation
+            ? await context.RequestServices.GetRequiredService<PostgresRelationalValidation>().RequireAsync(context)
+            : Auth.Require(context, context.RequestServices.GetRequiredService<Store>());
         context.Items["uid"] = session.UserId;
         context.Items["session"] = session;
+        if (string.Equals(path.Value?.TrimEnd('/'), "/api/telegram/rpc", StringComparison.OrdinalIgnoreCase) &&
+            !legacyJsonEnabled)
+        {
+            context.Items["protocol_usage_disabled"] = true;
+            throw new ApiException(410, "BOTGRAM_JSON_RPC_DISABLED");
+        }
     }
     await next(context);
 });
 app.UseRateLimiter();
+if (relationalBackend)
+{
+    Botgram.Backend.Storage.RelationalHttpRoutes.Map(app, builder.Configuration, protocolPolicy);
+    app.Run();
+    return;
+}
 string Uid(HttpContext context) => (string)context.Items["uid"]!;
 void Check(bool valid, string code) { if (!valid) throw new ApiException(400, code); }
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", protocol = "botgram-v1" }));
 app.MapPost("/api/auth/register", (RegisterInput input, Store store) =>
 {
-    Check(input.Username is not null && Regex.IsMatch(input.Username, "^[a-zA-Z0-9_]{3,32}$"), "invalid_username");
-    Check(!string.IsNullOrWhiteSpace(input.DisplayName) && input.DisplayName.Length <= 80, "invalid_display_name");
-    Check(input.Password is { Length: >= 10 and <= 256 }, "password_length_10_to_256");
-    var username = input.Username!.ToLowerInvariant();
-    var salt = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
-    var user = new User(Guid.NewGuid().ToString("N"), username, input.DisplayName.Trim(), salt, Auth.HashPassword(input.Password!, salt));
+    var user = Auth.PrepareRegistration(input);
     return store.Write(db =>
     {
-        if (db.Users.Any(u => u.Username == username)) throw new ApiException(409, "username_taken");
+        if (db.Users.Any(u => u.Username == user.Username)) throw new ApiException(409, "username_taken");
         user = user with { Gid = Gids.Allocate(db, Gids.FromCountry(input.LocationCountry)) };
         db.Users.Add(user);
         return Auth.CreateSession(db, user);
     });
 }).RequireRateLimiting("auth");
-app.MapPost("/api/auth/login", (LoginInput input, Store store) =>
+app.MapPost("/api/auth/login", (LoginInput input, Store store, AccountTotpService totp) =>
 {
-    Check(input.Username is { Length: <= 32 } && input.Password is { Length: <= 256 }, "invalid_credentials");
-    var user = store.Read(db => db.Users.FirstOrDefault(u => u.Username == input.Username!.ToLowerInvariant()));
-    // Perform the same password derivation even when the username is absent.
-    var hash = Auth.HashPassword(input.Password!, user?.Salt ?? new string('0', 32));
-    if (user is null || !CryptographicOperations.FixedTimeEquals(Convert.FromHexString(hash), Convert.FromHexString(user.PasswordHash)))
-        throw new ApiException(401, "invalid_credentials");
-    return store.Write(db => Auth.CreateSession(db, user));
+    Auth.ValidateLogin(input);
+    return store.Write(db =>
+    {
+        var user = db.Users.FirstOrDefault(u => u.Username == input.Username.ToLowerInvariant());
+        Auth.VerifyPassword(user, input.Password);
+        AccountPasswordService.VerifyLogin(user!, AccountPrivacyService.State(db, user!.Id).Password, input.PasswordProof);
+        totp.Verify(user.Id, AccountPrivacyService.State(db, user.Id).Totp, input.TotpCode);
+        return Auth.CreateSession(db, user);
+    });
+}).RequireRateLimiting("auth");
+app.MapPost("/api/auth/password", (LoginInput input, Store store) =>
+{
+    Auth.ValidateLogin(input);
+    return store.Read(db =>
+    {
+        var user = db.Users.FirstOrDefault(u => u.Username == input.Username.ToLowerInvariant());
+        Auth.VerifyPassword(user, input.Password);
+        var state = db.AccountPrivacy?.GetValueOrDefault(user!.Id)?.Password ?? new();
+        return AccountPasswordService.LoginInfo(user!, state);
+    });
 }).RequireRateLimiting("auth");
 
 var api = app.MapGroup("/api").RequireRateLimiting("api");
+api.MapGet("/security/totp", (HttpContext c, Store store) => store.Read(db =>
+    AccountTotpService.Status(db.AccountPrivacy?.GetValueOrDefault(Uid(c))?.Totp ?? new())));
+api.MapPost("/security/totp/{operation}", (string operation, TotpInput input, HttpContext c, Store store, AccountTotpService totp) =>
+    store.Write(db => totp.Execute(Uid(c), db.Users.Single(u => u.Id == Uid(c)).Username,
+        AccountPrivacyService.State(db, Uid(c)).Totp, operation, input.Code)));
 api.MapGet("/telegram/me", (HttpContext c, Store store) => store.Write(db => TelegramGateway.CurrentUser(db, Uid(c))));
 api.MapGet("/gid/regions", () => Gids.Regions.Where(r => r.Code != "001"));
 api.MapPut("/me/gid", (ChangeGidInput input, HttpContext c, Store store) => store.Write(db =>
@@ -106,58 +260,59 @@ api.MapPut("/me/gid", (ChangeGidInput input, HttpContext c, Store store) => stor
     Gids.Change(db, Uid(c), input);
     return TelegramGateway.CurrentUser(db, Uid(c));
 }));
+api.MapGet("/protocol/capabilities", (HttpContext c) =>
+{
+    var session = (Session)c.Items["session"]!;
+    // The same bearer session always receives the same cohort; never expose its hash.
+    var cohort = System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(
+        SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(session.TokenHash))) % 100;
+    return Results.Ok(new
+    {
+        negotiationVersion = 1,
+        protocols = legacyJsonEnabled ? new[] { "protobuf-v1", "tl-json-v1" } : new[] { "protobuf-v1" },
+        selectedProtocol = cohort < protobufPercent ? "protobuf-v1" : "tl-json-v1",
+        eventSubprotocols = protocolPolicy.LegacyJsonWssEnabled
+            ? new[] { "botgram.event-hint.v1.protobuf", "botgram.events.v1.json" }
+            : new[] { "botgram.event-hint.v1.protobuf" },
+        capabilities = new[] { "session-protocol-pinning", "send-random-id-idempotency-v1", "difference-pts-v1", "wss-wake-v1" }
+    });
+});
+if (relationalValidation) api.MapPost("/v1/rpc", ProtobufRpcEndpoint.HandleRelational);
+else api.MapPost("/v1/rpc", ProtobufRpcEndpoint.Handle);
 api.MapPost("/telegram/rpc", (System.Text.Json.Nodes.JsonObject input, HttpContext c, Store store) =>
-    store.Write(db => TelegramGateway.Execute(db, Uid(c), input)));
+{
+    if (auditRpc) c.Items["rpc_operation"] = input["$type"]?.GetValue<string>() ?? "unparsed";
+    var result = store.Write(db => TelegramGateway.Execute(db, Uid(c), input));
+    if (System.Diagnostics.Activity.Current?.GetTagItem("diag.enabled") is true)
+        c.Items["diag.json_result_ready"] = System.Diagnostics.Stopwatch.GetTimestamp();
+    return result;
+});
 api.MapPost("/auth/logout", (HttpContext c, Store store) => store.Write(db =>
 {
     db.Sessions.RemoveAll(s => s.TokenHash == ((Session)c.Items["session"]!).TokenHash);
     return Results.NoContent();
 }));
 api.MapGet("/me", (HttpContext c, Store store) => store.Read(db => Auth.PublicUser(db.Users.Single(u => u.Id == Uid(c)))));
+api.MapGet("/me/premium", (HttpContext c, Store store) =>
+    store.Read(db => PremiumService.Get(db, (Session)c.Items["session"]!)));
+api.MapPost("/me/premium/activate", (HttpContext c, Store store) =>
+    store.Write(db => PremiumService.Activate(db, (Session)c.Items["session"]!)));
 api.MapGet("/users", (string? username, Store store) =>
 {
     Check(username is { Length: >= 3 and <= 32 }, "exact_username_required");
     return store.Read(db => db.Users.Where(u => u.Username == username!.ToLowerInvariant()).Select(Auth.PublicUser).ToArray());
 });
 api.MapPost("/conversations", (ConversationInput input, HttpContext c, Store store) =>
-{
-    Check(input.Kind is "direct" or "group", "invalid_kind");
-    Check(input.MemberIds is { Length: >= 1 and <= 99 } && input.MemberIds.All(id => !string.IsNullOrWhiteSpace(id)), "invalid_members");
-    var members = input.MemberIds!.Append(Uid(c)).Distinct().Order().ToArray();
-    Check(input.Kind == "direct" ? members.Length == 2 : members.Length >= 2, "invalid_members");
-    Check(input.Kind != "group" || (!string.IsNullOrWhiteSpace(input.Title) && input.Title.Length <= 100), "invalid_title");
-    return store.Write(db =>
-    {
-        Check(members.All(id => db.Users.Any(u => u.Id == id)), "unknown_member");
-        if (input.Kind == "direct")
-        {
-            var existing = db.Conversations.FirstOrDefault(x => x.Kind == "direct" && x.Members.SequenceEqual(members));
-            if (existing is not null) return existing;
-        }
-        var conversation = new Conversation(Guid.NewGuid().ToString("N"), input.Kind, input.Kind == "group" ? input.Title!.Trim() : "", members, DateTimeOffset.UtcNow);
-        db.Conversations.Add(conversation);
-        db.Emit(members, "conversation.created", conversation);
-        return conversation;
-    });
-});
+    store.Write(db => ConversationMessageService.CreateRest(db, Uid(c), input)));
 api.MapGet("/conversations", (HttpContext c, Store store) => store.Read(db =>
-    db.Conversations.Where(x => x.Members.Contains(Uid(c))).Select(x => new
-    {
-        conversation = x,
-        lastMessage = db.Messages.LastOrDefault(m => m.ConversationId == x.Id),
-        unreadCount = db.Messages.Count(m => m.ConversationId == x.Id && m.SenderId != Uid(c) &&
-            m.Id > (db.Receipts.FirstOrDefault(r => r.ConversationId == x.Id && r.UserId == Uid(c))?.MessageId ?? 0)),
-        receipts = db.Receipts.Where(r => r.ConversationId == x.Id).ToArray(),
-        users = db.Users.Where(u => x.Members.Contains(u.Id)).Select(Auth.PublicUser).ToArray()
-    }).ToArray()));
+    ConversationQueryService.List(db, Uid(c))));
 api.MapGet("/conversations/{id}/messages", (string id, long? before, int? limit, HttpContext c, Store store) =>
 {
     Check(before is null or > 0 && limit is null or >= 1 and <= 100, "invalid_pagination");
     return store.Read(db =>
     {
-        Auth.Conversation(db, id, Uid(c));
-        return db.Messages.Where(m => m.ConversationId == id && (before is null || m.Id < before))
-            .OrderByDescending(m => m.Id).Take(limit ?? 50).Reverse().ToArray();
+        var conversation = Auth.Conversation(db, id, Uid(c));
+        return ConversationMessageService.History(db, conversation, new(OffsetId: before ?? 0, Limit: limit ?? 50)).Reverse().ToArray();
     });
 });
 api.MapPost("/conversations/{id}/messages", (string id, MessageInput input, HttpContext c, Store store) =>
@@ -167,39 +322,17 @@ api.MapPost("/conversations/{id}/messages", (string id, MessageInput input, Http
     return store.Write(db =>
     {
         var conversation = Auth.Conversation(db, id, Uid(c));
-        var existing = db.Messages.FirstOrDefault(m => m.ConversationId == id && m.SenderId == Uid(c) && m.ClientMessageId == input.ClientMessageId);
-        if (existing is not null)
-        {
-            if (existing.Text != input.Text) throw new ApiException(409, "idempotency_conflict");
-            return existing;
-        }
-        var message = new Message(db.NextMessageId++, id, Uid(c), input.ClientMessageId, input.Text, DateTimeOffset.UtcNow);
-        db.Messages.Add(message);
-        db.Emit(conversation.Members, "message.created", message);
-        return message;
+        return ConversationMessageService.Send(db, conversation, Uid(c), new(input.ClientMessageId, input.Text), MessageWriteContract.Rest);
     });
 });
 api.MapPost("/conversations/{id}/read", (string id, ReadInput input, HttpContext c, Store store) => store.Write(db =>
 {
     var conversation = Auth.Conversation(db, id, Uid(c));
-    Check(db.Messages.Any(m => m.Id == input.MessageId && m.ConversationId == id), "message_not_found");
-    var previous = db.Receipts.FirstOrDefault(r => r.ConversationId == id && r.UserId == Uid(c));
-    if (previous is not null && previous.MessageId >= input.MessageId) return previous;
-    if (previous is not null) db.Receipts.Remove(previous);
-    var receipt = new Receipt(id, Uid(c), input.MessageId);
-    db.Receipts.Add(receipt);
-    db.Emit(conversation.Members, "receipt.updated", receipt);
-    return receipt;
+    return ConversationMessageService.ReadExact(db, conversation, Uid(c), input.MessageId);
 }));
 
-object Events(Store store, string uid, long after, int limit) => store.Read(db =>
-{
-    var events = db.Events.Where(e => e.Id > after && e.Recipients.Contains(uid) &&
-        (e.ExpiresAt is null || e.ExpiresAt > DateTimeOffset.UtcNow)).Take(limit).ToArray();
-    // Advance across invisible and expired events only after the visible page is exhausted.
-    var cursor = events.Length == limit ? events[^1].Id : Math.Max(after, db.NextEventId - 1);
-    return new { events = events.Select(e => new { e.Id, e.Type, e.Payload, e.CreatedAt }).ToArray(), cursor };
-});
+EventPage Events(Store store, string uid, long after, int limit) =>
+    store.Read(db => SyncService.Events(db, uid, after, limit));
 api.MapGet("/events", (long? after, int? limit, HttpContext c, Store store) =>
 {
     Check(after is null or >= 0 && limit is null or >= 1 and <= 200, "invalid_pagination");
@@ -209,10 +342,31 @@ api.MapGet("/ws", async (long? after, HttpContext c, Store store) =>
 {
     Check(after is null or >= 0, "invalid_cursor");
     if (!c.WebSockets.IsWebSocketRequest) { c.Response.StatusCode = 400; return; }
-    using var socket = await c.WebSockets.AcceptWebSocketAsync();
+    const string protobufHints = "botgram.event-hint.v1.protobuf";
+    const string jsonEvents = "botgram.events.v1.json";
+    var offered = c.WebSockets.WebSocketRequestedProtocols;
+    var selected = offered.Contains(protobufHints) ? protobufHints : offered.Contains(jsonEvents) ? jsonEvents : null;
+    c.Items["protocol_usage_selected"] = selected == protobufHints ? "protobuf" : selected == jsonEvents || offered.Count == 0 ? "json" : "unknown";
+    if (offered.Count > 0 && selected is null)
+    {
+        c.Items["protocol_usage_unsupported"] = true;
+        c.Response.StatusCode = 400;
+        await c.Response.WriteAsJsonAsync(new { error = "unsupported_event_subprotocol" });
+        return;
+    }
+    if (selected != protobufHints && !protocolPolicy.LegacyJsonWssEnabled)
+    {
+        c.Items["protocol_usage_disabled"] = true;
+        c.Response.StatusCode = 410;
+        await c.Response.WriteAsJsonAsync(new { error = "BOTGRAM_JSON_WSS_DISABLED" });
+        return;
+    }
+    using var socket = await c.WebSockets.AcceptWebSocketAsync(selected);
+    c.RequestServices.GetRequiredService<ProtocolUsage>().AcceptedWebSocket(c, selected == protobufHints);
     using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(c.RequestAborted);
     var token = cancellation.Token;
     var session = (Session)c.Items["session"]!;
+    var receiveFailure = 0;
     async Task Receive()
     {
         try
@@ -223,36 +377,47 @@ api.MapGet("/ws", async (long? after, HttpContext c, Store store) =>
                 var received = await socket.ReceiveAsync(buffer.AsMemory(), token);
                 if (received.MessageType == WebSocketMessageType.Close) break;
                 // Client operations use HTTP. Do not accept arbitrary socket payloads.
-                if (received.Count > 0) break;
+                if (received.Count > 0) { Volatile.Write(ref receiveFailure, 2); break; }
             }
         }
         catch (OperationCanceledException) { }
-        catch (WebSocketException) { }
+        catch (WebSocketException) { Volatile.Write(ref receiveFailure, 1); }
         finally { await cancellation.CancelAsync(); }
     }
     var receive = Receive();
+    var endOutcome = "closed";
     try
     {
         long cursor = after ?? 0;
         while (!token.IsCancellationRequested && socket.State == WebSocketState.Open)
         {
-            if (!store.Read(db => db.Sessions.Any(s => s.TokenHash == session.TokenHash && s.ExpiresAt > DateTimeOffset.UtcNow))) break;
-            var batch = JsonSerializer.SerializeToElement(Events(store, Uid(c), cursor, 100), Store.Json);
-            var next = batch.GetProperty("cursor").GetInt64();
-            if (next != cursor || batch.GetProperty("events").GetArrayLength() > 0)
+            if (!store.Read(db => db.Sessions.Any(s => s.TokenHash == session.TokenHash && s.ExpiresAt > DateTimeOffset.UtcNow))) { endOutcome = "session_expired"; break; }
+            var batch = Events(store, Uid(c), cursor, 100);
+            var next = batch.Cursor;
+            if (next != cursor || batch.Events.Length > 0)
             {
-                await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(batch), WebSocketMessageType.Text, true, token);
+                byte[] payload = selected == protobufHints
+                    ? new Botgram.Protocol.V1.EventHint { ProtocolMajor = 1, Cursor = next }.ToByteArray()
+                    : JsonSerializer.SerializeToUtf8Bytes(batch, Store.Json);
+                // Await each send: no unbounded per-connection queue; a stalled peer is disconnected.
+                using var sendTimeout = CancellationTokenSource.CreateLinkedTokenSource(token);
+                sendTimeout.CancelAfter(TimeSpan.FromSeconds(10));
+                await socket.SendAsync(payload, selected == protobufHints ? WebSocketMessageType.Binary : WebSocketMessageType.Text, true, sendTimeout.Token);
                 cursor = next;
             }
             await Task.Delay(500, token);
         }
     }
-    catch (OperationCanceledException) { }
-    catch (WebSocketException) { }
+    catch (OperationCanceledException) { endOutcome = token.IsCancellationRequested ? "cancelled" : "send_timeout"; }
+    catch (WebSocketException) { endOutcome = "transport_error"; }
     finally
     {
         await cancellation.CancelAsync();
         await receive;
+        var receiveResult = Volatile.Read(ref receiveFailure);
+        if (endOutcome is "closed" or "cancelled" && receiveResult != 0)
+            endOutcome = receiveResult == 2 ? "client_payload_rejected" : "transport_error";
+        c.RequestServices.GetRequiredService<ProtocolUsage>().EndedWebSocket(selected == protobufHints, endOutcome);
         if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
         {
             using var closeTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
@@ -274,8 +439,10 @@ api.MapGet("/rtc/config", (IConfiguration config) => new
 api.MapPost("/calls", (CallInput input, HttpContext c, Store store) => store.Write(db =>
 {
     var conversation = Auth.Conversation(db, input.ConversationId, Uid(c));
-    Check(conversation.Kind == "direct" && input.CalleeId != Uid(c) && conversation.Members.Contains(input.CalleeId), "invalid_callee");
-    if (db.Calls.Any(call => call.State is "ringing" or "active" &&
+    CallService.ValidateCallee(conversation, Uid(c), input.CalleeId);
+    if (!AccountPrivacyService.Allowed(db, input.CalleeId, Uid(c), Botgram.Protocol.V1.PrivacyKey.PhoneCall))
+        throw new ApiException(403, "USER_PRIVACY_RESTRICTED");
+    if (db.Calls.Any(call => CallService.InProgress(call.State) &&
         (call.CallerId == Uid(c) || call.CalleeId == Uid(c) || call.CallerId == input.CalleeId || call.CalleeId == input.CalleeId)))
         throw new ApiException(409, "user_busy");
     var call = new Call(Guid.NewGuid().ToString("N"), conversation.Id, Uid(c), input.CalleeId, "ringing", DateTimeOffset.UtcNow);
@@ -284,20 +451,14 @@ api.MapPost("/calls", (CallInput input, HttpContext c, Store store) => store.Wri
     return call;
 }));
 api.MapGet("/calls", (HttpContext c, Store store) => store.Write(db => db.Calls
-    .Where(call => (call.CallerId == Uid(c) || call.CalleeId == Uid(c)) && call.State is "ringing" or "active")
+    .Where(call => (call.CallerId == Uid(c) || call.CalleeId == Uid(c)) && CallService.InProgress(call.State))
     .ToArray()));
 api.MapGet("/calls/{id}", (string id, HttpContext c, Store store) => store.Write(db => Auth.Call(db, id, Uid(c))));
 api.MapPost("/calls/{id}/{action}", (string id, string action, HttpContext c, Store store) => store.Write(db =>
 {
     var call = Auth.Call(db, id, Uid(c));
-    Check(action is "accept" or "reject" or "end", "invalid_action");
-    if (action is "accept" or "reject")
-    {
-        if (call.CalleeId != Uid(c)) throw new ApiException(403, "callee_only");
-        if (call.State != "ringing") throw new ApiException(409, "call_not_ringing");
-    }
-    if (call.State is "ended" or "rejected") return call;
-    var updated = call with { State = action == "accept" ? "active" : action == "reject" ? "rejected" : "ended", UpdatedAt = DateTimeOffset.UtcNow };
+    var updated = CallService.Transition(call, Uid(c), action, DateTimeOffset.UtcNow);
+    if (updated == call) return call;
     db.Calls[db.Calls.IndexOf(call)] = updated;
     db.Emit([call.CallerId, call.CalleeId], "call.updated", updated);
     return updated;
@@ -305,13 +466,8 @@ api.MapPost("/calls/{id}/{action}", (string id, string action, HttpContext c, St
 api.MapPost("/calls/{id}/signals", (string id, SignalInput input, HttpContext c, Store store) => store.Write(db =>
 {
     var call = Auth.Call(db, id, Uid(c));
-    if (call.State != "active") throw new ApiException(409, "call_not_active");
-    Check(input.Type is "offer" or "answer" or "ice", "invalid_signal_type");
-    Check(!string.IsNullOrWhiteSpace(input.Data) && input.Data.Length <= 64000, "invalid_signal_data");
-    Check(input.Type != "offer" || call.CallerId == Uid(c), "caller_offers_only");
-    Check(input.Type != "answer" || call.CalleeId == Uid(c), "callee_answers_only");
-    var recipient = call.CallerId == Uid(c) ? call.CalleeId : call.CallerId;
-    db.Emit([recipient], "call.signal", new { callId = id, senderId = Uid(c), input.Type, input.Data }, DateTimeOffset.UtcNow.AddMinutes(5));
+    var recipient = CallService.SignalRecipient(call, Uid(c), input);
+    db.Emit([recipient], "call.signal", new CallSignal(id, Uid(c), input.Type, input.Data), DateTimeOffset.UtcNow.AddMinutes(5));
     return Results.Accepted();
 }));
 app.Run();
