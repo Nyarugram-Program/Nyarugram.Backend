@@ -6,7 +6,9 @@ using System.Net.WebSockets;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Google.Protobuf;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
+using Botgram.Backend;
 using P = Botgram.Protocol.V1;
 
 internal static partial class HttpTests
@@ -28,7 +30,11 @@ internal static partial class HttpTests
         Directory.CreateDirectory(Root);
         try
         {
+            if (args.SequenceEqual(new[] { "--presence-contacts" })) { await PresenceContacts(); return 0; }
+            if (args.SequenceEqual(new[] { "--presence-contacts-protobuf-only" })) { await PresenceContacts(protobufOnly: true); return 0; }
+            if (args.SequenceEqual(new[] { "--presence-contacts-postgres" })) { await PresenceContacts(postgres: true); return 0; }
             if (args.SequenceEqual(new[] { "--privacy-security" })) { await PrivacySecurity(); return 0; }
+            if (args.SequenceEqual(new[] { "--calls-protobuf-only" })) { await NativeCallsProtobufOnly(); return 0; }
             if (args.SequenceEqual(new[] { "--storage-parity" })) return await StorageParity();
             if (args.SequenceEqual(new[] { "--relational-backend" })) return await RelationalBackend();
             if (args.SequenceEqual(new[] { "--four-component" })) return await RelationalBackend(fullStack: true);
@@ -41,6 +47,7 @@ internal static partial class HttpTests
             if (args.SequenceEqual(new[] { "--mapper-profile" })) return await MapperProfile();
             if (args.SequenceEqual(new[] { "--retirement" })) return await Retirement();
             if (args.Length != 0) throw new ArgumentException("Expected no arguments, --benchmark, --joint-tls, --joint-proxy-tls, --benchmark-tls, --certificate-security, --mapper-profile or --retirement");
+            CallRelayConfiguration();
             var baseline = Path.Combine(Root, "baseline.json");
             await using (var server = await Server.Start(baseline))
             {
@@ -989,6 +996,55 @@ internal static partial class HttpTests
         return path;
     }
 
+    private static void CallRelayConfiguration()
+    {
+        static IConfiguration Relays(params string[] urls)
+        {
+            var values = new Dictionary<string, string?>();
+            for (int i = 0; i < urls.Length; i++)
+            {
+                values[$"Rtc:IceServers:{i}:Urls:0"] = urls[i];
+                values[$"Rtc:IceServers:{i}:Username"] = "relay-user";
+                values[$"Rtc:IceServers:{i}:Credential"] = "relay-secret";
+            }
+            return new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+        }
+        static bool Rejects(Action action)
+        {
+            try { action(); return false; } catch (InvalidOperationException) { return true; }
+        }
+
+        CallService.Configure(Relays("turn:relay.example.com", "turn:192.0.2.10:3479?transport=udp",
+            "stun:192.0.2.11", "turn:[2001:db8::5]:3480"));
+        Check(CallService.Relays.Length == 4, "relay URL variants parsed");
+        Check(CallService.Relays[0] is { Host: "relay.example.com", Port: 3478, Turn: true, Transport: "udp" },
+            "TURN hostname uses the default port");
+        Check(CallService.Relays[1] is { Host: "192.0.2.10", Port: 3479, Turn: true }, "TURN explicit port");
+        Check(CallService.Relays[2] is { Host: "192.0.2.11", Port: 3478, Turn: false }, "STUN uses the default port");
+        Check(CallService.Relays[3] is { Ipv6: "2001:db8::5", Port: 3480 }, "bracketed IPv6 relay keeps its address");
+
+        CallService.Configure(Relays("turn:192.0.2.10:3478?transport=tcp", "turns:192.0.2.10:5349",
+            "stun:192.0.2.11:3479?transport=udp"));
+        Check(CallService.Relays.Length == 1 && CallService.Relays[0].Transport == "udp",
+            "only UDP relays reach the native engine");
+        Check(CallService.RejectedRelays.Length == 2, "TCP and TLS relays are recorded as unsupported");
+        var config = JsonNode.Parse(CallService.CallConfigJson())!["botgram_calls"]!;
+        Check(config["relays"]!.AsArray().Count == 1, "call config reports usable relays");
+        Check(config["unsupported"]!.AsArray().Count == 2, "call config reports unsupported relays");
+
+        Check(Rejects(() => CallService.Configure(Relays("turn:192.0.2.10:3478?transport=quic"))),
+            "invalid relay transport is rejected");
+        Check(Rejects(() => CallService.Configure(Relays("turn:192.0.2.10:0"))), "invalid relay port is rejected");
+        Check(Rejects(() => CallService.Configure(Relays("turn:2001:db8::5:3478"))),
+            "unbracketed IPv6 relay is rejected");
+        var noCredentials = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Rtc:IceServers:0:Urls:0"] = "turn:192.0.2.10:3478"
+        }).Build();
+        Check(Rejects(() => CallService.Configure(noCredentials)), "TURN without credentials is rejected");
+        CallService.Configure(new ConfigurationBuilder().Build());
+    }
+
     private sealed class Server(Process process, HttpClient client, string dataPath) : IAsyncDisposable
     {
         private Process? proxyProcess;
@@ -999,7 +1055,7 @@ internal static partial class HttpTests
         public static async Task<Server> Start(string dataPath, bool legacyEnabled = true, bool audit = false, int rollout = 100,
             bool legacyWssEnabled = true, bool usageLog = false, string? validationConnection = null, string? validationSeed = null,
             bool relational = false, bool fullRelational = false,
-            Botgram.Backend.Storage.FourComponentOptions? fullStack = null)
+            Botgram.Backend.Storage.FourComponentOptions? fullStack = null, bool relays = false, bool stunOnly = false)
         {
             var listener = new TcpListener(IPAddress.Loopback, 0); listener.Start();
             int port = ((IPEndPoint)listener.LocalEndpoint).Port; listener.Stop();
@@ -1032,8 +1088,24 @@ internal static partial class HttpTests
                 }) start.Environment["Storage__FullStack__" + pair.Key] = pair.Value;
             }
             start.Environment["ASPNETCORE_ENVIRONMENT"] = validationConnection is null ? "Production" : "Development";
+            if (relays)
+            {
+                if (stunOnly)
+                {
+                    start.Environment["Rtc__IceServers__0__Urls__0"] = "stun:127.0.0.1:3479";
+                }
+                else
+                {
+                    start.Environment["Rtc__IceServers__0__Urls__0"] = "turn:127.0.0.1:3478?transport=udp";
+                    start.Environment["Rtc__IceServers__0__Username"] = "nyaru";
+                    start.Environment["Rtc__IceServers__0__Credential"] = "turn-secret";
+                    start.Environment["Rtc__IceServers__1__Urls__0"] = "stun:127.0.0.1:3479";
+                }
+            }
             if (validationConnection is not null)
             {
+                // Key persistence is separate from the sentinel used to detect accidental Store creation.
+                start.Environment["Privacy__KeyDirectory"] = Path.Combine(Root, "privacy-keys", Path.GetFileName(dataPath));
                 start.Environment["Storage__ValidationAcknowledged"] = "true";
                 start.Environment["Storage__ValidationConnectionString"] = validationConnection;
                 if (validationSeed is not null) start.Environment["Storage__ValidationSeedPath"] = validationSeed;

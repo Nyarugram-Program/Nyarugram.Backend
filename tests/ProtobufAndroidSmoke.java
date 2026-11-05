@@ -19,6 +19,7 @@ import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_account;
+import org.telegram.tgnet.tl.TL_phone;
 import org.telegram.tgnet.tl.TL_update;
 
 /** Host-only generated protobuf -> production mapper -> original Android TL wire checks. */
@@ -184,9 +185,237 @@ public final class ProtobufAndroidSmoke {
                 .addParticipants(BotgramRpc.Participant.newBuilder().setUser(USER).setInviter(USER).setJoinedAtMs(NOW))), new TLRPC.TL_messages_getFullChat(), TLRPC.TL_messages_chatFull.class);
         roundTrip(envelope().setGetGroups(BotgramRpc.GroupList.newBuilder().addGroups(GROUP_SUMMARY)), new TLRPC.TL_messages_getChats(), TLRPC.TL_messages_chats.class);
         roundTrip(envelope().setGetNotifySettings(NOTIFY), new TL_account.getNotifySettings(), TLRPC.TL_peerNotifySettings.class);
-        check(outcomes.size() == 21, "all 21 application response outcomes");
+        callChecks();
+        check(outcomes.size() == 29, "all 29 application response outcomes");
+        presenceContactChecks();
         requestChecks(decodedMessage);
         negativeChecks();
+    }
+
+    private void presenceContactChecks() throws Exception {
+        TLRPC.TL_contacts_addContact request = new TLRPC.TL_contacts_addContact();
+        TLRPC.TL_inputUser target = new TLRPC.TL_inputUser();
+        target.user_id = USER_ID;
+        request.id = target;
+        request.first_name = "Contact";
+        request.last_name = "Alias";
+        BotgramRpc.RpcRequest encoded = requests.map(request, "add-contact");
+        check(encoded.hasAddContact() && encoded.getAddContact().getUser().getUser().equals(USER)
+                && encoded.getAddContact().getFirstName().equals("Contact"), "addContact typed request mapping");
+        // The original editor always supplies a textWithEntities object; empty content means no note.
+        TLRPC.TL_textWithEntities emptyNote = new TLRPC.TL_textWithEntities();
+        request.note = emptyNote;
+        encoded = BotgramRpc.RpcRequest.parseFrom(requests.map(request, "add-contact-empty-note").toByteArray());
+        check(encoded.hasAddContact() && encoded.getAddContact().getFirstName().equals("Contact"), "empty note object equals no note");
+        request.flags = 2;
+        encoded = BotgramRpc.RpcRequest.parseFrom(requests.map(request, "add-contact-empty-note-flag").toByteArray());
+        check(encoded.hasAddContact(), "empty note with note flag equals no note");
+        request.flags = 0;
+        emptyNote.text = "Private note";
+        rejects("contact note content rejected before transport", 501, () -> requests.map(request, "note"));
+        emptyNote.text = "";
+        TLRPC.TL_messageEntityBold bold = new TLRPC.TL_messageEntityBold();
+        bold.offset = 0;
+        bold.length = 1;
+        emptyNote.entities.add(bold);
+        rejects("contact note entities rejected before transport", 501, () -> requests.map(request, "note-entities"));
+        emptyNote.entities.clear();
+        request.note = null;
+        request.flags = 2;
+        rejects("note flag without a note object is invalid", 400, () -> requests.map(request, "note-flag-invalid"));
+        request.flags = 4;
+        rejects("unknown addContact flags rejected", 501, () -> requests.map(request, "unknown-flags"));
+        request.flags = 0;
+        request.add_phone_privacy_exception = true;
+        rejects("contact phone privacy exception rejected", 501, () -> requests.map(request, "phone-exception"));
+        request.add_phone_privacy_exception = false;
+        TLRPC.TL_contacts_importContacts importRequest = new TLRPC.TL_contacts_importContacts();
+        TLRPC.TL_inputPhoneContact importContact = new TLRPC.TL_inputPhoneContact();
+        importContact.phone = "+03012345678";
+        importContact.first_name = "Contact";
+        importContact.client_id = 7;
+        importContact.note = new TLRPC.TL_textWithEntities();
+        importRequest.contacts.add(importContact);
+        encoded = BotgramRpc.RpcRequest.parseFrom(requests.map(importRequest, "import-empty-note").toByteArray());
+        check(encoded.getImportContacts().getContacts(0).getGid().equals("+03012345678"), "empty import note equals no note");
+        importContact.flags = 1;
+        encoded = BotgramRpc.RpcRequest.parseFrom(requests.map(importRequest, "import-empty-note-flag").toByteArray());
+        check(encoded.getImportContacts().getContactsCount() == 1, "empty import note with flag equals no note");
+        importContact.note.text = "Private note";
+        rejects("import note content rejected before transport", 501, () -> requests.map(importRequest, "import-note"));
+        importContact.note.text = "";
+        importContact.note = null;
+        rejects("import note flag without object is invalid", 400, () -> requests.map(importRequest, "import-note-invalid"));
+        importContact.flags = 0;
+        for (BotgramRpc.UserStatus status : new BotgramRpc.UserStatus[] {
+                BotgramRpc.UserStatus.newBuilder().setOnlineUntilMs(NOW).build(),
+                BotgramRpc.UserStatus.newBuilder().setLastSeenMs(NOW - 60000).build(),
+                BotgramRpc.UserStatus.getDefaultInstance() }) {
+            BotgramRpc.UserSummary summary = SUMMARY.toBuilder().setStatus(status).build();
+            BotgramRpc.Updates values = BotgramRpc.Updates.newBuilder().setDateMs(NOW).addUsers(summary)
+                    .addUpdates(BotgramRpc.Update.newBuilder().setPresenceChanged(BotgramRpc.PresenceChanged.newBuilder()
+                            .setUser(USER).setStatus(status))).build();
+            TLRPC.TL_updates decoded = (TLRPC.TL_updates) roundTrip(envelope().setAddContact(values), request, TLRPC.TL_updates.class);
+            TLRPC.UserStatus userStatus = decoded.users.get(0).status;
+            TL_update.TL_updateUserStatus update = (TL_update.TL_updateUserStatus) decoded.updates.get(0);
+            Class<?> expected = status.hasOnlineUntilMs() ? TLRPC.TL_userStatusOnline.class
+                    : status.hasLastSeenMs() ? TLRPC.TL_userStatusOffline.class : TLRPC.TL_userStatusEmpty.class;
+            check(userStatus.getClass() == expected && update.status.getClass() == expected && update.user_id == USER_ID,
+                    "presence concrete user/update TL classes");
+            check(userStatus.expires == update.status.expires, "presence user/update timestamp equality");
+            if (status.hasLastSeenMs()) check(userStatus.expires == (NOW - 60000) / 1000, "offline last-seen timestamp survives TL serialization");
+        }
+        badResponse("presence without status", envelope().setAddContact(BotgramRpc.Updates.newBuilder().addUsers(SUMMARY)
+                .addUpdates(BotgramRpc.Update.newBuilder().setPresenceChanged(BotgramRpc.PresenceChanged.newBuilder().setUser(USER)))));
+    }
+
+    private void callChecks() throws Exception {
+        BotgramRpc.PhoneCallProtocol protocol = BotgramRpc.PhoneCallProtocol.newBuilder()
+                .setUdpP2P(true).setUdpReflector(true).setMinLayer(65).setMaxLayer(92)
+                .addLibraryVersions("10.0.0").build();
+        BotgramRpc.PhoneCall base = BotgramRpc.PhoneCall.newBuilder().setCallId(555L).setAccessHash(77L)
+                .setAdminTlUserId(USER_ID).setParticipantTlUserId(USER_ID + 1).setDateMs(NOW).setVideo(true)
+                .setProtocol(protocol).build();
+
+        TL_phone.requestCall request = new TL_phone.requestCall();
+        TL_phone.TL_phone_phoneCall waiting = (TL_phone.TL_phone_phoneCall) roundTrip(
+                envelope().setRequestCall(BotgramRpc.PhoneCallResult.newBuilder()
+                        .setPhoneCall(base.toBuilder().setState(BotgramRpc.PhoneCallState.PHONE_CALL_STATE_WAITING)
+                                .setReceiveDateMs(NOW)).addUsers(SUMMARY)),
+                request, TL_phone.TL_phone_phoneCall.class);
+        check(waiting.phone_call.getClass() == TL_phone.TL_phoneCallWaiting.class, "waiting call constructor");
+        check(waiting.phone_call.id == 555L && waiting.phone_call.access_hash == 77L
+                && waiting.phone_call.admin_id == USER_ID && waiting.phone_call.participant_id == USER_ID + 1
+                && waiting.phone_call.receive_date == NOW / 1000 && waiting.phone_call.video
+                && waiting.phone_call.protocol.udp_p2p && waiting.phone_call.protocol.min_layer == 65
+                && waiting.phone_call.protocol.library_versions.equals(java.util.Collections.singletonList("10.0.0")),
+                "waiting call fields");
+        check(waiting.users.size() == 1 && waiting.users.get(0).id == USER_ID, "call result users");
+
+        TL_phone.TL_phone_phoneCall requested = (TL_phone.TL_phone_phoneCall) roundTrip(
+                envelope().setRequestCall(BotgramRpc.PhoneCallResult.newBuilder()
+                        .setPhoneCall(base.toBuilder().setState(BotgramRpc.PhoneCallState.PHONE_CALL_STATE_REQUESTED)
+                                .setGAHash(com.google.protobuf.ByteString.copyFrom(new byte[] {1, 2, 3})))),
+                request, TL_phone.TL_phone_phoneCall.class);
+        check(requested.phone_call.getClass() == TL_phone.phoneCallRequested.class
+                && java.util.Arrays.equals(requested.phone_call.g_a_hash, new byte[] {1, 2, 3}), "requested call g_a_hash");
+
+        TL_phone.TL_phone_phoneCall accepted = (TL_phone.TL_phone_phoneCall) roundTrip(
+                envelope().setAcceptCall(BotgramRpc.PhoneCallResult.newBuilder()
+                        .setPhoneCall(base.toBuilder().setState(BotgramRpc.PhoneCallState.PHONE_CALL_STATE_ACCEPTED)
+                                .setGB(com.google.protobuf.ByteString.copyFrom(new byte[] {4, 5})))),
+                new TL_phone.acceptCall(), TL_phone.TL_phone_phoneCall.class);
+        check(accepted.phone_call.getClass() == TL_phone.TL_phoneCallAccepted.class
+                && java.util.Arrays.equals(accepted.phone_call.g_b, new byte[] {4, 5}), "accepted call g_b");
+
+        BotgramRpc.PhoneConnection connection = BotgramRpc.PhoneConnection.newBuilder()
+                .setId(9L).setIp("127.0.0.1").setIpv6("::1").setPort(8443)
+                .setTurn(true).setStun(false).setUsername("user").setPassword("secret").build();
+        TL_phone.TL_phone_phoneCall active = (TL_phone.TL_phone_phoneCall) roundTrip(
+                envelope().setConfirmCall(BotgramRpc.PhoneCallResult.newBuilder()
+                        .setPhoneCall(base.toBuilder().setState(BotgramRpc.PhoneCallState.PHONE_CALL_STATE_ACTIVE)
+                                .setStartDateMs(NOW).setP2PAllowed(true).addConnections(connection)
+                                .setGAOrB(com.google.protobuf.ByteString.copyFrom(new byte[] {6, 7}))
+                                .setKeyFingerprint(123L))),
+                new TL_phone.confirmCall(), TL_phone.TL_phone_phoneCall.class);
+        check(active.phone_call.getClass() == TL_phone.TL_phoneCall.class, "active call constructor");
+        check(active.phone_call.p2p_allowed && active.phone_call.start_date == NOW / 1000
+                && active.phone_call.key_fingerprint == 123L && active.phone_call.connections.size() == 1
+                && java.util.Arrays.equals(active.phone_call.g_a_or_b, new byte[] {6, 7}), "active call fields");
+        TLRPC.PhoneConnection wireConnection = active.phone_call.connections.get(0);
+        check(wireConnection.getClass() == TLRPC.TL_phoneConnectionWebrtc.class && wireConnection.turn
+                && !wireConnection.stun && wireConnection.id == 9L && wireConnection.port == 8443
+                && "127.0.0.1".equals(wireConnection.ip) && "::1".equals(wireConnection.ipv6)
+                && "user".equals(wireConnection.username), "call connection fields");
+
+        BotgramRpc.PhoneCall discarded = base.toBuilder()
+                .setState(BotgramRpc.PhoneCallState.PHONE_CALL_STATE_DISCARDED)
+                .setDiscardReason(BotgramRpc.PhoneCallDiscardReason.PHONE_CALL_DISCARD_REASON_BUSY)
+                .setDuration(12).build();
+        BotgramRpc.Updates discardedUpdates = BotgramRpc.Updates.newBuilder().setDateMs(NOW)
+                .addUpdates(BotgramRpc.Update.newBuilder().setPhoneCall(
+                        BotgramRpc.PhoneCallChanged.newBuilder().setPhoneCall(discarded))).build();
+        TLRPC.TL_updates discardResult = (TLRPC.TL_updates) roundTrip(
+                envelope().setDiscardCall(discardedUpdates), new TL_phone.discardCall(), TLRPC.TL_updates.class);
+        TL_update.TL_updatePhoneCall callUpdate = (TL_update.TL_updatePhoneCall) discardResult.updates.get(0);
+        check(callUpdate.phone_call.getClass() == TL_phone.TL_phoneCallDiscarded.class
+                && callUpdate.phone_call.reason.getClass() == TLRPC.TL_phoneCallDiscardReasonBusy.class
+                && callUpdate.phone_call.duration == 12 && callUpdate.phone_call.video, "discarded call update");
+
+        BotgramRpc.Difference difference = BotgramRpc.Difference.newBuilder()
+                .setComplete(BotgramRpc.DifferencePage.newBuilder().setState(STATE)
+                        .addUpdates(BotgramRpc.Update.newBuilder().setPhoneCallSignaling(
+                                BotgramRpc.PhoneCallSignalingData.newBuilder().setCallId(555L)
+                                        .setData(com.google.protobuf.ByteString.copyFrom(new byte[] {9, 8})))))
+                .build();
+        TLRPC.TL_updates_difference differenceResult = (TLRPC.TL_updates_difference) roundTrip(
+                envelope().setGetDifference(difference), new TLRPC.TL_updates_getDifference(),
+                TLRPC.TL_updates_difference.class);
+        TL_update.TL_updatePhoneCallSignalingData signaling =
+                (TL_update.TL_updatePhoneCallSignalingData) differenceResult.other_updates.get(0);
+        check(signaling.phone_call_id == 555L && java.util.Arrays.equals(signaling.data, new byte[] {9, 8}),
+                "call signaling update");
+
+        TLRPC.Bool receivedResult = (TLRPC.Bool) roundTrip(envelope().setReceivedCall(
+                BotgramRpc.BoolValue.newBuilder().setValue(true)), new TL_phone.receivedCall(), TLRPC.TL_boolTrue.class);
+        check(receivedResult instanceof TLRPC.TL_boolTrue, "receivedCall bool");
+        roundTrip(envelope().setSendSignalingData(BotgramRpc.BoolValue.newBuilder().setValue(true)),
+                new TL_phone.sendSignalingData(), TLRPC.TL_boolTrue.class);
+        roundTrip(envelope().setSaveCallDebug(BotgramRpc.BoolValue.newBuilder().setValue(true)),
+                new TL_phone.saveCallDebug(), TLRPC.TL_boolTrue.class);
+        TLRPC.TL_dataJSON configResult = (TLRPC.TL_dataJSON) roundTrip(envelope().setGetCallConfig(
+                BotgramRpc.DataJson.newBuilder().setData("{}")), new TL_phone.getCallConfig(), TLRPC.TL_dataJSON.class);
+        check("{}".equals(configResult.data), "call config data");
+
+        TLRPC.TL_inputPhoneCall peer = new TLRPC.TL_inputPhoneCall();
+        peer.id = 555L;
+        peer.access_hash = 77L;
+        TL_phone.requestCall outgoing = new TL_phone.requestCall();
+        outgoing.video = true;
+        TLRPC.TL_inputUser callee = new TLRPC.TL_inputUser();
+        callee.user_id = USER_ID;
+        outgoing.user_id = callee;
+        outgoing.random_id = 4242;
+        outgoing.g_a_hash = new byte[] {1, 2};
+        TL_phone.TL_phoneCallProtocol outgoingProtocol = new TL_phone.TL_phoneCallProtocol();
+        outgoingProtocol.udp_p2p = true;
+        outgoingProtocol.udp_reflector = true;
+        outgoingProtocol.min_layer = 65;
+        outgoingProtocol.max_layer = 92;
+        outgoingProtocol.library_versions.add("10.0.0");
+        outgoing.protocol = outgoingProtocol;
+        BotgramRpc.PhoneRequestCallRequest requestWire = requests.map(outgoing, "request-call").getRequestCall();
+        check(requestWire.getVideo() && requestWire.getRandomId() == 4242
+                && java.util.Arrays.equals(requestWire.getGAHash().toByteArray(), new byte[] {1, 2})
+                && requestWire.getProtocol().getUdpP2P() && requestWire.getProtocol().getMinLayer() == 65
+                && requestWire.getProtocol().getLibraryVersionsList().equals(java.util.Collections.singletonList("10.0.0")),
+                "requestCall mapping");
+
+        TL_phone.discardCall hangup = new TL_phone.discardCall();
+        hangup.peer = peer;
+        hangup.duration = 12;
+        hangup.reason = new TLRPC.TL_phoneCallDiscardReasonBusy();
+        BotgramRpc.PhoneDiscardCallRequest discardWire = requests.map(hangup, "discard-call").getDiscardCall();
+        check(discardWire.getPeer().getCallId() == 555L && discardWire.getPeer().getAccessHash() == 77L
+                && discardWire.getDuration() == 12
+                && discardWire.getReason() == BotgramRpc.PhoneCallDiscardReason.PHONE_CALL_DISCARD_REASON_BUSY,
+                "discardCall mapping");
+
+        TL_phone.sendSignalingData outgoingSignal = new TL_phone.sendSignalingData();
+        outgoingSignal.peer = peer;
+        outgoingSignal.data = new byte[] {7};
+        BotgramRpc.PhoneSendSignalingDataRequest signalWire =
+                requests.map(outgoingSignal, "signal").getSendSignalingData();
+        check(signalWire.getPeer().getCallId() == 555L
+                && java.util.Arrays.equals(signalWire.getData().toByteArray(), new byte[] {7}), "sendSignalingData mapping");
+
+        TL_phone.saveCallDebug outgoingDebug = new TL_phone.saveCallDebug();
+        outgoingDebug.peer = peer;
+        outgoingDebug.debug = new TLRPC.TL_dataJSON();
+        outgoingDebug.debug.data = "{\"log\":true}";
+        check(requests.map(outgoingDebug, "call-debug").getSaveCallDebug().getDebug().equals("{\"log\":true}"),
+                "saveCallDebug mapping");
+        check(requests.map(new TL_phone.getCallConfig(), "call-config").hasGetCallConfig(), "getCallConfig mapping");
     }
 
     private static void checkUpdates(ArrayList<TLRPC.Update> values) {
@@ -556,7 +785,7 @@ public final class ProtobufAndroidSmoke {
             smoke.run();
             smoke.privacyChecks();
             identityChecks(api, identity, resolverCalls);
-            System.out.println("PASS: 21 original response outcomes plus privacy/security, 15 entities, 4 differences, 5 updates; " + checks + " assertions against original Android TL classes (host only)");
+            System.out.println("PASS: 29 application response outcomes plus privacy/security, 15 entities, 4 differences, 5 updates; " + checks + " assertions against original Android TL classes (host only)");
         } finally { server.stop(0); }
     }
 }

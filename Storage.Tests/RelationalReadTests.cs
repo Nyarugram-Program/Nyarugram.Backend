@@ -95,11 +95,12 @@ static class RelationalReadTests
         async Task<P.RpcResponse> Parity(P.RpcRequest request)
         {
             var fixture = await Fixture();
+            long started = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             var expected = ProtobufRpcMapper.Execute(fixture, session.UserId, request, domain);
             var actual = await Rpc(request);
             NormalizeTime(expected);
             NormalizeTime(actual);
-            Check(expected.ToByteArray().SequenceEqual(actual.ToByteArray()), "Read parity: " + request.OperationCase);
+            Check(ProtobufParity.Equal(expected, actual, started), "Read parity: " + request.OperationCase);
             return actual;
         }
         await Parity(new() { GetHistory = new() { Peer = peer } });

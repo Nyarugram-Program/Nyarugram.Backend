@@ -159,7 +159,7 @@ try {
   const aliceContacts = await rpc(alice.token, 'TL_contacts_getContacts', { hash: 0 });
   assert(aliceContacts.users.some(u => u.id === bobTl.id && u.contact), 'added contact must be persisted');
   const alicePresenceBase = await rpc(alice.token, 'TL_updates_getState');
-  const state = await rpc(bob.token, 'TL_updates_getState');
+  const state = await rpc(bob.token, 'TL_updates_getState', { foreground: true });
   assert.equal(state.pts, 1, 'fresh accounts require a nonzero initial pts');
   const presenceDiff = await rpc(alice.token, 'TL_updates_getDifference', {
     pts: alicePresenceBase.pts, date: alicePresenceBase.date, qts: 0

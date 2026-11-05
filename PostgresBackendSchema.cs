@@ -4,12 +4,23 @@ namespace Botgram.Backend.Storage;
 
 public static class PostgresBackendSchema
 {
+    public const int CurrentVersion = 8;
+
     // Explicit offline operation, never run by constructing a repository or handling a request.
     public static async Task ApplyAsync(NpgsqlDataSource source, CancellationToken token = default)
     {
         await new PostgresMessageAcceptance(source).InitializeAsync(token);
         await using var connection = await source.OpenConnectionAsync(token);
         await using var transaction = await connection.BeginTransactionAsync(token);
+        await ApplyInTransactionAsync(connection, transaction, token);
+        await transaction.CommitAsync(token);
+    }
+
+    // Callers that already own the transaction (offline maintenance) keep their advisory locks and
+    // rollback boundary around the exact same migration SQL.
+    public static async Task ApplyInTransactionAsync(NpgsqlConnection connection, NpgsqlTransaction transaction,
+        CancellationToken token = default)
+    {
         await using var command = new NpgsqlCommand("""
             SET LOCAL synchronous_commit=on;
             SELECT pg_advisory_xact_lock(7459241304232);
@@ -116,8 +127,82 @@ public static class PostgresBackendSchema
                 INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(5);
             END IF;
             END $migration$;
+            DO $migration$ BEGIN
+            IF NOT EXISTS(SELECT 1 FROM botgram_backend_v1.schema_versions WHERE version=6) THEN
+                CREATE TABLE botgram_backend_v1.presence_accounts (
+                    user_id text PRIMARY KEY REFERENCES botgram_backend_v1.accounts,
+                    last_seen timestamptz, online boolean NOT NULL DEFAULT false, notified_at timestamptz);
+                CREATE TABLE botgram_backend_v1.presence_sessions (
+                    token_hash text PRIMARY KEY REFERENCES botgram_intake_v1.sessions ON DELETE CASCADE,
+                    foreground_at timestamptz NOT NULL);
+                ALTER TABLE botgram_intake_v1.events DROP CONSTRAINT backend_event_shape;
+                ALTER TABLE botgram_intake_v1.events ADD CONSTRAINT backend_event_shape CHECK (
+                    (schema_version=1 AND (
+                        (type='message.created' AND message_id IS NOT NULL)
+                        OR (type IN ('conversation.created','receipt.updated','call.updated','call.signal','user.gid_changed')
+                            AND message_id IS NULL AND payload IS NOT NULL)))
+                    OR (schema_version=2 AND type='wallpaper.changed' AND message_id IS NULL AND payload IS NOT NULL)
+                    OR (schema_version=3 AND type='user.presence_changed' AND message_id IS NULL AND payload IS NOT NULL));
+                ALTER TABLE botgram_intake_v1.outbox DROP CONSTRAINT backend_outbox_schema;
+                ALTER TABLE botgram_intake_v1.outbox ADD CONSTRAINT backend_outbox_schema CHECK (
+                    schema_version=1 OR (schema_version IN (2,3) AND projection_version IS NULL));
+                INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(6);
+            END IF;
+            END $migration$;
+            DO $migration$ BEGIN
+            IF NOT EXISTS(SELECT 1 FROM botgram_backend_v1.schema_versions WHERE version=7) THEN
+                CREATE SEQUENCE IF NOT EXISTS botgram_backend_v1.call_identity START WITH 1000000;
+                ALTER TABLE botgram_backend_v1.calls
+                    ADD COLUMN telegram_id bigint NOT NULL DEFAULT nextval('botgram_backend_v1.call_identity'),
+                    ADD COLUMN access_hash bigint NOT NULL DEFAULT 0,
+                    ADD COLUMN random_id bigint NOT NULL DEFAULT 0,
+                    ADD COLUMN video boolean NOT NULL DEFAULT false,
+                    ADD COLUMN protocol jsonb,
+                    ADD COLUMN g_a_hash bytea, ADD COLUMN g_b bytea, ADD COLUMN g_a bytea,
+                    ADD COLUMN key_fingerprint bigint NOT NULL DEFAULT 0,
+                    ADD COLUMN date integer NOT NULL DEFAULT 0,
+                    ADD COLUMN receive_date integer NOT NULL DEFAULT 0,
+                    ADD COLUMN start_date integer NOT NULL DEFAULT 0,
+                    ADD COLUMN reason text NOT NULL DEFAULT 'Hangup',
+                    ADD COLUMN duration integer NOT NULL DEFAULT 0,
+                    ADD COLUMN connections jsonb,
+                    ADD COLUMN p2p_allowed boolean NOT NULL DEFAULT false;
+                UPDATE botgram_backend_v1.calls SET date=EXTRACT(EPOCH FROM updated_at)::integer WHERE date=0;
+                ALTER TABLE botgram_backend_v1.calls DROP CONSTRAINT calls_state_check;
+                ALTER TABLE botgram_backend_v1.calls ADD CONSTRAINT calls_state_check
+                    CHECK(state IN ('ringing','accepted','active','ended','rejected'));
+                ALTER TABLE botgram_backend_v1.calls ADD CONSTRAINT calls_telegram_id_key UNIQUE(telegram_id);
+                CREATE UNIQUE INDEX backend_call_random ON botgram_backend_v1.calls(caller_id,random_id) WHERE random_id<>0;
+                CREATE INDEX backend_call_participants ON botgram_backend_v1.calls(caller_id,callee_id,state);
+                ALTER TABLE botgram_intake_v1.events DROP CONSTRAINT backend_event_shape;
+                ALTER TABLE botgram_intake_v1.events ADD CONSTRAINT backend_event_shape CHECK (
+                    (schema_version=1 AND (
+                        (type='message.created' AND message_id IS NOT NULL)
+                        OR (type IN ('conversation.created','receipt.updated','call.updated','call.signal','user.gid_changed')
+                            AND message_id IS NULL AND payload IS NOT NULL)))
+                    OR (schema_version=2 AND type='wallpaper.changed' AND message_id IS NULL AND payload IS NOT NULL)
+                    OR (schema_version=3 AND type='user.presence_changed' AND message_id IS NULL AND payload IS NOT NULL)
+                    OR (schema_version=4 AND type IN ('call.updated','call.tl_signal')
+                        AND message_id IS NULL AND payload IS NOT NULL));
+                ALTER TABLE botgram_intake_v1.outbox DROP CONSTRAINT backend_outbox_schema;
+                ALTER TABLE botgram_intake_v1.outbox ADD CONSTRAINT backend_outbox_schema CHECK (
+                    schema_version=1 OR (schema_version IN (2,3,4) AND projection_version IS NULL));
+                INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(7);
+            END IF;
+            END $migration$;
+            DO $migration$ BEGIN
+            IF NOT EXISTS(SELECT 1 FROM botgram_backend_v1.schema_versions WHERE version=8) THEN
+                -- Keep both proposals alongside the negotiated result. Older rows only had the
+                -- negotiated protocol, which remains a safe stand-in for both sides.
+                ALTER TABLE botgram_backend_v1.calls ADD COLUMN request_protocol jsonb;
+                ALTER TABLE botgram_backend_v1.calls ADD COLUMN accept_protocol jsonb;
+                UPDATE botgram_backend_v1.calls
+                    SET request_protocol=COALESCE(request_protocol,protocol),
+                        accept_protocol=COALESCE(accept_protocol,protocol);
+                INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(8);
+            END IF;
+            END $migration$;
             """, connection, transaction);
         await command.ExecuteNonQueryAsync(token);
-        await transaction.CommitAsync(token);
     }
 }

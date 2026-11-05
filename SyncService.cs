@@ -1,7 +1,7 @@
 namespace Botgram.Backend;
 
 public enum DifferenceKind { Empty, Complete, Slice, TooLong }
-public sealed record DifferenceResult(DifferenceKind Kind, ChatEvent[] Events, int PreviousCount, int Pts);
+public sealed record DifferenceResult(DifferenceKind Kind, ChatEvent[] Events, int PreviousCount, int Pts, bool[]? Hidden = null);
 public sealed record EventView(long Id, string Type, IEventPayload Payload, DateTimeOffset CreatedAt);
 public sealed record EventPage(EventView[] Events, long Cursor);
 
@@ -30,7 +30,24 @@ public static class SyncService
         if (after > stream.Length) return new(DifferenceKind.TooLong, [], after, stream.Length + 1);
         var page = stream.Skip(after).Take(100).ToArray();
         if (page.Length == 0) return new(DifferenceKind.Empty, [], after, stream.Length + 1);
+        // Replay must not resurrect a call: converge every call event onto the current
+        // persisted state and hide expired or obsolete signaling without moving pts.
+        var now = DateTimeOffset.UtcNow;
+        var calls = db.Calls.ToDictionary(call => call.Id);
+        var hidden = new bool[page.Length];
+        for (int i = 0; i < page.Length; i++)
+        {
+            var item = page[i];
+            if (item.ExpiresAt is not null && item.ExpiresAt <= now) hidden[i] = true;
+            else if (item.Payload is CallSignal signal)
+                hidden[i] = signal.Type == "tl" && (!calls.TryGetValue(signal.CallId, out var target) || target.State != "active");
+            else if (item.Payload is Call call)
+            {
+                if (calls.TryGetValue(call.Id, out var current)) page[i] = item with { Payload = current };
+                else hidden[i] = true;
+            }
+        }
         return new(after + page.Length < stream.Length ? DifferenceKind.Slice : DifferenceKind.Complete,
-            page, after, after + page.Length + 1);
+            page, after, after + page.Length + 1, hidden);
     }
 }

@@ -1,8 +1,8 @@
 namespace Botgram.Backend;
 
 public sealed record User(string Id, string Username, string DisplayName, string Salt, string PasswordHash, string Gid = "", bool Premium = false,
-    DateTimeOffset? LastSeen = null, bool Online = false);
-public sealed record Session(string TokenHash, string UserId, DateTimeOffset ExpiresAt);
+    DateTimeOffset? LastSeen = null, bool Online = false, DateTimeOffset? PresenceNotifiedAt = null);
+public sealed record Session(string TokenHash, string UserId, DateTimeOffset ExpiresAt, DateTimeOffset? ForegroundAt = null);
 public sealed record Conversation(string Id, string Kind, string Title, string[] Members, DateTimeOffset CreatedAt) : IEventPayload;
 public sealed record Message(long Id, string ConversationId, string SenderId, string ClientMessageId, string Text, DateTimeOffset CreatedAt,
     string? ServiceTitle = null, string[]? ServiceMembers = null, MessageEntity[]? TelegramEntities = null,
@@ -10,11 +10,13 @@ public sealed record Message(long Id, string ConversationId, string SenderId, st
 public sealed record Receipt(string ConversationId, string UserId, long MessageId) : IEventPayload;
 public sealed record Contact(string OwnerId, string UserId, string FirstName, string LastName);
 public sealed record Call(string Id, string ConversationId, string CallerId, string CalleeId, string State, DateTimeOffset UpdatedAt,
-    long TelegramId = 0, long AccessHash = 0, int RandomId = 0, bool Video = false,
+    long TelegramId = 0, long AccessHash = 0, long RandomId = 0, bool Video = false,
     System.Text.Json.Nodes.JsonObject? Protocol = null,
     byte[]? GAHash = null, byte[]? GB = null, byte[]? GA = null, long KeyFingerprint = 0,
     int Date = 0, int ReceiveDate = 0, int StartDate = 0, string Reason = "Hangup", int Duration = 0,
-    System.Text.Json.Nodes.JsonObject[]? Connections = null) : IEventPayload;
+    System.Text.Json.Nodes.JsonObject[]? Connections = null, bool P2pAllowed = false,
+    System.Text.Json.Nodes.JsonObject? RequestProtocol = null,
+    System.Text.Json.Nodes.JsonObject? AcceptProtocol = null) : IEventPayload;
 [System.Text.Json.Serialization.JsonConverter(typeof(ChatEventJsonConverter))]
 public sealed record ChatEvent(long Id, string[] Recipients, string Type, IEventPayload Payload, DateTimeOffset CreatedAt, DateTimeOffset? ExpiresAt = null);
 public sealed class Database

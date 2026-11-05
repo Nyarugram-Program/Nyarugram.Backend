@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Npgsql;
 
 namespace Botgram.Backend.Storage;
@@ -19,8 +20,13 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
     public static Database Normalize(Database input)
     {
         var db = JsonSerializer.Deserialize<Database>(JsonSerializer.Serialize(input, Store.Json), Store.Json)!;
+        db.Users = db.Users.Select(u => u with
+        {
+            LastSeen = u.LastSeen is { } seen ? Time(seen) : null,
+            PresenceNotifiedAt = u.PresenceNotifiedAt is { } notified ? Time(notified) : null
+        }).ToList();
         db.Sessions = db.Sessions.OrderBy(s => s.TokenHash, StringComparer.Ordinal)
-            .Select(s => s with { ExpiresAt = Time(s.ExpiresAt) }).ToList();
+            .Select(s => s with { ExpiresAt = Time(s.ExpiresAt), ForegroundAt = s.ForegroundAt is { } seen ? Time(seen) : null }).ToList();
         db.Conversations = db.Conversations.Select(c => c with { CreatedAt = Time(c.CreatedAt) }).ToList();
         db.Messages = db.Messages.OrderBy(m => m.Id).Select(m => (Message)Payload(m)).ToList();
         db.Calls = db.Calls.Select(c => (Call)Payload(c)).ToList();
@@ -37,6 +43,7 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
                 .OrderBy(p => p.Key, StringComparer.Ordinal).ToDictionary(p => p.Key, p => p.Value);
             foreach (var state in db.AccountPrivacy.Values)
             {
+                state.SpecialContacts = state.SpecialContacts.Order(StringComparer.Ordinal).ToHashSet(StringComparer.Ordinal);
                 state.Rules = state.Rules.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value);
                 state.Blocked = state.Blocked.OrderBy(p => p.Key, StringComparer.Ordinal).ToDictionary(p => p.Key, p => Time(p.Value));
             }
@@ -64,6 +71,11 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
                 || pair.Value.DefaultHistoryTtlSeconds is < 0 or > 31_536_000
                 || pair.Value.Blocked.Keys.Any(id => !db.Users.Any(u => u.Id == id)))
                 throw new InvalidDataException("Invalid snapshot privacy owner or retention settings");
+            if (pair.Value.SpecialContactsRevision < 0 || pair.Value.SpecialContacts.Count != 0 && pair.Value.SpecialContactsRevision == 0
+                || pair.Value.SpecialContacts.Any(id => id == pair.Key || !db.Users.Any(u => u.Id == id)
+                    || !db.Contacts.Any(c => c.OwnerId == pair.Key && c.UserId == id)
+                    || AccountPrivacyService.IsBlocked(db, pair.Key, id) || AccountPrivacyService.IsBlocked(db, id, pair.Key)))
+                throw new InvalidDataException("Invalid snapshot special contacts");
             foreach (var rule in pair.Value.Rules)
             {
                 var decoded = Botgram.Protocol.V1.PrivacyRuleSet.Parser.ParseFrom(rule.Value);
@@ -153,10 +165,16 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
                 VALUES($1,$2,$3,$4,$5,$6,$7)
                 """, user.Id, user.Username, user.DisplayName, user.Salt, user.PasswordHash, user.Gid, user.Premium);
             await Execute("INSERT INTO botgram_intake_v1.sync(user_id,pts) VALUES($1,$2)", user.Id, SyncService.Pts(db, user.Id));
+            await Execute("""
+                INSERT INTO botgram_backend_v1.presence_accounts(user_id,last_seen,online,notified_at) VALUES($1,$2,$3,$4)
+                """, user.Id, (object?)user.LastSeen ?? DBNull.Value, user.Online, (object?)user.PresenceNotifiedAt ?? DBNull.Value);
         }
         foreach (var session in db.Sessions)
             await Execute("INSERT INTO botgram_intake_v1.sessions(token_hash,user_id,expires_at) VALUES($1,$2,$3)",
                 session.TokenHash, session.UserId, session.ExpiresAt);
+        foreach (var session in db.Sessions.Where(s => s.ForegroundAt is not null))
+            await Execute("INSERT INTO botgram_backend_v1.presence_sessions(token_hash,foreground_at) VALUES($1,$2)",
+                session.TokenHash, session.ForegroundAt!.Value);
         foreach (var pair in db.AccountPrivacy ?? [])
             await Execute("INSERT INTO botgram_backend_v1.privacy_accounts(user_id,state) VALUES($1,$2::jsonb)",
                 pair.Key, JsonSerializer.Serialize(pair.Value, Store.Json));
@@ -188,8 +206,22 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
             await Execute("INSERT INTO botgram_backend_v1.receipts(conversation_id,user_id,message_id) VALUES($1,$2,$3)",
                 receipt.ConversationId, receipt.UserId, receipt.MessageId);
         foreach (var call in db.Calls)
-            await Execute("INSERT INTO botgram_backend_v1.calls(id,conversation_id,caller_id,callee_id,state,updated_at) VALUES($1,$2,$3,$4,$5,$6)",
-                call.Id, call.ConversationId, call.CallerId, call.CalleeId, call.State, call.UpdatedAt);
+            await Execute("""
+                INSERT INTO botgram_backend_v1.calls(id,conversation_id,caller_id,callee_id,state,updated_at,
+                    telegram_id,access_hash,random_id,video,protocol,g_a_hash,g_b,g_a,key_fingerprint,
+                    date,receive_date,start_date,reason,duration,connections,p2p_allowed)
+                VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21::jsonb,$22)
+                """, call.Id, call.ConversationId, call.CallerId, call.CalleeId, call.State, call.UpdatedAt,
+                call.TelegramId, call.AccessHash, call.RandomId, call.Video,
+                call.Protocol?.ToJsonString() ?? (object)DBNull.Value,
+                (object?)call.GAHash ?? DBNull.Value, (object?)call.GB ?? DBNull.Value, (object?)call.GA ?? DBNull.Value,
+                call.KeyFingerprint, call.Date, call.ReceiveDate, call.StartDate, call.Reason, call.Duration,
+                call.Connections is null ? (object)DBNull.Value : new JsonArray(call.Connections.Select(c => c.DeepClone()).ToArray()).ToJsonString(),
+                call.P2pAllowed);
+        await Execute("""
+            SELECT setval('botgram_backend_v1.call_identity',
+                GREATEST(999999,(SELECT COALESCE(MAX(telegram_id),0) FROM botgram_backend_v1.calls)))
+            """);
         foreach (var identity in db.TelegramIds)
             await Execute("INSERT INTO botgram_backend_v1.identities(key,value) VALUES($1,$2)", identity.Key, identity.Value);
         var pts = db.Users.ToDictionary(u => u.Id, _ => 1);
@@ -201,22 +233,24 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
             {
                 Message m => m.ConversationId, Conversation c => c.Id, Receipt r => r.ConversationId,
                 Call c => c.ConversationId, GidChanged g => "user:" + g.UserId,
+                PresenceChanged p => "user:" + p.UserId,
                 CallSignal s => db.Calls.Single(c => c.Id == s.CallId).ConversationId,
                 _ => throw new InvalidDataException("Unsupported snapshot event")
             };
             var message = item.Payload as Message;
             var outboxId = Guid.NewGuid();
             var positions = item.Recipients.Select(recipient => new RecipientPosition(recipient,
-                item.Type is "message.created" or "receipt.updated" or "user.gid_changed" ? ++pts[recipient] : null)).ToArray();
-            DeliveryEventCodec.Validate(new(outboxId, 1, item.Id, partition, item.Type, item.Payload, positions,
+                item.Type is "message.created" or "receipt.updated" or "user.gid_changed" or "user.presence_changed" ? ++pts[recipient] : null)).ToArray();
+            int schema = item.Type == "user.presence_changed" ? StorageContractVersions.PresenceEventSchema : StorageContractVersions.EventSchema;
+            DeliveryEventCodec.Validate(new(outboxId, schema, item.Id, partition, item.Type, item.Payload, positions,
                 item.CreatedAt, item.ExpiresAt, message is null ? null : sequences[message.Id],
                 message is null ? null : 1L, message is null ? null : 1));
             await Execute("""
                 INSERT INTO botgram_intake_v1.events(id,message_id,type,created_at,schema_version,payload,expires_at)
-                VALUES($1,$2::bigint,$3,$4,1,$5::jsonb,$6::timestamptz)
+                VALUES($1,$2::bigint,$3,$4,$7,$5::jsonb,$6::timestamptz)
                 """, item.Id, (object?)message?.Id ?? DBNull.Value, item.Type, item.CreatedAt,
                 message is null ? JsonSerializer.Serialize(item.Payload, item.Payload.GetType()) : DBNull.Value,
-                (object?)item.ExpiresAt ?? DBNull.Value);
+                (object?)item.ExpiresAt ?? DBNull.Value, schema);
             foreach (var recipient in positions)
             {
                 await Execute("INSERT INTO botgram_intake_v1.event_recipients(event_id,user_id,pts) VALUES($1,$2,$3::integer)",
@@ -224,8 +258,8 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
             }
             await Execute("""
                 INSERT INTO botgram_intake_v1.outbox(id,event_id,partition_key,schema_version,projection_version)
-                VALUES($1,$2,$3,1,$4::bigint)
-                """, outboxId, item.Id, partition, message is null ? DBNull.Value : 1L);
+                VALUES($1,$2,$3,$5,$4::bigint)
+                """, outboxId, item.Id, partition, message is null ? DBNull.Value : 1L, schema);
         }
         await Execute("SELECT setval(pg_get_serial_sequence('botgram_intake_v1.messages','id'),$1,false)", db.NextMessageId);
         await Execute("SELECT setval('botgram_backend_v1.telegram_identity',$1,false)", db.NextTelegramId);
@@ -264,10 +298,17 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
         }
         await Rows("SELECT EXISTS(SELECT 1 FROM botgram_backend_v1.wallpaper_accounts WHERE revision<>0 OR installed IS NOT NULL)",
             r => { if (r.GetBoolean(0)) throw new InvalidOperationException("Legacy export cannot represent wallpaper state; retain the relational database and pre-cutover backup"); });
-        await Rows("SELECT id,username,display_name,salt,password_hash,gid,premium FROM botgram_backend_v1.accounts ORDER BY ordinal",
-            r => db.Users.Add(new(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3), r.GetString(4), r.GetString(5), r.GetBoolean(6))));
-        await Rows("SELECT token_hash,user_id,expires_at FROM botgram_intake_v1.sessions ORDER BY token_hash",
-            r => db.Sessions.Add(new(r.GetString(0), r.GetString(1), r.GetFieldValue<DateTimeOffset>(2))));
+        await Rows("""
+            SELECT a.id,a.username,a.display_name,a.salt,a.password_hash,a.gid,a.premium,p.last_seen,p.online,p.notified_at
+            FROM botgram_backend_v1.accounts a LEFT JOIN botgram_backend_v1.presence_accounts p ON p.user_id=a.id ORDER BY a.ordinal
+            """, r => db.Users.Add(new(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3), r.GetString(4), r.GetString(5), r.GetBoolean(6),
+                r.IsDBNull(7) ? null : r.GetFieldValue<DateTimeOffset>(7), !r.IsDBNull(8) && r.GetBoolean(8),
+                r.IsDBNull(9) ? null : r.GetFieldValue<DateTimeOffset>(9))));
+        await Rows("""
+            SELECT s.token_hash,s.user_id,s.expires_at,h.foreground_at FROM botgram_intake_v1.sessions s
+            LEFT JOIN botgram_backend_v1.presence_sessions h ON h.token_hash=s.token_hash ORDER BY s.token_hash
+            """, r => db.Sessions.Add(new(r.GetString(0), r.GetString(1), r.GetFieldValue<DateTimeOffset>(2),
+                r.IsDBNull(3) ? null : r.GetFieldValue<DateTimeOffset>(3))));
         await Rows("SELECT user_id,state::text FROM botgram_backend_v1.privacy_accounts ORDER BY user_id", r =>
         {
             db.AccountPrivacy ??= [];
@@ -281,8 +322,8 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
         await Rows("SELECT body::text FROM botgram_intake_v1.messages ORDER BY id", r => db.Messages.Add(JsonSerializer.Deserialize<Message>(r.GetString(0))!));
         await Rows("SELECT conversation_id,user_id,message_id FROM botgram_backend_v1.receipts", r => db.Receipts.Add(new(r.GetString(0), r.GetString(1), r.GetInt64(2))));
         await Rows("SELECT owner_id,user_id,first_name,last_name FROM botgram_backend_v1.contacts ORDER BY ordinal", r => db.Contacts.Add(new(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3))));
-        await Rows("SELECT id,conversation_id,caller_id,callee_id,state,updated_at FROM botgram_backend_v1.calls ORDER BY ordinal",
-            r => db.Calls.Add(new(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3), r.GetString(4), r.GetFieldValue<DateTimeOffset>(5))));
+        await Rows(PostgresBackend.CallRows + " ORDER BY ordinal",
+            r => db.Calls.Add(PostgresBackend.CallRow(r)));
         await Rows("SELECT key,value FROM botgram_backend_v1.identities ORDER BY key", r => db.TelegramIds.Add(r.GetString(0), r.GetInt64(1)));
         await Rows("""
             SELECT e.id,e.type,COALESCE(e.payload,m.body)::text,e.created_at,e.expires_at,

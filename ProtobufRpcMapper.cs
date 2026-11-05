@@ -1,4 +1,7 @@
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text.Json.Nodes;
+using Google.Protobuf;
 using P = Botgram.Protocol.V1;
 
 namespace Botgram.Backend;
@@ -12,6 +15,10 @@ public static class ProtobufRpcMapper
     public static void ValidateUnique<T>(IEnumerable<T> values) => Adapter.Unique(values);
     public static long ValidateMessageId(long value, bool positive = false) => Adapter.MessageId(value, positive);
     public static int ValidateLimit(bool present, int value, int fallback) => Adapter.Limit(present, value, fallback);
+    public static P.PhoneCallProtocol MapProtocol(JsonObject? protocol) => Adapter.Protocol(protocol);
+    public static JsonObject? MapProtocolJson(P.PhoneCallProtocol? protocol) => Adapter.ProtocolJson(protocol);
+    public static P.PhoneCall MapPhoneCall(Call call, long adminTlUserId, long participantTlUserId, bool callerView)
+        => Adapter.PhoneCall(call, adminTlUserId, participantTlUserId, callerView);
 
     public static P.Message MapMessage(Message message, P.PeerRef peer, string uid, string domain, long read)
     {
@@ -62,8 +69,17 @@ public static class ProtobufRpcMapper
         Identity = new() { ServerDomain = domain, UserId = user.Id }, TlUserId = user.TelegramId,
         Username = user.Username, DisplayName = user.DisplayName, FirstName = user.FirstName, LastName = user.LastName,
         Gid = user.Gid, IsSelf = user.IsSelf, IsContact = user.IsContact, IsMutualContact = user.IsMutual,
-        NyarugramPremium = user.Premium
+        NyarugramPremium = user.Premium, Status = MapStatus(user)
     };
+
+    public static P.UserStatus MapStatus(UserProfile user)
+    {
+        var now = DateTimeOffset.UtcNow;
+        if (user.LastSeen is not { } seen) return new();
+        return user.Online && now - seen <= PresenceService.OnlineWindow
+            ? new() { OnlineUntilMs = (seen + PresenceService.OnlineWindow).ToUnixTimeMilliseconds() }
+            : new() { LastSeenMs = seen.ToUnixTimeMilliseconds() };
+    }
 
     public static P.GroupSummary MapGroup(Conversation conversation, long telegramId) => new()
     {
@@ -266,6 +282,7 @@ public static class ProtobufRpcMapper
             var page = new P.DifferencePage { State = State(difference.Pts) };
             for (int i = 0; i < difference.Events.Length; i++)
             {
+                if (difference.Hidden?[i] == true) continue;
                 var e = difference.Events[i];
                 switch (e.Payload)
                 {
@@ -275,6 +292,25 @@ public static class ProtobufRpcMapper
                     case GidChanged changed:
                         var user = UserQueryService.Find(db, IdentityService.UserId(db, changed.UserId), uid);
                         page.Updates.Add(new P.Update { GidChanged = new() { User = Reference(user.Id), Gid = user.Gid } });
+                        break;
+                    case Call call when call.TelegramId != 0:
+                        page.Updates.Add(PhoneUpdate(call));
+                        break;
+                    case CallSignal signal when signal.Type == "tl":
+                        var tlCall = db.Calls.FirstOrDefault(item => item.Id == signal.CallId && item.TelegramId != 0);
+                        if (tlCall is not null)
+                            page.Updates.Add(new P.Update
+                            {
+                                PhoneCallSignaling = new()
+                                {
+                                    CallId = tlCall.TelegramId,
+                                    Data = ByteString.CopyFrom(Convert.FromBase64String(signal.Data))
+                                }
+                            });
+                        break;
+                    case PresenceChanged presence:
+                        var presenceUser = UserQueryService.Find(db, IdentityService.UserId(db, presence.UserId), uid);
+                        page.Updates.Add(new P.Update { PresenceChanged = new() { User = Reference(presenceUser.Id), Status = MapStatus(presenceUser) } });
                         break;
                     case Receipt receipt:
                         var conversation = Auth.Conversation(db, receipt.ConversationId, uid);
@@ -287,7 +323,10 @@ public static class ProtobufRpcMapper
                         break;
                 }
             }
-            page.Users.Add(Related(true));
+            page.Users.Add(UserQueryService.Related(db, uid, true)
+                .Concat(difference.Events.Select(e => e.Payload).OfType<PresenceChanged>()
+                    .Select(p => UserQueryService.Find(db, IdentityService.UserId(db, p.UserId), uid)))
+                .DistinctBy(u => u.Id).Select(User));
             page.Groups.Add(Groups());
             return difference.Kind == DifferenceKind.Slice ? new() { Slice = page } : new() { Complete = page };
         }
@@ -344,8 +383,150 @@ public static class ProtobufRpcMapper
             return result;
         }
 
+        // ---------- phone.* (1:1 calls) ----------
+        private static int Seconds(long milliseconds)
+        {
+            if (milliseconds < 0 || milliseconds % 1000 != 0 || milliseconds / 1000 > int.MaxValue) throw Invalid();
+            return (int)(milliseconds / 1000);
+        }
+        private static long Milliseconds(int seconds) => checked((long)seconds * 1000);
+        // Stored protocol JSON keeps plain ints, so numeric reads must accept every JSON integer shape.
+        private static long Number(JsonNode? node, long min = long.MinValue, long max = long.MaxValue)
+        {
+            if (node is JsonValue value)
+            {
+                if (value.TryGetValue<long>(out var wide) && wide >= min && wide <= max) return wide;
+                if (value.TryGetValue<int>(out var number) && number >= min && number <= max) return number;
+                if (value.TryGetValue<double>(out var real) && real == Math.Floor(real) && real >= min && real <= max) return (long)real;
+            }
+            throw Invalid();
+        }
+        internal static P.PhoneCallProtocol Protocol(JsonObject? source)
+        {
+            var result = new P.PhoneCallProtocol();
+            if (source is null) return result;
+            result.UdpP2P = source["udp_p2p"]?.GetValue<bool>() ?? false;
+            result.UdpReflector = source["udp_reflector"]?.GetValue<bool>() ?? false;
+            result.MinLayer = (int)Number(source["min_layer"], 0, int.MaxValue);
+            result.MaxLayer = (int)Number(source["max_layer"], 0, int.MaxValue);
+            if (source["library_versions"] is JsonArray versions)
+                result.LibraryVersions.Add(versions.Select(version => version?.GetValue<string>() ?? ""));
+            return result;
+        }
+        internal static JsonObject? ProtocolJson(P.PhoneCallProtocol? protocol)
+        {
+            if (protocol is null) return null;
+            return new JsonObject
+            {
+                ["$type"] = "org.telegram.tgnet.tl.TL_phone$TL_phoneCallProtocol",
+                ["flags"] = (protocol.UdpP2P ? 1 : 0) | (protocol.UdpReflector ? 2 : 0),
+                ["udp_p2p"] = protocol.UdpP2P,
+                ["udp_reflector"] = protocol.UdpReflector,
+                ["min_layer"] = protocol.MinLayer,
+                ["max_layer"] = protocol.MaxLayer,
+                ["library_versions"] = new JsonArray(protocol.LibraryVersions.Select(version => (JsonNode?)JsonValue.Create(version)).ToArray())
+            };
+        }
+        private static P.PhoneCallDiscardReason DiscardReason(string reason) => reason switch
+        {
+            "Missed" => P.PhoneCallDiscardReason.Missed,
+            "Busy" => P.PhoneCallDiscardReason.Busy,
+            "Disconnect" => P.PhoneCallDiscardReason.Disconnect,
+            _ => P.PhoneCallDiscardReason.Hangup
+        };
+        private P.PhoneCall PhoneCall(Call call) => PhoneCall(call,
+            IdentityService.UserId(db, call.CallerId), IdentityService.UserId(db, call.CalleeId), call.CallerId == uid);
+        internal static P.PhoneCall PhoneCall(Call call, long adminTlUserId, long participantTlUserId, bool callerView)
+        {
+            var result = new P.PhoneCall
+            {
+                CallId = call.TelegramId, AccessHash = call.AccessHash,
+                State = call.State switch
+                {
+                    "ringing" => callerView ? P.PhoneCallState.Waiting : P.PhoneCallState.Requested,
+                    "accepted" => P.PhoneCallState.Accepted,
+                    "active" => P.PhoneCallState.Active,
+                    _ => P.PhoneCallState.Discarded
+                },
+                AdminTlUserId = adminTlUserId,
+                ParticipantTlUserId = participantTlUserId,
+                DateMs = Milliseconds(call.Date), Video = call.Video, P2PAllowed = call.P2pAllowed,
+                Protocol = Protocol(call.Protocol ?? CallService.DefaultProtocol()),
+                ReceiveDateMs = Milliseconds(call.ReceiveDate), StartDateMs = Milliseconds(call.StartDate),
+                GAHash = ByteString.CopyFrom(call.GAHash ?? []), GB = ByteString.CopyFrom(call.GB ?? []),
+                GAOrB = ByteString.CopyFrom(call.GA ?? []), KeyFingerprint = call.KeyFingerprint,
+                DiscardReason = DiscardReason(call.Reason), Duration = call.Duration
+            };
+            foreach (var connection in call.Connections ?? [])
+            {
+                long id = Number(connection["id"]);
+                long port = Number(connection["port"], 0, int.MaxValue);
+                result.Connections.Add(new P.PhoneConnection
+                {
+                    Id = id, Ip = connection["ip"]?.GetValue<string>() ?? "", Ipv6 = connection["ipv6"]?.GetValue<string>() ?? "",
+                    Port = (int)port, Turn = connection["turn"]?.GetValue<bool>() ?? false,
+                    Stun = connection["stun"]?.GetValue<bool>() ?? false,
+                    Username = connection["username"]?.GetValue<string>() ?? "", Password = connection["password"]?.GetValue<string>() ?? ""
+                });
+            }
+            return result;
+        }
+        private P.PhoneCallResult PhoneResult(Call call)
+        {
+            var result = new P.PhoneCallResult { PhoneCall = PhoneCall(call) };
+            string other = call.CallerId == uid ? call.CalleeId : call.CallerId;
+            result.Users.Add(User(UserQueryService.Find(db, IdentityService.UserId(db, other), uid)));
+            return result;
+        }
+        private P.Update PhoneUpdate(Call call) => new() { PhoneCall = new() { PhoneCall = PhoneCall(call) } };
+        private Call RequireCall(P.PhoneCallRef? peer)
+        {
+            if (peer is null) throw new ApiException(400, "CALL_NOT_FOUND");
+            return CallService.Require(db, peer.CallId, peer.AccessHash, uid);
+        }
+        private P.PhoneCallResult RequestCall(P.PhoneRequestCallRequest input)
+        {
+            var callee = SelectUser(input.User);
+            if (callee.Id == uid) throw new ApiException(400, "CALL_PEER_INVALID");
+            if (!AccountPrivacyService.Allowed(db, callee.Id, uid, P.PrivacyKey.PhoneCall))
+                throw new ApiException(403, "USER_PRIVACY_RESTRICTED");
+            byte[] gaHash = input.GAHash.ToByteArray();
+            var protocol = ProtocolJson(input.Protocol);
+            var replay = db.Calls.FirstOrDefault(call => call.TelegramId != 0 && call.CallerId == uid && call.RandomId == input.RandomId);
+            if (replay is not null)
+            {
+                if (replay.CalleeId != callee.Id || replay.Video != input.Video ||
+                    !CryptographicOperations.FixedTimeEquals(replay.GAHash ?? [], gaHash) ||
+                    !JsonNode.DeepEquals(replay.RequestProtocol ?? replay.Protocol, protocol))
+                    throw new ApiException(409, "CALL_IDEMPOTENCY_CONFLICT");
+                return PhoneResult(replay);
+            }
+            CallService.ValidateGaHash(gaHash);
+            CallService.ValidateProtocol(protocol);
+            bool p2p = CallService.EffectiveP2p(protocol!,
+                AccountPrivacyService.Allowed(db, uid, callee.Id, P.PrivacyKey.PhoneP2P),
+                AccountPrivacyService.Allowed(db, callee.Id, uid, P.PrivacyKey.PhoneP2P));
+            CallService.RequireRelayWhenP2pDisabled(p2p);
+            long peerId = IdentityService.UserId(db, callee.Id);
+            var conversation = ConversationMessageService.FindByPeer(db, peerId, uid, create: true);
+            CallService.ValidateCallee(conversation, uid, callee.Id);
+            if (db.Calls.Any(call => CallService.InProgress(call.State) &&
+                (call.CallerId == uid || call.CalleeId == uid || call.CallerId == callee.Id || call.CalleeId == callee.Id)))
+                throw new ApiException(409, "CALL_BUSY");
+            if (db.NextCallId == 0) db.NextCallId = 1_000_000_000;
+            var created = new Call(Guid.NewGuid().ToString("N"), conversation.Id, uid, callee.Id, "ringing", DateTimeOffset.UtcNow,
+                TelegramId: db.NextCallId++, AccessHash: CallService.NewAccessHash(), RandomId: input.RandomId,
+                Video: input.Video, Protocol: CallService.NormalizeProtocol(protocol!, p2p),
+                GAHash: gaHash, Date: Seconds(Now), P2pAllowed: p2p, RequestProtocol: protocol);
+            CallService.Save(db, created);
+            db.Emit([created.CallerId, created.CalleeId], "call.updated", created);
+            return PhoneResult(created);
+        }
+
         public P.RpcResponse Execute(P.RpcRequest request)
         {
+            if (request.HasForeground)
+                PresenceService.Report(db, authenticatedSession ?? throw new ApiException(401, "session_expired"), request.Foreground);
             var response = new P.RpcResponse { ProtocolMajor = 1, RequestId = request.RequestId };
             switch (request.OperationCase)
             {
@@ -459,6 +640,12 @@ public static class ProtobufRpcMapper
                     response.GetUsers.Users.Add(UserQueryService.ByIds(db, ids.Select(id => IdentityService.UserId(db, id)).ToArray(), uid).Select(User));
                     break;
                 }
+                case P.RpcRequest.OperationOneofCase.GetSpecialContacts:
+                    response.GetSpecialContacts = AccountPrivacyService.SpecialContacts(db, uid, null, serverDomain);
+                    break;
+                case P.RpcRequest.OperationOneofCase.SetSpecialContact:
+                    response.SetSpecialContact = AccountPrivacyService.SpecialContacts(db, uid, request.SetSpecialContact, serverDomain);
+                    break;
                 case P.RpcRequest.OperationOneofCase.GetContacts:
                 {
                     var contacts = ContactService.List(db, uid);
@@ -470,6 +657,154 @@ public static class ProtobufRpcMapper
                 case P.RpcRequest.OperationOneofCase.ResolveGid:
                     response.ResolveGid = Resolved(ContactService.ResolveGid(db, request.ResolveGid.Gid, uid));
                     break;
+                case P.RpcRequest.OperationOneofCase.AddContact:
+                {
+                    var input = request.AddContact;
+                    var target = SelectUser(input.User);
+                    var added = ContactService.Add(db, uid, IdentityService.UserId(db, target.Id), input.FirstName, input.LastName, false);
+                    response.AddContact = new() { DateMs = Now };
+                    response.AddContact.Users.Add(User(added));
+                    break;
+                }
+                case P.RpcRequest.OperationOneofCase.RequestCall:
+                    response.RequestCall = RequestCall(request.RequestCall);
+                    break;
+                case P.RpcRequest.OperationOneofCase.ReceivedCall:
+                {
+                    var call = RequireCall(request.ReceivedCall.Peer);
+                    if (call.CalleeId != uid) throw new ApiException(400, "CALL_NOT_FOUND");
+                    if (call.State == "ringing" && call.ReceiveDate == 0)
+                    {
+                        var updated = call with { ReceiveDate = Seconds(Now) };
+                        CallService.Save(db, updated);
+                        db.Emit([call.CallerId], "call.updated", updated);
+                    }
+                    response.ReceivedCall = new P.BoolValue { Value = true };
+                    break;
+                }
+                case P.RpcRequest.OperationOneofCase.AcceptCall:
+                {
+                    var input = request.AcceptCall;
+                    var call = RequireCall(input.Peer);
+                    if (call.CalleeId != uid) throw new ApiException(400, "CALL_NOT_FOUND");
+                    byte[] gb = input.GB.ToByteArray();
+                    var protocol = ProtocolJson(input.Protocol);
+                    CallService.ValidatePublicKey(gb, "CALL_INVALID_GB");
+                    CallService.ValidateProtocol(protocol);
+                    // Only the first accept wins; other devices may replay the same key material and proposal.
+                    if (call.State is "accepted" or "active")
+                    {
+                        if (CryptographicOperations.FixedTimeEquals(call.GB ?? [], gb) &&
+                            JsonNode.DeepEquals(call.AcceptProtocol ?? call.Protocol, protocol))
+                        {
+                            response.AcceptCall = PhoneResult(call);
+                            break;
+                        }
+                        throw new ApiException(409, "CALL_ALREADY_ACCEPTED");
+                    }
+                    if (call.State != "ringing") throw new ApiException(400, "CALL_ALREADY_ACCEPTED");
+                    // The accept can only further restrict P2P; privacy resolved at request time stays in force.
+                    bool p2p = call.P2pAllowed && CallService.RequestsP2p(protocol!);
+                    CallService.RequireRelayWhenP2pDisabled(p2p);
+                    var negotiated = CallService.NegotiateProtocol(
+                        call.RequestProtocol ?? call.Protocol ?? CallService.DefaultProtocol(), protocol!, p2p);
+                    var updated = call with
+                    {
+                        State = "accepted", GB = gb, UpdatedAt = DateTimeOffset.UtcNow,
+                        Protocol = negotiated, AcceptProtocol = protocol, P2pAllowed = p2p
+                    };
+                    CallService.Save(db, updated);
+                    db.Emit([call.CallerId], "call.updated", updated);
+                    response.AcceptCall = PhoneResult(updated);
+                    break;
+                }
+                case P.RpcRequest.OperationOneofCase.ConfirmCall:
+                {
+                    var input = request.ConfirmCall;
+                    var call = RequireCall(input.Peer);
+                    if (call.CallerId != uid) throw new ApiException(400, "CALL_NOT_FOUND");
+                    byte[] ga = input.GA.ToByteArray();
+                    var protocol = ProtocolJson(input.Protocol);
+                    CallService.ValidateGa(ga, call.GAHash);
+                    // Confirm must echo the caller's original proposal; the negotiated result stays final.
+                    CallService.RequireSameCapabilities(
+                        call.RequestProtocol ?? call.Protocol ?? CallService.DefaultProtocol(), protocol!);
+                    if (input.KeyFingerprint == 0) throw new ApiException(400, "CALL_INVALID_KEY_FINGERPRINT");
+                    if (call.State == "active")
+                    {
+                        if (CryptographicOperations.FixedTimeEquals(call.GA ?? [], ga) && call.KeyFingerprint == input.KeyFingerprint)
+                        {
+                            response.ConfirmCall = PhoneResult(call);
+                            break;
+                        }
+                        throw new ApiException(409, "CALL_ALREADY_ACTIVE");
+                    }
+                    if (call.State != "accepted") throw new ApiException(400, "CALL_NOT_ACCEPTED");
+                    var updated = call with
+                    {
+                        State = "active", GA = ga, KeyFingerprint = input.KeyFingerprint,
+                        StartDate = Seconds(Now), UpdatedAt = DateTimeOffset.UtcNow, Connections = CallService.PhoneConnections()
+                    };
+                    CallService.Save(db, updated);
+                    db.Emit([call.CalleeId], "call.updated", updated);
+                    response.ConfirmCall = PhoneResult(updated);
+                    break;
+                }
+                case P.RpcRequest.OperationOneofCase.DiscardCall:
+                {
+                    var input = request.DiscardCall;
+                    var call = RequireCall(input.Peer);
+                    // A retry keeps the original terminal outcome instead of rewriting it.
+                    if (call.State is not ("ended" or "rejected"))
+                    {
+                        int duration = input.Duration;
+                        if (duration < 0) throw new ApiException(400, "CALL_INVALID_DURATION");
+                        if (duration == 0 && call.StartDate != 0) duration = Math.Max(0, Seconds(Now) - call.StartDate);
+                        string reason = input.Reason switch
+                        {
+                            P.PhoneCallDiscardReason.Missed => "Missed",
+                            P.PhoneCallDiscardReason.Busy => "Busy",
+                            P.PhoneCallDiscardReason.Disconnect => "Disconnect",
+                            _ => "Hangup"
+                        };
+                        call = call with { State = "ended", Reason = reason, Duration = duration, UpdatedAt = DateTimeOffset.UtcNow };
+                        CallService.Save(db, call);
+                        db.Emit([call.CallerId, call.CalleeId], "call.updated", call);
+                    }
+                    response.DiscardCall = Updates([PhoneUpdate(call)]);
+                    break;
+                }
+                case P.RpcRequest.OperationOneofCase.SendSignalingData:
+                {
+                    var input = request.SendSignalingData;
+                    var call = RequireCall(input.Peer);
+                    if (call.State != "active") throw new ApiException(400, "CALL_NOT_ACTIVE");
+                    byte[] data = input.Data.ToByteArray();
+                    if (data.Length is 0 or > CallService.MaximumSignalingBytes)
+                        throw new ApiException(400, "CALL_SIGNALING_TOO_LARGE");
+                    string other = call.CallerId == uid ? call.CalleeId : call.CallerId;
+                    db.Emit([other], "call.tl_signal", new CallSignal(call.Id, uid, "tl", Convert.ToBase64String(data)),
+                        DateTimeOffset.UtcNow.AddMinutes(5));
+                    response.SendSignalingData = new P.BoolValue { Value = true };
+                    break;
+                }
+                case P.RpcRequest.OperationOneofCase.GetCallConfig:
+                    response.GetCallConfig = new P.DataJson { Data = CallService.CallConfigJson() };
+                    break;
+                case P.RpcRequest.OperationOneofCase.SaveCallDebug:
+                    response.SaveCallDebug = new P.BoolValue { Value = true };
+                    break;
+                case P.RpcRequest.OperationOneofCase.GetDhConfig:
+                {
+                    var input = request.GetDhConfig;
+                    var config = CallService.GetDhConfig(input.Version, input.RandomLength);
+                    response.GetDhConfig = new P.DhConfig
+                    {
+                        Version = config.Version, G = config.G, NotModified = config.NotModified,
+                        P = ByteString.CopyFrom(config.P), Random = ByteString.CopyFrom(config.Random)
+                    };
+                    break;
+                }
                 case P.RpcRequest.OperationOneofCase.ImportContacts:
                 {
                     var input = request.ImportContacts.Contacts;
@@ -505,7 +840,13 @@ public static class ProtobufRpcMapper
                 {
                     var selected = SelectUser(request.GetFullUser.User);
                     var user = UserQueryService.Find(db, IdentityService.UserId(db, selected.Id), uid);
-                    response.GetFullUser = new() { User = Reference(user.Id), Settings = new(), NotifySettings = new() };
+                    response.GetFullUser = new()
+                    {
+                        User = Reference(user.Id), Settings = new(), NotifySettings = new(), About = "", CommonGroupsCount = 0,
+                        PhoneCallsAvailable = AccountPrivacyService.Allowed(db, user.Id, uid, P.PrivacyKey.PhoneCall),
+                        VideoCallsAvailable = AccountPrivacyService.Allowed(db, user.Id, uid, P.PrivacyKey.PhoneCall),
+                        PhoneCallsPrivate = !AccountPrivacyService.Allowed(db, user.Id, uid, P.PrivacyKey.PhoneP2P)
+                    };
                     response.GetFullUser.Users.Add(User(user));
                     break;
                 }

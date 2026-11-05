@@ -34,8 +34,18 @@ public static class DeliveryEventCodec
 
     public static void Validate(DeliveryEvent delivery)
     {
-        var schema = delivery.Type == "wallpaper.changed" ? StorageContractVersions.WallpaperEventSchema : StorageContractVersions.EventSchema;
-        if (delivery.SchemaVersion != schema || delivery.OutboxId == Guid.Empty ||
+        var schema = delivery.Type switch
+        {
+            "wallpaper.changed" => StorageContractVersions.WallpaperEventSchema,
+            "user.presence_changed" => StorageContractVersions.PresenceEventSchema,
+            "call.updated" or "call.tl_signal" => StorageContractVersions.CallEventSchema,
+            _ => StorageContractVersions.EventSchema
+        };
+        // Legacy v1 snapshots stored call events without pts; they stay readable for replay.
+        var legacyCall = delivery.Type is "call.updated" or "call.tl_signal" &&
+            delivery.SchemaVersion == StorageContractVersions.EventSchema;
+        if (delivery.SchemaVersion != schema && !legacyCall ||
+            delivery.OutboxId == Guid.Empty ||
             delivery.EventId <= 0 || delivery.Payload is null ||
             EventPayloadTypes.For(delivery.Type) != delivery.Payload.GetType())
             throw new InvalidDataException("Invalid delivery identity, schema or type");
@@ -46,6 +56,7 @@ public static class DeliveryEventCodec
             Receipt r => r.ConversationId,
             Call c => c.ConversationId,
             GidChanged g => "user:" + g.UserId,
+            PresenceChanged p => "user:" + p.UserId,
             WallpaperChanged w => "user:" + w.UserId,
             CallSignal => delivery.PartitionKey,
             _ => throw new InvalidDataException("Unknown delivery payload")
@@ -57,7 +68,11 @@ public static class DeliveryEventCodec
                 delivery.ProjectionFormatVersion != StorageContractVersions.HistoryProjection :
             delivery.ConversationSequence is not null || delivery.MessageVersion is not null || delivery.ProjectionFormatVersion is not null)
             throw new InvalidDataException("Invalid projection metadata");
-        var hasPts = delivery.Type is "message.created" or "receipt.updated" or "user.gid_changed";
+        var hasPts = delivery.Type is "message.created" or "receipt.updated" or "user.gid_changed" or "user.presence_changed"
+            || delivery.SchemaVersion == StorageContractVersions.CallEventSchema;
+        if (delivery.Type == "call.tl_signal" && delivery.SchemaVersion == StorageContractVersions.CallEventSchema &&
+            delivery.ExpiresAt is null)
+            throw new InvalidDataException("Call signaling requires an expiry");
         string? previous = null;
         if (delivery.Recipients is null) throw new InvalidDataException("Missing recipients");
         if (delivery.Payload is WallpaperChanged changed &&

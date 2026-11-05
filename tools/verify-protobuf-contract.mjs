@@ -25,7 +25,7 @@ assert.equal(policy.contract.unknownMustUnderstandEntityStatus, 501);
 assert.equal(policy.contract.missingRequiredOneofStatus, 400);
 assert.match(proto, /syntax\s*=\s*"proto3"/);
 assert.match(proto, /package\s+botgram\.rpc\.v1\s*;/);
-assert(!/\b(?:Any|Struct|Value|ListValue|bytes)\b/.test(proto), 'No Any/Struct/JSON or opaque bytes escape hatches allowed');
+assert(!/\b(?:Any|Struct|Value|ListValue)\b/.test(proto), 'No Any/Struct/JSON escape hatches allowed');
 assert(!/\b(?:import|map)\b/.test(proto), 'v1 must remain a standalone explicitly typed schema');
 
 const messages = new Map();
@@ -51,9 +51,19 @@ for (const match of proto.matchAll(/\bmessage\s+(\w+)\s*\{/g)) {
     oneofs.set(`${match[1]}.${group[1]}`, [...group[2].matchAll(fieldPattern)].map(m => ({ type: m[2], name: m[3], tag: Number(m[4]) })));
   }
 }
-const scalarTypes = new Set(['string', 'bool', 'int32', 'int64', 'uint32', 'uint64', 'sint32', 'sint64', 'fixed32', 'fixed64', 'sfixed32', 'sfixed64', 'float', 'double']);
+const scalarTypes = new Set(['string', 'bool', 'bytes', 'int32', 'int64', 'uint32', 'uint64', 'sint32', 'sint64', 'fixed32', 'fixed64', 'sfixed32', 'sfixed64', 'float', 'double']);
+const enumTypes = new Set([...proto.matchAll(/\benum\s+(\w+)\s*\{/g)].map(m => m[1]));
+const binaryFields = new Set(['PasswordKdf.salt1', 'PasswordKdf.salt2', 'PasswordKdf.p',
+  'SrpProof.a', 'SrpProof.m1', 'PasswordInfo.srp_b', 'PasswordInfo.new_secure_salt',
+  'PasswordInfo.secure_random', 'PasswordUpdate.new_password_hash',
+  'PhoneRequestCallRequest.g_a_hash', 'PhoneAcceptCallRequest.g_b', 'PhoneConfirmCallRequest.g_a',
+  'PhoneSendSignalingDataRequest.data', 'PhoneCall.g_a_hash', 'PhoneCall.g_b', 'PhoneCall.g_a_or_b',
+  'PhoneCallSignalingData.data', 'DhConfig.p', 'DhConfig.random']);
 for (const [name, fields] of messages) {
-  for (const field of fields) assert(scalarTypes.has(field.type) || messages.has(field.type), `Unknown type ${name}.${field.name}: ${field.type}`);
+  for (const field of fields) {
+    assert(scalarTypes.has(field.type) || messages.has(field.type) || enumTypes.has(field.type), `Unknown type ${name}.${field.name}: ${field.type}`);
+    if (field.type === 'bytes') assert(binaryFields.has(`${name}.${field.name}`), `Unregistered binary field ${name}.${field.name}`);
+  }
 }
 function schemaField(target) {
   const [message, field, extra] = target.split('.');
@@ -88,6 +98,9 @@ checkFields(policy.inheritedFields, 'TLObject');
 assert.equal(policy.requests.length, 21);
 assert.equal(new Set(policy.requests.map(r => r.tl)).size, 21);
 assert.equal(new Set(policy.requests.map(r => r.javaType)).size, 21);
+assert.equal(policy.phoneOperations.length, 9);
+assert.equal(new Set(policy.phoneOperations.map(r => r.tl)).size, 9);
+assert.equal(new Set(policy.phoneOperations.map(r => r.javaType)).size, 9);
 assert.equal(policy.transportOperations.length, 1);
 const transport = policy.transportOperations[0];
 assert.equal(transport.tag, 121);
@@ -100,7 +113,7 @@ for (const [key, message] of [['requestFields', transport.message], ['responseFi
   transport[key].forEach(schemaField);
   assert.deepEqual([...transport[key]].sort(), messages.get(message).map(f => `${message}.${f.name}`).sort(), `Complete transport ${key}`);
 }
-assert.equal(policy.featureOperations.length, 4);
+assert.equal(policy.featureOperations.length, 8);
 for (const feature of policy.featureOperations) {
   assert(feature.purpose && feature.validation, `Missing feature semantics: ${feature.operation}`);
   for (const [key, message] of [['requestFields', feature.message], ['responseFields', feature.response]]) {
@@ -108,21 +121,24 @@ for (const feature of policy.featureOperations) {
     assert.deepEqual([...feature[key]].sort(), messages.get(message).map(f => `${message}.${f.name}`).sort(), `Complete feature ${feature.operation}.${key}`);
   }
 }
-const registeredOperations = [...policy.requests, ...policy.transportOperations, ...policy.featureOperations];
-assert.equal(new Set(registeredOperations.map(r => r.operation)).size, 26);
-assert.equal(new Set(registeredOperations.map(r => r.tag)).size, 26);
+const registeredOperations = [...policy.requests, ...policy.transportOperations, ...policy.featureOperations, ...policy.phoneOperations];
+const orderedOperations = [...registeredOperations].sort((a, b) => a.tag - b.tag);
+assert.equal(new Set(registeredOperations.map(r => r.operation)).size, 39);
+assert.equal(new Set(registeredOperations.map(r => r.tag)).size, 39);
+for (const [i, request] of orderedOperations.entries()) {
+  assert.equal(request.tag, 100 + i, `Tag gap before ${request.tl ?? request.operation}`);
+}
 for (const envelope of ['RpcRequest.operation', 'RpcResponse.outcome']) {
   const operations = oneofs.get(envelope).filter(f => f.tag >= 100);
-  assert.equal(operations.length, 26, `${envelope} requires 21 original operations + bootstrap + 4 wallpaper operations`);
-  for (const [i, request] of registeredOperations.entries()) {
-    assert.equal(request.tag, 100 + i);
+  assert.equal(operations.length, 39, `${envelope} requires 21 original operations + bootstrap + 8 feature operations + 9 phone/DH operations`);
+  for (const request of registeredOperations) {
     const operation = operations.find(f => f.tag === request.tag);
-    assert.equal(operation?.name, request.operation, `Tag drift: ${request.tl}`);
+    assert.equal(operation?.name, request.operation, `Tag drift: ${request.tl ?? request.operation}`);
     if (envelope.startsWith('RpcRequest')) assert.equal(operation.type, request.message);
     else if (request.response) assert.equal(operation.type, request.response);
   }
 }
-for (const request of policy.requests) {
+for (const request of [...policy.phoneOperations, ...policy.requests]) {
   checkFields(request.fields, request.tl);
   for (const target of Object.keys(request.wireDefaults ?? {})) schemaField(target);
 }
@@ -136,7 +152,7 @@ for (const [name, group] of Object.entries(policy.nested)) {
     if (variant.select?.endsWith('.self')) assert.equal(variant.value, true, subclass);
   }
 }
-console.log(`PASS: v1 typed schema, 21 original TL operations + bootstrap + 4 wallpaper request/response tags, mapping targets and policy decisions (${messages.size} messages)`);
+console.log(`PASS: v1 typed schema, 21 original TL operations + bootstrap + wallpaper + privacy + addContact + 9 phone/DH operations, mapping targets and policy decisions (${messages.size} messages)`);
 
 if (androidRoot) {
   const clientProto = fs.readFileSync(path.join(androidRoot, 'Shared/botgram_rpc.proto'));

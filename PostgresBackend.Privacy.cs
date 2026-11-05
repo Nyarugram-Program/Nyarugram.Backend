@@ -5,9 +5,30 @@ namespace Botgram.Backend.Storage;
 
 public sealed partial class PostgresBackend
 {
+    private async Task<P.SpecialContacts> SpecialContacts(Transaction work, string uid,
+        P.SetSpecialContactRequest? input, string domain)
+    {
+        await work.Execute("SELECT pg_advisory_xact_lock(716239104)");
+        var state = await LoginPrivacy(work, uid);
+        var view = new Database { AccountPrivacy = new() { [uid] = state } };
+        if (input is not null)
+        {
+            var id = ProtobufRpcMapper.SelectedUserId(input.User, uid, domain);
+            var profiles = await Profiles(work, uid, "a.id=$2", id);
+            view.Users = profiles.Select(p => new User(p.Id, p.Username, p.DisplayName, "", "", p.Gid)).ToList();
+            view.Contacts = await work.Rows("SELECT owner_id,user_id,first_name,last_name FROM botgram_backend_v1.contacts WHERE owner_id=$1 AND user_id=$2",
+                r => new Contact(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3)), uid, id);
+            if (id != uid && profiles.Length != 0) view.AccountPrivacy[id] = await LoginPrivacy(work, id);
+        }
+        var result = AccountPrivacyService.SpecialContacts(view, uid, input, domain);
+        await SaveLoginPrivacy(work, uid, state);
+        return result;
+    }
+
     private async Task<P.AccountPrivacyResponse> AccountPrivacy(Transaction work, Session session,
         P.AccountPrivacyRequest input, string domain)
     {
+        await work.Execute("SELECT pg_advisory_xact_lock(716239104)");
         await work.Execute("INSERT INTO botgram_backend_v1.privacy_accounts(user_id) VALUES($1) ON CONFLICT DO NOTHING", session.UserId);
         var json = (string)(await work.Scalar("SELECT state::text FROM botgram_backend_v1.privacy_accounts WHERE user_id=$1 FOR UPDATE", session.UserId))!;
         var state = JsonSerializer.Deserialize<AccountPrivacyState>(json, Store.Json)
@@ -25,7 +46,7 @@ public sealed partial class PostgresBackend
         var view = new Database
         {
             AccountPrivacy = new() { [session.UserId] = state },
-            Users = profiles.Select(p => new User(p.Id, p.Username, p.DisplayName, "", "", p.Gid, p.Premium)).ToList(),
+            Users = profiles.Select(p => new User(p.Id, p.Username, p.DisplayName, "", "", p.Gid, p.Premium, p.LastSeen, p.Online)).ToList(),
             Contacts = await work.Rows("""
                 SELECT owner_id,user_id,first_name,last_name FROM botgram_backend_v1.contacts
                 WHERE (owner_id=$1 AND user_id=ANY($2)) OR (user_id=$1 AND owner_id=ANY($2))
@@ -43,7 +64,19 @@ public sealed partial class PostgresBackend
         foreach (var mapping in await GroupIdentities(work, view.Conversations)) view.TelegramIds["chat:" + mapping.Key] = mapping.Value;
         var previousSessions = view.Sessions.Select(s => s.TokenHash).ToHashSet(StringComparer.Ordinal);
         var previousContacts = view.Contacts.Where(c => c.OwnerId == session.UserId).Select(c => c.UserId).ToHashSet(StringComparer.Ordinal);
+        AccountPrivacyState? reverseState = null;
+        string? blockedId = null;
+        if (input.BlockUser is not null)
+        {
+            blockedId = ProtobufRpcMapper.UserReferenceId(input.BlockUser, domain);
+            if (blockedId != session.UserId && profiles.Any(p => p.Id == blockedId))
+            {
+                reverseState = await LoginPrivacy(work, blockedId);
+                view.AccountPrivacy[blockedId] = reverseState;
+            }
+        }
         var result = AccountPrivacyService.Execute(view, session, input, domain);
+        if (reverseState is not null) await SaveLoginPrivacy(work, blockedId!, reverseState);
         if (input.OperationCase == P.AccountPrivacyRequest.OperationOneofCase.ResetSavedContacts)
             await work.Execute("DELETE FROM botgram_backend_v1.contacts WHERE owner_id=$1", session.UserId);
         else

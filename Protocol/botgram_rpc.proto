@@ -9,6 +9,8 @@ option csharp_namespace = "Botgram.Protocol.V1";
 message RpcRequest {
   uint32 protocol_major = 1;
   string request_id = 2;
+  // Explicit foreground activity for this authenticated session. Omission does not refresh presence.
+  optional bool foreground = 3;
   oneof operation {
     GetStateRequest get_state = 100;
     GetDifferenceRequest get_difference = 101;
@@ -37,6 +39,18 @@ message RpcRequest {
     InstallWallpaperRequest install_wallpaper = 124;
     SetChatWallpaperRequest set_chat_wallpaper = 125;
     AccountPrivacyRequest account_privacy = 126;
+    AddContactRequest add_contact = 127;
+    PhoneRequestCallRequest request_call = 128;
+    PhoneReceivedCallRequest received_call = 129;
+    PhoneAcceptCallRequest accept_call = 130;
+    PhoneConfirmCallRequest confirm_call = 131;
+    PhoneDiscardCallRequest discard_call = 132;
+    PhoneSendSignalingDataRequest send_signaling_data = 133;
+    PhoneGetCallConfigRequest get_call_config = 134;
+    PhoneSaveCallDebugRequest save_call_debug = 135;
+    GetDhConfigRequest get_dh_config = 136;
+    GetSpecialContactsRequest get_special_contacts = 137;
+    SetSpecialContactRequest set_special_contact = 138;
   }
 }
 message RpcResponse {
@@ -71,6 +85,18 @@ message RpcResponse {
     WallpaperMutationResult install_wallpaper = 124;
     ChatWallpaperResult set_chat_wallpaper = 125;
     AccountPrivacyResponse account_privacy = 126;
+    Updates add_contact = 127;
+    PhoneCallResult request_call = 128;
+    BoolValue received_call = 129;
+    PhoneCallResult accept_call = 130;
+    PhoneCallResult confirm_call = 131;
+    Updates discard_call = 132;
+    BoolValue send_signaling_data = 133;
+    DataJson get_call_config = 134;
+    BoolValue save_call_debug = 135;
+    DhConfig get_dh_config = 136;
+    SpecialContacts get_special_contacts = 137;
+    SpecialContacts set_special_contact = 138;
   }
 }
 message RpcError {
@@ -90,6 +116,9 @@ message EventHint {
   // clients into refreshing wallpaper state rather than inventing chat updates.
   optional int64 wallpaper_revision = 3;
 }
+message GetSpecialContactsRequest {}
+message SetSpecialContactRequest { UserSelector user = 1; bool enabled = 2; }
+message SpecialContacts { int64 revision = 1; repeated UserRef users = 2; }
 message Empty {}
 // Settings use domain references and explicit rules, with ownership checked by
 // the same authenticated account as other RPC operations.
@@ -252,7 +281,13 @@ message UserSummary {
   bool is_contact = 9;
   bool is_mutual_contact = 10;
   optional bool nyarugram_premium = 11;
+  UserStatus status = 12;
 }
+message UserStatus {
+  oneof kind { int64 online_until_ms = 1; int64 last_seen_ms = 2; }
+}
+message PresenceChanged { UserRef user = 1; UserStatus status = 2; }
+message AddContactRequest { UserSelector user = 1; string first_name = 2; string last_name = 3; }
 message Contact { UserRef user = 1; bool mutual = 2; }
 message GroupSummary {
   string group_id = 1;
@@ -332,6 +367,9 @@ message Update {
     GidChanged gid_changed = 5;
     // Returned only to set_chat_wallpaper callers, never in the durable pts stream.
     PeerWallpaperChanged peer_wallpaper_changed = 6;
+    PresenceChanged presence_changed = 7;
+    PhoneCallChanged phone_call = 8;
+    PhoneCallSignalingData phone_call_signaling = 9;
   }
 }
 message Updates { repeated Update updates = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; int64 date_ms = 4; int32 seq = 5; }
@@ -367,7 +405,7 @@ message ImportedContacts { repeated ImportedContact imported = 1; repeated UserS
 message MissingInvitee { UserRef user = 1; bool premium_would_allow_invite = 2; bool premium_required_for_pm = 3; }
 message GroupCreated { GroupSummary group = 1; Updates updates = 2; repeated MissingInvitee missing_invitees = 3; }
 message PeerSettingsResult { PeerSettings settings = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; }
-message UserFullResult { UserRef user = 1; PeerSettings settings = 2; NotifySettings notify_settings = 3; string about = 4; int32 common_groups_count = 5; bool phone_calls_available = 6; bool phone_calls_private = 7; repeated UserSummary users = 8; repeated GroupSummary groups = 9; WallpaperState wallpaper = 10; }
+message UserFullResult { UserRef user = 1; PeerSettings settings = 2; NotifySettings notify_settings = 3; string about = 4; int32 common_groups_count = 5; bool phone_calls_available = 6; bool phone_calls_private = 7; repeated UserSummary users = 8; repeated GroupSummary groups = 9; WallpaperState wallpaper = 10; bool video_calls_available = 11; }
 message GroupFullResult { GroupSummary group = 1; string about = 2; repeated Participant participants = 3; int32 participants_version = 4; NotifySettings notify_settings = 5; repeated UserSummary users = 6; repeated GroupSummary groups = 7; WallpaperState wallpaper = 8; }
 message GroupList { repeated GroupSummary groups = 1; }
 message GetStateRequest {}
@@ -442,3 +480,98 @@ message SetChatWallpaperRequest {
 }
 message PeerWallpaperChanged { PeerRef peer = 1; WallpaperState state = 2; }
 message ChatWallpaperResult { Updates updates = 1; WallpaperState state = 2; int64 revision = 3; }
+
+// 1:1 voice/video calls. The call ID is the existing stable TL call ID; the access
+// hash remains a per-call capability and is verified like the TL-JSON transport.
+message PhoneCallProtocol {
+  bool udp_p2p = 1;
+  bool udp_reflector = 2;
+  int32 min_layer = 3;
+  int32 max_layer = 4;
+  repeated string library_versions = 5;
+}
+message PhoneConnection {
+  int64 id = 1;
+  string ip = 2;
+  string ipv6 = 3;
+  int32 port = 4;
+  bool turn = 5;
+  bool stun = 6;
+  string username = 7;
+  string password = 8;
+}
+message PhoneCallRef { int64 call_id = 1; int64 access_hash = 2; }
+enum PhoneCallState {
+  PHONE_CALL_STATE_UNSPECIFIED = 0;
+  PHONE_CALL_STATE_WAITING = 1;
+  PHONE_CALL_STATE_REQUESTED = 2;
+  PHONE_CALL_STATE_ACCEPTED = 3;
+  PHONE_CALL_STATE_ACTIVE = 4;
+  PHONE_CALL_STATE_DISCARDED = 5;
+}
+enum PhoneCallDiscardReason {
+  PHONE_CALL_DISCARD_REASON_UNSPECIFIED = 0;
+  PHONE_CALL_DISCARD_REASON_HANGUP = 1;
+  PHONE_CALL_DISCARD_REASON_MISSED = 2;
+  PHONE_CALL_DISCARD_REASON_BUSY = 3;
+  PHONE_CALL_DISCARD_REASON_DISCONNECT = 4;
+}
+message PhoneCall {
+  int64 call_id = 1;
+  int64 access_hash = 2;
+  PhoneCallState state = 3;
+  int64 admin_tl_user_id = 4;
+  int64 participant_tl_user_id = 5;
+  int64 date_ms = 6;
+  bool video = 7;
+  bool p2p_allowed = 8;
+  PhoneCallProtocol protocol = 9;
+  int64 receive_date_ms = 10;
+  int64 start_date_ms = 11;
+  bytes g_a_hash = 12;
+  bytes g_b = 13;
+  bytes g_a_or_b = 14;
+  int64 key_fingerprint = 15;
+  repeated PhoneConnection connections = 16;
+  PhoneCallDiscardReason discard_reason = 17;
+  int32 duration = 18;
+}
+message PhoneCallResult { PhoneCall phone_call = 1; repeated UserSummary users = 2; }
+message BoolValue { bool value = 1; }
+message DataJson { string data = 1; }
+message PhoneRequestCallRequest {
+  UserSelector user = 1;
+  int64 random_id = 2;
+  bool video = 3;
+  bytes g_a_hash = 4;
+  PhoneCallProtocol protocol = 5;
+}
+message PhoneReceivedCallRequest { PhoneCallRef peer = 1; }
+message PhoneAcceptCallRequest { PhoneCallRef peer = 1; bytes g_b = 2; PhoneCallProtocol protocol = 3; }
+message PhoneConfirmCallRequest { PhoneCallRef peer = 1; bytes g_a = 2; int64 key_fingerprint = 3; PhoneCallProtocol protocol = 4; }
+message PhoneDiscardCallRequest {
+  PhoneCallRef peer = 1;
+  int32 duration = 2;
+  PhoneCallDiscardReason reason = 3;
+  int64 connection_id = 4;
+  bool video = 5;
+}
+message PhoneSendSignalingDataRequest { PhoneCallRef peer = 1; bytes data = 2; }
+message PhoneGetCallConfigRequest {}
+message PhoneSaveCallDebugRequest { PhoneCallRef peer = 1; string debug = 2; }
+message PhoneCallChanged { PhoneCall phone_call = 1; }
+message PhoneCallSignalingData { int64 call_id = 1; bytes data = 2; }
+
+// messages.getDhConfig. The server owns one immutable version; a matching version
+// returns not_modified with fresh random padding, otherwise the full configuration.
+message GetDhConfigRequest {
+  int32 version = 1;
+  int32 random_length = 2;
+}
+message DhConfig {
+  int32 version = 1;
+  int32 g = 2;
+  bytes p = 3;
+  bytes random = 4;
+  bool not_modified = 5;
+}

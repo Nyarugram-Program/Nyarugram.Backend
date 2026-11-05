@@ -453,7 +453,10 @@ public sealed class PostgresDeliveryPersistence(NpgsqlDataSource dataSource,
     private static void Validate(DeliveryEvent delivery)
     {
         if (delivery.SchemaVersion != StorageContractVersions.EventSchema &&
-            !(delivery.SchemaVersion == StorageContractVersions.WallpaperEventSchema && delivery.Type == "wallpaper.changed"))
+            !(delivery.SchemaVersion == StorageContractVersions.WallpaperEventSchema && delivery.Type == "wallpaper.changed") &&
+            !(delivery.SchemaVersion == StorageContractVersions.PresenceEventSchema && delivery.Type == "user.presence_changed") &&
+            !(delivery.SchemaVersion == StorageContractVersions.CallEventSchema &&
+                delivery.Type is "call.updated" or "call.tl_signal"))
             throw new NotSupportedException("Unsupported delivery schema/type");
         DeliveryEventCodec.Validate(delivery);
         if (delivery.Type != "message.created")

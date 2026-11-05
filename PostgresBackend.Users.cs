@@ -38,11 +38,12 @@ public sealed partial class PostgresBackend
         var rows = await work.Rows($"""
             SELECT a.id,a.username,a.display_name,a.salt,a.password_hash,a.gid,a.premium,
                 c.first_name,c.last_name,
-                EXISTS(SELECT 1 FROM botgram_backend_v1.contacts reverse WHERE reverse.owner_id=a.id AND reverse.user_id=$1)
+                EXISTS(SELECT 1 FROM botgram_backend_v1.contacts reverse WHERE reverse.owner_id=a.id AND reverse.user_id=$1), p.last_seen, p.online
             FROM botgram_backend_v1.accounts a
             LEFT JOIN botgram_backend_v1.contacts c ON c.owner_id=$1 AND c.user_id=a.id
+            LEFT JOIN botgram_backend_v1.presence_accounts p ON p.user_id=a.id
             WHERE {predicate} ORDER BY {order}
-            """, r => (User: UserRow(r),
+            """, r => (User: UserRow(r) with { LastSeen = r.IsDBNull(10) ? null : r.GetFieldValue<DateTimeOffset>(10), Online = !r.IsDBNull(11) && r.GetBoolean(11) },
                 Contact: r.IsDBNull(7) ? null : new Contact(uid, r.GetString(0), r.GetString(7), r.GetString(8)),
                 Mutual: !r.IsDBNull(7) && r.GetBoolean(9)), values);
         var ids = await UserIdentities(work, rows.Select(r => r.User.Id).ToArray());
@@ -50,8 +51,10 @@ public sealed partial class PostgresBackend
         return rows.Select(r =>
         {
             var profile = UserQueryService.Profile(r.User, uid, ids[r.User.Id], r.Contact, r.Mutual);
-            return AccountPrivacyService.Allowed(privacy, r.User.Id, uid, Botgram.Protocol.V1.PrivacyKey.PhoneNumber)
-                ? profile : profile with { Gid = "" };
+            if (!AccountPrivacyService.Allowed(privacy, r.User.Id, uid, Botgram.Protocol.V1.PrivacyKey.PhoneNumber))
+                profile = profile with { Gid = "" };
+            return AccountPrivacyService.Allowed(privacy, r.User.Id, uid, Botgram.Protocol.V1.PrivacyKey.StatusTimestamp)
+                ? profile : profile with { LastSeen = null, Online = false };
         }).ToArray();
     }
 

@@ -766,3 +766,53 @@ WSS cursor 源码已改为与 `/api/events` 共用接收人过滤与 100 条分�
 ```
 
 准备好的实例使用 `http://127.0.0.1:18525`，正式环境切流、真实用户库迁移、设备操作及长期高负载验收需要各自的证据。此前性能候选的 FAIL 结论保留。
+
+## 16. 指定既有隔离数据库的离线 schema v7→v8 升级（2026-11-05）
+
+`Storage.Admin` 新增 `inspect` 与 `upgrade`。它们只操作显式配置指定的、回环地址上的 `botgram_test_*` 数据库，不启动服务、不读取旧 JSON、不连接正式库，也不打印连接字符串或凭据。实际支持的起始版本是精确的 `{1,2,3,4,5,6,7}`，目标是 `{1,2,3,4,5,6,7,8}`；已经是 v8 时报告 no-op，缺版本、含未知版本或其他集合明确拒绝。
+
+`BOTGRAM_MIGRATION_TESTS=1` 仍只是快照导入导出的回归入口：测试程序创建随机 `botgram_test_intake_*` 临时库并在结束时删除，不能升级调用方指定的既有数据库。两者用途不能互相替代。
+
+维护配置保存在 D 盘受限目录，不要提交到仓库。回环主机和 `botgram_test_*` 库名在加载时再次校验：
+
+```json
+{
+  "Storage": {
+    "Mode": "NewStorageValidation",
+    "ValidationBackend": "RelationalBackend",
+    "ValidationAcknowledged": "true",
+    "ValidationConnectionString": "Host=127.0.0.1;Port=55432;Database=botgram_test_schema_fixture;Username=<limited-user>;Password=<secret>"
+  }
+}
+```
+
+`FourComponent` 目标使用同一入口，配置中的后端名可写 `FourComponent`。示例命令全部在 PowerShell 下执行，路径按实际仓库位置调整；已发布的维护程序位于 `artifacts/storage-admin`，也可按下面命令从源码构建：
+
+```powershell
+# 0. 先停止后端、四组件工作进程及任何读写者，等待数据库连接完全释放。
+# 1. 备份目标数据库、部署配置以及 Privacy:KeyDirectory 密钥环；缺少密钥环会导致验证器不可解密。
+# 2. 只读预检查：打印主机、数据库、用户、服务器版本、活动客户端数和真实 schema 版本。
+dotnet build Storage.Admin/Storage.Admin.csproj -c Release
+dotnet Storage.Admin/bin/Release/net8.0/Storage.Admin.dll inspect D:\BotgramBuild\private\schema-upgrade.json
+
+# 3. 应用迁移：在单个事务内执行；任何失败都回滚，保留 v7、原数据和原版本记录。
+dotnet Storage.Admin/bin/Release/net8.0/Storage.Admin.dll upgrade D:\BotgramBuild\private\schema-upgrade.json
+
+# 4. 重复执行应输出 no migration required；再次 inspect 应显示 1..8。
+dotnet Storage.Admin/bin/Release/net8.0/Storage.Admin.dll upgrade D:\BotgramBuild\private\schema-upgrade.json
+
+# 5. 用同一数据库启动当前后端。PostgresBackend.VerifySchemaAsync 只接受精确的 1..8，
+#    拒绝旧库或部分迁移；启动后检查 /health、登录、隐私、验证器和通话读取。
+
+# 6. 快照导入/导出回归仍使用 BOTGRAM_MIGRATION_TESTS（临时库，不作为指定库升级证据）：
+$env:BOTGRAM_PG_TEST_CONNECTION_STRING = 'Host=127.0.0.1;Port=55432;Database=botgram_test_migration_admin;Username=<limited-user>;Password=<secret>'
+$env:BOTGRAM_MIGRATION_TESTS = '1'
+dotnet run --project Storage.Tests
+```
+
+行为与验证：
+
+- `inspect` 和应用前都核对 schema_versions、目标身份与 `pg_stat_activity` 的其他 client backend。`upgrade` 在同一事务内取得离线维护键、四组件运行时租约和容量写锁；其他读写者、工作进程或并发维护进程存在时明确失败。
+- v8 只给 `calls` 增加 `request_protocol`/`accept_protocol` 并从原 `protocol` 回填。账号、有效会话、TL 身份、会话与成员、消息/事件/pts、联系人、回执、隐私规则、验证器/恢复码和通话记录保持逐字节不变。
+- 实际定向回归 `BOTGRAM_SCHEMA_UPGRADE_TESTS=1` 覆盖预检查、v1..v6/未知版本拒绝、活动客户端、四组件租约、并发升级、触发器制造真实失败后的整事务回滚、重复执行、启动校验、登录、隐私、验证器和通话读取。
+- 实际隔离 PostgreSQL 16.15、loopback 端口及 `botgram_test_*` 上的 CLI `inspect`/`upgrade`/重复 `upgrade`/迁移后应用读取结果记录在客户端 `artifacts/build-info.json` 的 `nativeCallsProtobufAndMigrationFixVerification`；不包含连接凭据或用户数据。

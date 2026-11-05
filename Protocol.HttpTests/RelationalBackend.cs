@@ -11,6 +11,7 @@ internal static partial class HttpTests
 {
     private static async Task<int> RelationalBackend(bool fullStack = false)
     {
+        CallRelayConfiguration();
         var adminString = Environment.GetEnvironmentVariable("BOTGRAM_PG_TEST_CONNECTION_STRING")
             ?? throw new InvalidOperationException("Relational HTTP tests require isolated PostgreSQL");
         var options = new NpgsqlConnectionStringBuilder(adminString);
@@ -56,7 +57,7 @@ internal static partial class HttpTests
                 return P.EventHint.Parser.ParseFrom(buffer.AsSpan(0, frame.Count));
             }
             Task<Server> Start() => Server.Start(noStore, legacyEnabled: false, legacyWssEnabled: false,
-                validationConnection: options.ConnectionString, fullRelational: true, fullStack: stack);
+                validationConnection: options.ConnectionString, fullRelational: true, fullStack: stack, relays: true);
             await using (var server = await Start())
             {
                 foreach (var name in new[] { "alice", "bob", "outsider" })
@@ -133,6 +134,304 @@ internal static partial class HttpTests
                 await server.Json("GET", $"/api/calls/{callId}", null, Accounts["bob"].Token);
                 await server.Json("GET", $"/api/calls/{callId}", null, Accounts["outsider"].Token, 404);
                 await server.Json("POST", $"/api/calls/{callId}/end", new { }, Accounts["alice"].Token);
+                var dh = await server.Rpc(Req(new P.GetDhConfigRequest { Version = 0, RandomLength = 32 }));
+                Check(dh.GetDhConfig.G == 3 && dh.GetDhConfig.P.Length == 256 && dh.GetDhConfig.Random.Length == 32 &&
+                    !dh.GetDhConfig.NotModified, "PG getDhConfig returns prime and fresh random");
+                Check((await server.Rpc(Req(new P.GetDhConfigRequest { Version = 1, RandomLength = 8 }))).GetDhConfig.NotModified,
+                    "PG getDhConfig not modified");
+                var callConfig = (await server.Rpc(Req(new P.PhoneGetCallConfigRequest()))).GetCallConfig.Data;
+                Check(callConfig.Contains("\"botgram_calls\"") && callConfig.Contains("\"turn\"") &&
+                    callConfig.Contains("\"stun\""), "PG getCallConfig reports TURN/STUN capabilities");
+                Check((await server.Rpc(Req(new P.PhoneSaveCallDebugRequest { Debug = "{}" }))).SaveCallDebug.Value,
+                    "PG saveCallDebug");
+                var phoneProtocol = new P.PhoneCallProtocol { UdpP2P = true, UdpReflector = true, MinLayer = 65, MaxLayer = 92 };
+                phoneProtocol.LibraryVersions.Add("10.0.0");
+                byte[] gA = new byte[256]; Array.Fill(gA, (byte)2);
+                byte[] gB = new byte[256]; Array.Fill(gB, (byte)3);
+                var requested = await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000111, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = phoneProtocol
+                }));
+                var phoneCall = requested.RequestCall.PhoneCall;
+                Check(phoneCall.CallId > 0 && phoneCall.AccessHash != 0 && phoneCall.State == P.PhoneCallState.Waiting &&
+                    phoneCall.P2PAllowed && requested.RequestCall.Users.Count == 1, "PG requestCall allocates identity");
+                var replayRequest = new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000111, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = phoneProtocol
+                };
+                Check((await server.Rpc(Req(replayRequest))).RequestCall.PhoneCall.CallId == phoneCall.CallId,
+                    "PG requestCall idempotent retry");
+                await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000111, Video = false,
+                    GAHash = ByteString.CopyFrom(new byte[32]), Protocol = phoneProtocol
+                }), "alice", 409, "CALL_IDEMPOTENCY_CONFLICT");
+                var reference = new P.PhoneCallRef { CallId = phoneCall.CallId, AccessHash = phoneCall.AccessHash };
+                Check((await server.Rpc(Req(new P.PhoneReceivedCallRequest { Peer = reference }), "bob")).ReceivedCall.Value,
+                    "PG receivedCall");
+                var accepted = await server.Rpc(Req(new P.PhoneAcceptCallRequest
+                {
+                    Peer = reference, GB = ByteString.CopyFrom(gB), Protocol = phoneProtocol
+                }), "bob");
+                Check(accepted.AcceptCall.PhoneCall.State == P.PhoneCallState.Accepted, "PG acceptCall");
+                await server.Rpc(Req(new P.PhoneAcceptCallRequest
+                {
+                    Peer = reference, GB = ByteString.CopyFrom(gB), Protocol = phoneProtocol
+                }), "bob");
+                byte[] otherB = new byte[256]; Array.Fill(otherB, (byte)4);
+                await server.Rpc(Req(new P.PhoneAcceptCallRequest
+                {
+                    Peer = reference, GB = ByteString.CopyFrom(otherB), Protocol = phoneProtocol
+                }), "bob", 409, "CALL_ALREADY_ACCEPTED");
+                byte[] otherA = new byte[256]; Array.Fill(otherA, (byte)5);
+                await server.Rpc(Req(new P.PhoneConfirmCallRequest
+                {
+                    Peer = reference, GA = ByteString.CopyFrom(otherA), KeyFingerprint = 0x1122334455, Protocol = phoneProtocol
+                }), "alice", 400, "CALL_HASH_MISMATCH");
+                var confirmed = await server.Rpc(Req(new P.PhoneConfirmCallRequest
+                {
+                    Peer = reference, GA = ByteString.CopyFrom(gA), KeyFingerprint = 0x1122334455, Protocol = phoneProtocol
+                }), "alice");
+                Check(confirmed.ConfirmCall.PhoneCall.State == P.PhoneCallState.Active &&
+                    confirmed.ConfirmCall.PhoneCall.KeyFingerprint == 0x1122334455, "PG confirmCall validates g_a hash");
+                byte[] signalData = { 1, 2, 3, 4 };
+                Check((await server.Rpc(Req(new P.PhoneSendSignalingDataRequest
+                {
+                    Peer = reference, Data = ByteString.CopyFrom(signalData)
+                }))).SendSignalingData.Value, "PG sendSignalingData");
+                var bobState = await server.Rpc(Req(new P.GetStateRequest()), "bob");
+                var difference = await server.Rpc(Req(new P.GetDifferenceRequest { Pts = Math.Max(1, bobState.GetState.Pts - 8) }), "bob");
+                var page = difference.GetDifference.Complete ?? difference.GetDifference.Slice;
+                Check(page is not null && (page.Updates.Any(u => u.PhoneCallSignaling is { CallId: > 0 }) ||
+                    page.Updates.Any(u => u.PhoneCall is { PhoneCall.State: P.PhoneCallState.Active })),
+                    "PG difference carries phone updates");
+                var discarded = await server.Rpc(Req(new P.PhoneDiscardCallRequest
+                {
+                    Peer = reference, Duration = 3, Reason = P.PhoneCallDiscardReason.Hangup
+                }), "bob");
+                Check(discarded.DiscardCall.Updates_.Any(u => u.PhoneCall.PhoneCall.State == P.PhoneCallState.Discarded),
+                    "PG discardCall converges to terminal state");
+                await server.Rpc(Req(new P.AccountPrivacyRequest
+                {
+                    SetRules = new() { Key = P.PrivacyKey.PhoneP2P, Rules = { new P.PrivacyRule { Kind = P.PrivacyRuleKind.DisallowAll } } }
+                }), "bob");
+                var relayed = await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000222, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = phoneProtocol
+                }));
+                var relayedCall = relayed.RequestCall.PhoneCall;
+                Check(!relayedCall.P2PAllowed && !relayedCall.Protocol.UdpP2P,
+                    "PG callee PhoneP2P disallow forces the call off peer-to-peer");
+                var relayedRef = new P.PhoneCallRef { CallId = relayedCall.CallId, AccessHash = relayedCall.AccessHash };
+                await server.Rpc(Req(new P.PhoneReceivedCallRequest { Peer = relayedRef }), "bob");
+                await server.Rpc(Req(new P.PhoneAcceptCallRequest
+                {
+                    Peer = relayedRef, GB = ByteString.CopyFrom(gB), Protocol = phoneProtocol
+                }), "bob");
+                var relayedConfirmed = await server.Rpc(Req(new P.PhoneConfirmCallRequest
+                {
+                    Peer = relayedRef, GA = ByteString.CopyFrom(gA), KeyFingerprint = 0x1122334456, Protocol = phoneProtocol
+                }));
+                Check(relayedConfirmed.ConfirmCall.PhoneCall.Connections.Any(c => c.Turn) &&
+                    relayedConfirmed.ConfirmCall.PhoneCall.Connections.Any(c => c.Stun),
+                    "PG relayed call exposes TURN and STUN endpoints to the client");
+                await server.Rpc(Req(new P.PhoneDiscardCallRequest
+                {
+                    Peer = relayedRef, Duration = 1, Reason = P.PhoneCallDiscardReason.Hangup
+                }), "bob");
+                // Both proposals are kept; accept intersects the layer range and library versions,
+                // and confirm must echo the caller's original proposal.
+                var callerProposal = new P.PhoneCallProtocol { UdpP2P = true, UdpReflector = true, MinLayer = 60, MaxLayer = 95 };
+                callerProposal.LibraryVersions.Add("11.0.0");
+                callerProposal.LibraryVersions.Add("10.0.0");
+                var calleeProposal = new P.PhoneCallProtocol { UdpP2P = true, UdpReflector = true, MinLayer = 75, MaxLayer = 100 };
+                calleeProposal.LibraryVersions.Add("9.0.0");
+                calleeProposal.LibraryVersions.Add("10.0.0");
+                var negotiatedRequest = await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000333, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = callerProposal
+                }));
+                var negotiatedRef = new P.PhoneCallRef
+                {
+                    CallId = negotiatedRequest.RequestCall.PhoneCall.CallId,
+                    AccessHash = negotiatedRequest.RequestCall.PhoneCall.AccessHash
+                };
+                var negotiatedAccepted = await server.Rpc(Req(new P.PhoneAcceptCallRequest
+                {
+                    Peer = negotiatedRef, GB = ByteString.CopyFrom(gB), Protocol = calleeProposal
+                }), "bob");
+                var negotiatedProtocol = negotiatedAccepted.AcceptCall.PhoneCall.Protocol;
+                Check(negotiatedProtocol.MinLayer == 75 && negotiatedProtocol.MaxLayer == 95 &&
+                    negotiatedProtocol.LibraryVersions.SequenceEqual(new[] { "10.0.0" }) &&
+                    !negotiatedProtocol.UdpP2P,
+                    "PG accept intersects layers, library versions and forced relay privacy");
+                var negotiatedPts = (await server.Rpc(Req(new P.GetStateRequest()), "bob")).GetState.Pts;
+                var requestRetryAfterAccept = await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000333, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = callerProposal
+                }));
+                Check(requestRetryAfterAccept.RequestCall.PhoneCall.CallId == negotiatedRef.CallId &&
+                    requestRetryAfterAccept.RequestCall.PhoneCall.State == P.PhoneCallState.Accepted,
+                    "PG requestCall retry after accept returns the same call and state");
+                var acceptRetryAfterAccept = await server.Rpc(Req(new P.PhoneAcceptCallRequest
+                {
+                    Peer = negotiatedRef, GB = ByteString.CopyFrom(gB), Protocol = calleeProposal
+                }), "bob");
+                Check(acceptRetryAfterAccept.AcceptCall.PhoneCall.CallId == negotiatedRef.CallId &&
+                    acceptRetryAfterAccept.AcceptCall.PhoneCall.State == P.PhoneCallState.Accepted &&
+                    acceptRetryAfterAccept.AcceptCall.PhoneCall.Protocol.MinLayer == 75,
+                    "PG acceptCall retry after accept returns the same call and negotiated protocol");
+                Check((await server.Rpc(Req(new P.GetStateRequest()), "bob")).GetState.Pts == negotiatedPts,
+                    "PG request and accept retries do not advance pts");
+                await server.Rpc(Req(new P.PhoneConfirmCallRequest
+                {
+                    Peer = negotiatedRef, GA = ByteString.CopyFrom(gA), KeyFingerprint = 0x1122334457,
+                    Protocol = calleeProposal
+                }), "alice", 409, "CALL_PROTOCOL_MISMATCH");
+                var negotiatedConfirmed = await server.Rpc(Req(new P.PhoneConfirmCallRequest
+                {
+                    Peer = negotiatedRef, GA = ByteString.CopyFrom(gA), KeyFingerprint = 0x1122334457,
+                    Protocol = callerProposal
+                }));
+                Check(negotiatedConfirmed.ConfirmCall.PhoneCall.Protocol.MinLayer == 75 &&
+                    negotiatedConfirmed.ConfirmCall.PhoneCall.Protocol.MaxLayer == 95 &&
+                    negotiatedConfirmed.ConfirmCall.PhoneCall.Protocol.LibraryVersions.SequenceEqual(new[] { "10.0.0" }),
+                    "PG confirm keeps the negotiated protocol");
+                var activePts = (await server.Rpc(Req(new P.GetStateRequest()), "bob")).GetState.Pts;
+                var confirmRetry = await server.Rpc(Req(new P.PhoneConfirmCallRequest
+                {
+                    Peer = negotiatedRef, GA = ByteString.CopyFrom(gA), KeyFingerprint = 0x1122334457,
+                    Protocol = callerProposal
+                }));
+                Check(confirmRetry.ConfirmCall.PhoneCall.State == P.PhoneCallState.Active &&
+                    confirmRetry.ConfirmCall.PhoneCall.CallId == negotiatedRef.CallId,
+                    "PG confirmCall retry after activation returns the same active call");
+                var acceptRetryAfterConfirm = await server.Rpc(Req(new P.PhoneAcceptCallRequest
+                {
+                    Peer = negotiatedRef, GB = ByteString.CopyFrom(gB), Protocol = calleeProposal
+                }), "bob");
+                Check(acceptRetryAfterConfirm.AcceptCall.PhoneCall.State == P.PhoneCallState.Active,
+                    "PG acceptCall retry after activation converges on the active call");
+                var requestRetryAfterConfirm = await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000333, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = callerProposal
+                }));
+                Check(requestRetryAfterConfirm.RequestCall.PhoneCall.State == P.PhoneCallState.Active,
+                    "PG requestCall retry after activation converges on the active call");
+                Check((await server.Rpc(Req(new P.GetStateRequest()), "bob")).GetState.Pts == activePts,
+                    "PG confirm and accept retries do not advance pts");
+                await server.Rpc(Req(new P.PhoneDiscardCallRequest
+                {
+                    Peer = negotiatedRef, Duration = 1, Reason = P.PhoneCallDiscardReason.Hangup
+                }), "bob");
+                var terminalPts = (await server.Rpc(Req(new P.GetStateRequest()), "bob")).GetState.Pts;
+                var terminalRequestRetry = await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000333, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = callerProposal
+                }));
+                Check(terminalRequestRetry.RequestCall.PhoneCall.State == P.PhoneCallState.Discarded &&
+                    terminalRequestRetry.RequestCall.PhoneCall.CallId == negotiatedRef.CallId,
+                    "PG requestCall retry after hangup returns the stable terminal state");
+                await server.Rpc(Req(new P.PhoneAcceptCallRequest
+                {
+                    Peer = negotiatedRef, GB = ByteString.CopyFrom(gB), Protocol = calleeProposal
+                }), "bob", 400, "CALL_ALREADY_ACCEPTED");
+                Check((await server.Rpc(Req(new P.GetStateRequest()), "bob")).GetState.Pts == terminalPts,
+                    "PG terminal retries do not revive the call or advance pts");
+
+                var emptyVersions = new P.PhoneCallProtocol { UdpP2P = true, UdpReflector = true, MinLayer = 65, MaxLayer = 92 };
+                await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000334, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = emptyVersions
+                }), "alice", 400, "CALL_INVALID_PROTOCOL_LIBRARY");
+                var zeroLayer = new P.PhoneCallProtocol { UdpP2P = true, UdpReflector = true, MinLayer = 0, MaxLayer = 92 };
+                zeroLayer.LibraryVersions.Add("10.0.0");
+                await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000335, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = zeroLayer
+                }), "alice", 400, "CALL_INVALID_PROTOCOL_LAYERS");
+                var hugeLayer = new P.PhoneCallProtocol { UdpP2P = true, UdpReflector = true, MinLayer = 65, MaxLayer = 1001 };
+                hugeLayer.LibraryVersions.Add("10.0.0");
+                await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000336, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)), Protocol = hugeLayer
+                }), "alice", 400, "CALL_INVALID_PROTOCOL_LAYERS");
+
+                var incompatibleProtocol = new P.PhoneCallProtocol
+                {
+                    UdpP2P = true, UdpReflector = true, MinLayer = 90, MaxLayer = 95,
+                    LibraryVersions = { "10.0.0" }
+                };
+                var incompatibleRequest = await server.Rpc(Req(new P.PhoneRequestCallRequest
+                {
+                    User = Selector("bob"), RandomId = 777000337, Video = false,
+                    GAHash = ByteString.CopyFrom(System.Security.Cryptography.SHA256.HashData(gA)),
+                    Protocol = incompatibleProtocol
+                }));
+                var incompatibleRef = new P.PhoneCallRef
+                {
+                    CallId = incompatibleRequest.RequestCall.PhoneCall.CallId,
+                    AccessHash = incompatibleRequest.RequestCall.PhoneCall.AccessHash
+                };
+                await server.Rpc(Req(new P.PhoneAcceptCallRequest
+                {
+                    Peer = incompatibleRef, GB = ByteString.CopyFrom(gB),
+                    Protocol = new P.PhoneCallProtocol
+                    {
+                        UdpP2P = true, UdpReflector = true, MinLayer = 60, MaxLayer = 80,
+                        LibraryVersions = { "10.0.0" }
+                    }
+                }), "bob", 409, "CALL_PROTOCOL_INCOMPATIBLE");
+                await server.Rpc(Req(new P.PhoneDiscardCallRequest
+                {
+                    Peer = incompatibleRef, Duration = 0, Reason = P.PhoneCallDiscardReason.Hangup
+                }), "alice");
+
+                // Profile capability fields must follow the same privacy decisions as call entry.
+                await server.Rpc(Req(new P.AccountPrivacyRequest
+                {
+                    SetRules = new() { Key = P.PrivacyKey.PhoneCall,
+                        Rules = { new P.PrivacyRule { Kind = P.PrivacyRuleKind.AllowAll } } }
+                }), "bob");
+                await server.Rpc(Req(new P.AccountPrivacyRequest
+                {
+                    SetRules = new() { Key = P.PrivacyKey.PhoneP2P,
+                        Rules = { new P.PrivacyRule { Kind = P.PrivacyRuleKind.AllowAll } } }
+                }), "bob");
+                var capability = await server.Rpc(Req(new P.GetFullUserRequest { User = Selector("bob") }), "alice");
+                Check(capability.GetFullUser.PhoneCallsAvailable && capability.GetFullUser.VideoCallsAvailable &&
+                    !capability.GetFullUser.PhoneCallsPrivate, "profile call capability follows allow-all privacy");
+                await server.Rpc(Req(new P.AccountPrivacyRequest
+                {
+                    SetRules = new() { Key = P.PrivacyKey.PhoneCall,
+                        Rules = { new P.PrivacyRule { Kind = P.PrivacyRuleKind.DisallowAll } } }
+                }), "bob");
+                capability = await server.Rpc(Req(new P.GetFullUserRequest { User = Selector("bob") }), "alice");
+                Check(!capability.GetFullUser.PhoneCallsAvailable && !capability.GetFullUser.VideoCallsAvailable,
+                    "PhoneCall privacy disables phone and video capability");
+                await server.Rpc(Req(new P.AccountPrivacyRequest
+                {
+                    SetRules = new() { Key = P.PrivacyKey.PhoneP2P,
+                        Rules = { new P.PrivacyRule { Kind = P.PrivacyRuleKind.DisallowAll } } }
+                }), "bob");
+                capability = await server.Rpc(Req(new P.GetFullUserRequest { User = Selector("bob") }), "alice");
+                Check(capability.GetFullUser.PhoneCallsPrivate, "PhoneP2P privacy is reported separately");
+                await server.Rpc(Req(new P.AccountPrivacyRequest
+                {
+                    SetRules = new() { Key = P.PrivacyKey.PhoneCall,
+                        Rules = { new P.PrivacyRule { Kind = P.PrivacyRuleKind.AllowAll } } }
+                }), "bob");
+
                 await server.Json("GET", "/api/events?after=0", null, Accounts["bob"].Token);
                 for (int i = 0; i < 105; i++)
                     await server.Rpc(Send(899_000 + i, "WSS page " + i));

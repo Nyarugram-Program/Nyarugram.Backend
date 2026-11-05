@@ -15,8 +15,8 @@ public sealed partial class PostgresBackend(NpgsqlDataSource source, int maximum
                 to_regclass('botgram_backend_v1.privacy_accounts')::text
             """, connection);
         await using var reader = await command.ExecuteReaderAsync(token);
-        if (!await reader.ReadAsync(token) || !reader.GetFieldValue<int[]>(0).SequenceEqual(new[] { 1, 2, 3, 4, 5 }) || reader.IsDBNull(1) || reader.IsDBNull(2))
-            throw new InvalidDataException("Relational backend requires the explicit offline schema migration through version 5");
+        if (!await reader.ReadAsync(token) || !reader.GetFieldValue<int[]>(0).SequenceEqual(new[] { 1, 2, 3, 4, 5, 6, 7, 8 }) || reader.IsDBNull(1) || reader.IsDBNull(2))
+            throw new InvalidDataException("Relational backend requires the explicit offline schema migration through version 8");
     }
 
     public Task<Botgram.Protocol.V1.EventHint> EventHintAsync(Session session, long after, CancellationToken token = default)

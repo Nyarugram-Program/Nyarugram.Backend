@@ -35,6 +35,7 @@ internal static class SnapshotMigrationTests
         var saved = ConversationMessageService.Create(db, "saved", "", [alice.Id]);
         ConversationMessageService.Send(db, saved, alice.Id, new("saved-key", "saved text"), MessageWriteContract.Rest);
         ContactService.Import(db, alice.Id, 1, [new(7, bob.Gid, "Private", "Name", false)]);
+        PresenceService.Report(db, db.Sessions.Single(s => s.TokenHash == Auth.HashToken(auth.Token)), true);
         var call = new Call(Guid.NewGuid().ToString("N"), conversation.Id, alice.Id, bob.Id, "ended", DateTimeOffset.UtcNow);
         db.Calls.Add(call);
         db.Emit(conversation.Members, "call.updated", call);
@@ -45,6 +46,8 @@ internal static class SnapshotMigrationTests
         privacy.AccountTtlDays = 180;
         privacy.DefaultHistoryTtlSeconds = 86400;
         privacy.TopPeersEnabled = false;
+        privacy.SpecialContacts.Add(bob.Id);
+        privacy.SpecialContactsRevision = 7;
         privacy.Blocked[outsider.Id] = DateTimeOffset.UtcNow;
         privacy.Rules[(int)P.PrivacyKey.PhoneCall] = new P.PrivacyRuleSet { Key = P.PrivacyKey.PhoneCall,
             Rules = { new P.PrivacyRule { Kind = P.PrivacyRuleKind.DisallowAll } } }.ToByteArray();
@@ -72,6 +75,9 @@ internal static class SnapshotMigrationTests
         var session = await backend.RequireAsync(Auth.HashToken(auth.Token));
         Check(session.UserId == alice.Id, "legacy bearer session identity changed");
         Check((await backend.PremiumAsync(session)).Active, "Premium lost during import");
+        var special = await backend.DispatchAsync(session, new P.RpcRequest { GetSpecialContacts = new() },
+            "migration.test", response => response.GetSpecialContacts);
+        Check(special.Revision == 7 && special.Users.Single().UserId == bob.Id, "special UUID/revision lost during snapshot import");
         var read = await backend.DispatchAsync(session, new P.RpcRequest { ReadHistory = new()
         {
             Peer = new() { User = new() { ServerDomain = "migration.test", UserId = bob.Id } }, MaxMessageId = 0

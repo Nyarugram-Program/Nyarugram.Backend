@@ -16,7 +16,8 @@ public sealed partial class PostgresBackend
             throw new ApiException(503, "storage_backlog_full");
         recipients = recipients.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
         if (recipients.Length == 0) throw new InvalidDataException("Missing event recipients");
-        var stream = type is "receipt.updated" or "user.gid_changed";
+        var stream = type is "receipt.updated" or "user.gid_changed" or "user.presence_changed"
+            or "call.updated" or "call.tl_signal";
         int?[] positions;
         if (stream)
         {
@@ -33,7 +34,13 @@ public sealed partial class PostgresBackend
             UPDATE botgram_intake_v1.event_cursor SET value=value+1 WHERE singleton RETURNING value
             """))!;
         var created = DateTimeOffset.UtcNow;
-        var schema = type == "wallpaper.changed" ? StorageContractVersions.WallpaperEventSchema : StorageContractVersions.EventSchema;
+        var schema = type switch
+        {
+            "wallpaper.changed" => StorageContractVersions.WallpaperEventSchema,
+            "user.presence_changed" => StorageContractVersions.PresenceEventSchema,
+            "call.updated" or "call.tl_signal" => StorageContractVersions.CallEventSchema,
+            _ => StorageContractVersions.EventSchema
+        };
         var delivery = new DeliveryEvent(Guid.NewGuid(), schema, eventId, partition, type, payload,
             recipients.Select((r, i) => new RecipientPosition(r, positions[i])).ToArray(),
             created, expires, null, null, null);

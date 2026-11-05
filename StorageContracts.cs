@@ -5,6 +5,8 @@ public static class StorageContractVersions
 {
     public const int EventSchema = 1;
     public const int WallpaperEventSchema = 2;
+    public const int PresenceEventSchema = 3;
+    public const int CallEventSchema = 4;
     public const int HistoryProjection = 1;
     public const long InitialMessageVersion = 1;
     public const int MessagesPerBucket = 10_000;

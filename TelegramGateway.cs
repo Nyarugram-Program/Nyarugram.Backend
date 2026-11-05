@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -43,8 +44,9 @@ public static class TelegramGateway
     {
         if (user.IsSelf) return T("TL_userStatusOnline", ("expires", Now + 60));
         if (user.LastSeen is not { } seen) return T("TL_userStatusEmpty");
-        if (DateTimeOffset.UtcNow - seen <= PresenceService.OnlineWindow) return T("TL_userStatusOnline", ("expires", Now + 60));
-        return T("TL_userStatusOffline", ("was_online", (int)seen.ToUnixTimeSeconds()));
+        if (user.Online && DateTimeOffset.UtcNow - seen <= PresenceService.OnlineWindow)
+            return T("TL_userStatusOnline", ("expires", (int)(seen + PresenceService.OnlineWindow).ToUnixTimeSeconds()));
+        return T("TL_userStatusOffline", ("expires", (int)seen.ToUnixTimeSeconds()));
     }
     public static JsonObject User(UserProfile user) => T("TL_user",
         ("id", user.TelegramId), ("access_hash", 1L), ("first_name", user.FirstName), ("last_name", user.LastName),
@@ -104,49 +106,11 @@ public static class TelegramGateway
     }
 
     // ---------- phone.* (1:1 calls) ----------
-    // Telegram's 2048-bit DH prime; clients derive the voice-call auth key from p/g and the exchanged g_a/g_b.
-    private static readonly byte[] DhPrime = Convert.FromHexString(
-        "c71caeb9c6b1c9048e6c522f70f13f73980d40238e3e21c14934d037563d930f" +
-        "48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c3720" +
-        "fd51f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f64247" +
-        "7fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3c4f3a9060bee67cf9a4a4a" +
-        "695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754fd17" +
-        "ed950d5965b4b9dd46582db1178d169c6bc465b0d6ff9ca3928fef5b9ae4e418" +
-        "fc15e83ebea0f87fa9ff5eed70050ded2849f47bf959d956850ce929851f0d8115" +
-        "f635b105ee2e4e15d04b2454bf6f4fadf034b10403119cd8e3b92fcc5b");
     private static byte[] B(JsonNode? node) => S(node, "$bytes") is { Length: > 0 } text ? Convert.FromBase64String(text) : [];
-    private static JsonObject DefaultProtocol() => T("TL_phone$TL_phoneCallProtocol",
-        ("flags", 3), ("udp_p2p", true), ("udp_reflector", true), ("min_layer", 65), ("max_layer", 92),
-        ("library_versions", new[] { "10.0.0" }));
-    private static JsonObject? Protocol(JsonNode? node) => node is JsonObject value ? (JsonObject)value.DeepClone() : null;
-    private static Call? FindTelegramCall(Database db, long id) =>
-        id == 0 ? null : db.Calls.FirstOrDefault(call => call.TelegramId == id);
-    private static Call RequireCall(Database db, JsonNode? peer, string uid)
-    {
-        var call = FindTelegramCall(db, N(peer, "id")) ?? throw new ApiException(400, "CALL_NOT_FOUND");
-        if (call.AccessHash != N(peer, "access_hash") || (call.CallerId != uid && call.CalleeId != uid))
-            throw new ApiException(400, "CALL_NOT_FOUND");
-        return call;
-    }
-    private static void SaveCall(Database db, Call call)
-    {
-        int index = db.Calls.FindIndex(existing => existing.Id == call.Id);
-        if (index < 0) db.Calls.Add(call); else db.Calls[index] = call;
-    }
-    private static JsonObject[] PhoneConnections()
-    {
-        var result = new List<JsonObject>();
-        long id = 1;
-        foreach (var relay in CallService.Relays)
-            result.Add(T("TL_phoneConnectionWebrtc", ("flags", relay.Turn ? 1 : 2), ("id", id++),
-                ("ip", relay.Host), ("ipv6", ""), ("port", relay.Port), ("turn", relay.Turn), ("stun", !relay.Turn),
-                ("username", relay.Turn ? relay.Username : ""), ("password", relay.Turn ? relay.Password : "")));
-        return result.ToArray();
-    }
     private static JsonObject CallJson(Database db, Call call, string uid)
     {
         long admin = UserId(db, call.CallerId), participant = UserId(db, call.CalleeId);
-        var protocol = call.Protocol ?? DefaultProtocol();
+        var protocol = call.Protocol ?? CallService.DefaultProtocol();
         int videoFlag = call.Video ? 64 : 0;
         if (call.State == "ringing" && call.CallerId == uid)
             return T("TL_phone$TL_phoneCallWaiting", ("flags", videoFlag | (call.ReceiveDate != 0 ? 1 : 0)),
@@ -161,8 +125,8 @@ public static class TelegramGateway
                 ("id", call.TelegramId), ("access_hash", call.AccessHash), ("date", call.Date),
                 ("admin_id", admin), ("participant_id", participant), ("g_b", Bytes(call.GB)), ("protocol", protocol));
         if (call.State == "active")
-            return T("TL_phone$TL_phoneCall", ("flags", videoFlag | (CallService.P2p ? 32 : 0)), ("video", call.Video),
-                ("p2p_allowed", CallService.P2p), ("id", call.TelegramId), ("access_hash", call.AccessHash), ("date", call.Date),
+            return T("TL_phone$TL_phoneCall", ("flags", videoFlag | (call.P2pAllowed ? 32 : 0)), ("video", call.Video),
+                ("p2p_allowed", call.P2pAllowed), ("id", call.TelegramId), ("access_hash", call.AccessHash), ("date", call.Date),
                 ("admin_id", admin), ("participant_id", participant), ("g_a_or_b", Bytes(call.GA)),
                 ("key_fingerprint", call.KeyFingerprint), ("protocol", protocol),
                 ("connections", (call.Connections ?? []).ToArray()), ("start_date", call.StartDate));
@@ -187,24 +151,36 @@ public static class TelegramGateway
         if (callee.Id == uid) throw new ApiException(400, "CALL_PEER_INVALID");
         if (!AccountPrivacyService.Allowed(db, callee.Id, uid, Botgram.Protocol.V1.PrivacyKey.PhoneCall))
             throw new ApiException(403, "USER_PRIVACY_RESTRICTED");
-        int randomId = I(N(request, "random_id"));
+        long randomId = N(request, "random_id");
+        bool video = request["video"]?.GetValue<bool>() ?? false;
+        byte[] gaHash = B(request["g_a_hash"]);
+        var protocol = CallService.CloneProtocol(request["protocol"]);
         var replay = db.Calls.FirstOrDefault(call => call.TelegramId != 0 && call.CallerId == uid && call.RandomId == randomId);
-        if (replay is not null && CallService.InProgress(replay.State)) return PhoneResult(db, replay, uid);
+        if (replay is not null)
+        {
+            if (replay.CalleeId != callee.Id || replay.Video != video ||
+                !CryptographicOperations.FixedTimeEquals(replay.GAHash ?? [], gaHash) ||
+                !JsonNode.DeepEquals(replay.RequestProtocol ?? replay.Protocol, protocol))
+                throw new ApiException(409, "CALL_IDEMPOTENCY_CONFLICT");
+            return PhoneResult(db, replay, uid);
+        }
+        CallService.ValidateGaHash(gaHash);
+        CallService.ValidateProtocol(protocol);
+        bool p2p = CallService.EffectiveP2p(protocol!,
+            AccountPrivacyService.Allowed(db, uid, callee.Id, Botgram.Protocol.V1.PrivacyKey.PhoneP2P),
+            AccountPrivacyService.Allowed(db, callee.Id, uid, Botgram.Protocol.V1.PrivacyKey.PhoneP2P));
+        CallService.RequireRelayWhenP2pDisabled(p2p);
         var conversation = ConversationMessageService.FindByPeer(db, peerId, uid, create: true);
         CallService.ValidateCallee(conversation, uid, callee.Id);
         if (db.Calls.Any(call => CallService.InProgress(call.State) &&
             (call.CallerId == uid || call.CalleeId == uid || call.CallerId == callee.Id || call.CalleeId == callee.Id)))
             throw new ApiException(409, "CALL_BUSY");
         if (db.NextCallId == 0) db.NextCallId = 1_000_000_000;
-        // Kept within the IEEE-754 safe integer range so the TL-JSON field round-trips
-        // unchanged through the app and generic JSON tooling.
-        long accessHash = BitConverter.ToInt64(System.Security.Cryptography.RandomNumberGenerator.GetBytes(8)) & 0x1FFFFFFFFFFFFF;
-        if (accessHash == 0) accessHash = 1;
         var created = new Call(Guid.NewGuid().ToString("N"), conversation.Id, uid, callee.Id, "ringing", DateTimeOffset.UtcNow,
-            TelegramId: db.NextCallId++, AccessHash: accessHash, RandomId: randomId,
-            Video: request["video"]?.GetValue<bool>() ?? false, Protocol: Protocol(request["protocol"]) ?? DefaultProtocol(),
-            GAHash: B(request["g_a_hash"]), Date: Now);
-        SaveCall(db, created);
+            TelegramId: db.NextCallId++, AccessHash: CallService.NewAccessHash(), RandomId: randomId,
+            Video: video, Protocol: CallService.NormalizeProtocol(protocol!, p2p), GAHash: gaHash, Date: Now,
+            P2pAllowed: p2p, RequestProtocol: protocol);
+        CallService.Save(db, created);
         db.Emit([created.CallerId, created.CalleeId], "call.updated", created);
         return PhoneResult(db, created, uid);
     }
@@ -215,76 +191,115 @@ public static class TelegramGateway
             case "requestCall": return RequestCall(db, uid, request);
             case "receivedCall":
             {
-                var call = RequireCall(db, request["peer"], uid);
+                var call = CallService.Require(db, N(request["peer"], "id"), N(request["peer"], "access_hash"), uid);
                 if (call.CalleeId != uid) throw new ApiException(400, "CALL_NOT_FOUND");
                 if (call.State == "ringing" && call.ReceiveDate == 0)
                 {
                     var updated = call with { ReceiveDate = Now };
-                    SaveCall(db, updated);
+                    CallService.Save(db, updated);
                     db.Emit([call.CallerId], "call.updated", updated);
                 }
                 return T("TL_boolTrue");
             }
             case "acceptCall":
             {
-                var call = RequireCall(db, request["peer"], uid);
+                var call = CallService.Require(db, N(request["peer"], "id"), N(request["peer"], "access_hash"), uid);
                 if (call.CalleeId != uid) throw new ApiException(400, "CALL_NOT_FOUND");
+                byte[] gb = B(request["g_b"]);
+                var protocol = CallService.CloneProtocol(request["protocol"]);
+                CallService.ValidatePublicKey(gb, "CALL_INVALID_GB");
+                CallService.ValidateProtocol(protocol);
+                // A second device may repeat the winner's accept, but nobody can replace
+                // its key material or reactivate a call that already finished.
+                if (call.State is "accepted" or "active")
+                {
+                    if (CryptographicOperations.FixedTimeEquals(call.GB ?? [], gb) &&
+                        JsonNode.DeepEquals(call.AcceptProtocol ?? call.Protocol, protocol))
+                        return PhoneResult(db, call, uid);
+                    throw new ApiException(409, "CALL_ALREADY_ACCEPTED");
+                }
                 if (call.State != "ringing") throw new ApiException(400, "CALL_ALREADY_ACCEPTED");
+                bool p2p = call.P2pAllowed && CallService.RequestsP2p(protocol!);
+                CallService.RequireRelayWhenP2pDisabled(p2p);
+                var negotiated = CallService.NegotiateProtocol(
+                    call.RequestProtocol ?? call.Protocol ?? CallService.DefaultProtocol(), protocol!, p2p);
                 var updated = call with
                 {
-                    State = "accepted", GB = B(request["g_b"]), UpdatedAt = DateTimeOffset.UtcNow,
-                    Protocol = Protocol(request["protocol"]) ?? call.Protocol
+                    State = "accepted", GB = gb, UpdatedAt = DateTimeOffset.UtcNow,
+                    Protocol = negotiated, AcceptProtocol = protocol, P2pAllowed = p2p
                 };
-                SaveCall(db, updated);
+                CallService.Save(db, updated);
                 db.Emit([call.CallerId], "call.updated", updated);
                 return PhoneResult(db, updated, uid);
             }
             case "confirmCall":
             {
-                var call = RequireCall(db, request["peer"], uid);
+                var call = CallService.Require(db, N(request["peer"], "id"), N(request["peer"], "access_hash"), uid);
                 if (call.CallerId != uid) throw new ApiException(400, "CALL_NOT_FOUND");
+                byte[] ga = B(request["g_a"]);
+                long fingerprint = N(request, "key_fingerprint");
+                var protocol = CallService.CloneProtocol(request["protocol"]);
+                CallService.ValidateGa(ga, call.GAHash);
+                // Confirm must echo the caller's original proposal; the negotiated protocol
+                // stored at accept time stays final even for retried confirmations.
+                CallService.RequireSameCapabilities(
+                    call.RequestProtocol ?? call.Protocol ?? CallService.DefaultProtocol(), protocol!);
+                if (fingerprint == 0) throw new ApiException(400, "CALL_INVALID_KEY_FINGERPRINT");
+                if (call.State == "active")
+                {
+                    if (CryptographicOperations.FixedTimeEquals(call.GA ?? [], ga) && call.KeyFingerprint == fingerprint)
+                        return PhoneResult(db, call, uid);
+                    throw new ApiException(409, "CALL_ALREADY_ACTIVE");
+                }
                 if (call.State != "accepted") throw new ApiException(400, "CALL_NOT_ACCEPTED");
                 var updated = call with
                 {
-                    State = "active", GA = B(request["g_a"]), KeyFingerprint = N(request, "key_fingerprint"),
-                    StartDate = Now, UpdatedAt = DateTimeOffset.UtcNow, Connections = PhoneConnections(),
-                    Protocol = Protocol(request["protocol"]) ?? call.Protocol
+                    State = "active", GA = ga, KeyFingerprint = fingerprint,
+                    StartDate = Now, UpdatedAt = DateTimeOffset.UtcNow, Connections = CallService.PhoneConnections()
                 };
-                SaveCall(db, updated);
+                CallService.Save(db, updated);
                 db.Emit([call.CalleeId], "call.updated", updated);
                 return PhoneResult(db, updated, uid);
             }
             case "discardCall":
             {
-                var call = RequireCall(db, request["peer"], uid);
+                var call = CallService.Require(db, N(request["peer"], "id"), N(request["peer"], "access_hash"), uid);
+                // Retries and late hang-ups keep the original terminal outcome.
+                if (call.State is "ended" or "rejected")
+                    return Updates(db, uid, new[] { T("TL_updatePhoneCall", ("phone_call", CallJson(db, call, uid))) });
                 string reason = ReasonName(S(request["reason"], "$type"));
                 int duration = I(N(request, "duration"));
-                if (duration <= 0 && call.StartDate != 0) duration = Math.Max(0, Now - call.StartDate);
+                if (duration < 0) throw new ApiException(400, "CALL_INVALID_DURATION");
+                if (duration == 0 && call.StartDate != 0) duration = Math.Max(0, Now - call.StartDate);
                 var updated = call with { State = "ended", Reason = reason, Duration = duration, UpdatedAt = DateTimeOffset.UtcNow };
-                SaveCall(db, updated);
+                CallService.Save(db, updated);
                 db.Emit([call.CallerId, call.CalleeId], "call.updated", updated);
                 return Updates(db, uid, new[] { T("TL_updatePhoneCall", ("phone_call", CallJson(db, updated, uid))) });
             }
             case "sendSignalingData":
             {
-                var call = RequireCall(db, request["peer"], uid);
+                var call = CallService.Require(db, N(request["peer"], "id"), N(request["peer"], "access_hash"), uid);
                 if (call.State != "active") throw new ApiException(400, "CALL_NOT_ACTIVE");
+                byte[] data = B(request["data"]);
+                if (data.Length is 0 or > CallService.MaximumSignalingBytes)
+                    throw new ApiException(400, "CALL_SIGNALING_TOO_LARGE");
                 string other = call.CallerId == uid ? call.CalleeId : call.CallerId;
-                db.Emit([other], "call.tl_signal", new CallSignal(call.Id, uid, "tl", Convert.ToBase64String(B(request["data"]))));
+                db.Emit([other], "call.tl_signal", new CallSignal(call.Id, uid, "tl", Convert.ToBase64String(data)),
+                    DateTimeOffset.UtcNow.AddMinutes(5));
                 return T("TL_boolTrue");
             }
-            case "getCallConfig": return T("TL_dataJSON", ("data", "{}"));
+            case "getCallConfig": return T("TL_dataJSON", ("data", CallService.CallConfigJson()));
             case "saveCallDebug": return T("TL_boolTrue");
             default: throw new ApiException(501, "BOTGRAM_RPC_UNSUPPORTED:" + method);
         }
     }
 
-    public static JsonObject Execute(Database db, string uid, JsonObject request)
+    public static JsonObject Execute(Database db, string uid, JsonObject request, Session? session = null)
     {
         using var diagnostic = RpcDiagnosticStage.Start("json_mapper_ms");
         string method = S(request, "$type").Split('$').Last();
-        // Every authenticated RPC carries presence; the outer write transaction persists it.
-        PresenceService.Touch(db, uid);
+        if (request["foreground"] is { } foreground)
+            PresenceService.Report(db, session ?? throw new ApiException(401, "session_expired"), foreground.GetValue<bool>());
         var owned = ConversationQueryService.Owned(db, uid);
         var users = UserQueryService.Related(db, uid, true).Select(User).ToArray();
         var chats = owned.Where(c => c.Kind == "group").Select(c => Chat(db, c)).ToArray();
@@ -299,8 +314,10 @@ public static class TelegramGateway
                 if (difference.Kind == DifferenceKind.TooLong) return T("TL_updates_differenceTooLong", ("pts", difference.Pts));
                 if (difference.Kind == DifferenceKind.Empty) return T("TL_updates_differenceEmpty", ("date", Now), ("seq", 0));
                 var messages = new List<JsonObject>(); var updates = new List<JsonObject>();
-                foreach (var e in page)
+                for (int i = 0; i < page.Length; i++)
                 {
+                    if (difference.Hidden?[i] == true) continue;
+                    var e = page[i];
                     if (e.Payload is Message m)
                     {
                         messages.Add(Message(db, m, uid));
@@ -319,7 +336,7 @@ public static class TelegramGateway
                     {
                         var c = Auth.Conversation(db, r.ConversationId, uid);
                         updates.Add(T(r.UserId == uid ? "TL_updateReadHistoryInbox" : "TL_updateReadHistoryOutbox",
-                            ("peer", Peer(DialogId(db, c, uid))), ("max_id", I(r.MessageId)), ("pts", after + messages.Count + updates.Count + 2), ("pts_count", 1)));
+                            ("peer", Peer(DialogId(db, c, uid))), ("max_id", I(r.MessageId)), ("pts", after + i + 2), ("pts_count", 1)));
                     }
                     else if (e.Payload is Call call && call.TelegramId != 0 && (call.CallerId == uid || call.CalleeId == uid))
                     {
@@ -333,6 +350,10 @@ public static class TelegramGateway
                                 ("phone_call_id", tlCall.TelegramId), ("data", Bytes(Convert.FromBase64String(signal.Data)))));
                     }
                 }
+                users = UserQueryService.Related(db, uid, true)
+                    .Concat(page.Select(e => e.Payload).OfType<PresenceChanged>()
+                        .Select(p => UserQueryService.Find(db, UserId(db, p.UserId), uid)))
+                    .DistinctBy(u => u.Id).Select(User).ToArray();
                 bool more = difference.Kind == DifferenceKind.Slice;
                 return T(more ? "TL_updates_differenceSlice" : "TL_updates_difference", ("new_messages", messages),
                     ("other_updates", updates), ("users", users), ("chats", chats),
@@ -475,10 +496,13 @@ public static class TelegramGateway
             case "TL_users_getFullUser":
             {
                 var user = UserQueryService.Find(db, PeerId(request["id"], db, uid), uid);
+                bool calls = AccountPrivacyService.Allowed(db, user.Id, uid, Botgram.Protocol.V1.PrivacyKey.PhoneCall);
+                bool privateCalls = !AccountPrivacyService.Allowed(db, user.Id, uid, Botgram.Protocol.V1.PrivacyKey.PhoneP2P);
+                int flags = (calls ? 16 | 8192 : 0) | (privateCalls ? 32 : 0);
                 return T("TL_users_userFull", ("users", new[] { User(user) }),
-                    ("full_user", T("TL_userFull", ("id", user.TelegramId), ("flags", 16 | 8192), ("settings", T("TL_peerSettings")),
+                    ("full_user", T("TL_userFull", ("id", user.TelegramId), ("flags", flags), ("settings", T("TL_peerSettings")),
                         ("notify_settings", T("TL_peerNotifySettings")), ("about", ""), ("common_chats_count", 0),
-                        ("phone_calls_available", true), ("video_calls_available", true), ("phone_calls_private", false))));
+                        ("phone_calls_available", calls), ("video_calls_available", calls), ("phone_calls_private", privateCalls))));
             }
             case "TL_messages_getFullChat":
             {
@@ -497,8 +521,13 @@ public static class TelegramGateway
             case "TL_account_getNotifySettings":
             case "getNotifySettings": return T("TL_peerNotifySettings");
             case "TL_messages_getDhConfig":
-                return T("TL_messages_dhConfig", ("g", 3), ("p", Bytes(DhPrime)), ("version", 1),
-                    ("random", Bytes(System.Security.Cryptography.RandomNumberGenerator.GetBytes(256))));
+            {
+                var config = CallService.GetDhConfig(I(N(request, "version")), I(N(request, "random_length")));
+                return config.NotModified
+                    ? T("TL_messages_dhConfigNotModified", ("random", Bytes(config.Random)))
+                    : T("TL_messages_dhConfig", ("g", config.G), ("p", Bytes(config.P)),
+                        ("version", config.Version), ("random", Bytes(config.Random)));
+            }
             case "requestCall":
             case "receivedCall":
             case "acceptCall":

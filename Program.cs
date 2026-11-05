@@ -282,7 +282,7 @@ else api.MapPost("/v1/rpc", ProtobufRpcEndpoint.Handle);
 api.MapPost("/telegram/rpc", (System.Text.Json.Nodes.JsonObject input, HttpContext c, Store store) =>
 {
     if (auditRpc) c.Items["rpc_operation"] = input["$type"]?.GetValue<string>() ?? "unparsed";
-    var result = store.Write(db => TelegramGateway.Execute(db, Uid(c), input));
+    var result = store.Write(db => TelegramGateway.Execute(db, Uid(c), input, (Session)c.Items["session"]!));
     if (System.Diagnostics.Activity.Current?.GetTagItem("diag.enabled") is true)
         c.Items["diag.json_result_ready"] = System.Diagnostics.Stopwatch.GetTimestamp();
     return result;

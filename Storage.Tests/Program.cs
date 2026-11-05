@@ -10,9 +10,19 @@ if (Environment.GetEnvironmentVariable("BOTGRAM_COMMIT_DIAGNOSTIC") != "1" &&
     await CacheTests.RunAsync();
 
 var connectionString = Environment.GetEnvironmentVariable("BOTGRAM_PG_TEST_CONNECTION_STRING");
+if (Environment.GetEnvironmentVariable("BOTGRAM_SCHEMA_UPGRADE_VERIFY") is { } verify)
+{
+    await SchemaUpgradeTests.VerifyFixtureAsync(verify);
+    return;
+}
 if (string.IsNullOrWhiteSpace(connectionString))
 {
     Console.WriteLine("SKIP: set BOTGRAM_PG_TEST_CONNECTION_STRING to a loopback PostgreSQL test database (botgram_test_*). Requires CREATE DATABASE permission.");
+    return;
+}
+if (Environment.GetEnvironmentVariable("BOTGRAM_SCHEMA_UPGRADE_FIXTURE") is { } fixture)
+{
+    await SchemaUpgradeTests.PrepareFixtureAsync(connectionString, fixture);
     return;
 }
 var options = new NpgsqlConnectionStringBuilder(connectionString);
@@ -31,6 +41,18 @@ try
     options.Database = database;
     if (Environment.GetEnvironmentVariable("BOTGRAM_MIGRATION_TESTS") == "1")
         await SnapshotMigrationTests.RunAsync(options.ConnectionString);
+    else if (Environment.GetEnvironmentVariable("BOTGRAM_SCHEMA_UPGRADE_TESTS") == "1")
+    {
+        try
+        {
+            await SchemaUpgradeTests.RunAsync(options.ConnectionString);
+        }
+        catch (Exception error)
+        {
+            await Console.Error.WriteLineAsync("FAIL: " + error);
+            throw;
+        }
+    }
     else if (Environment.GetEnvironmentVariable("BOTGRAM_FULL_BACKEND_TESTS") == "1")
         await RelationalBackendTests.RunAsync(options.ConnectionString);
     else if (Environment.GetEnvironmentVariable("BOTGRAM_CAPACITY_DIAGNOSTIC") == "1")

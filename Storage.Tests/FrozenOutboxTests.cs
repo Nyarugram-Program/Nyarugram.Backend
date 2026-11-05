@@ -4,6 +4,7 @@ using Botgram.Backend.Storage;
 using Botgram.Backend.Storage.FrozenV1;
 using Google.Protobuf;
 using P = Botgram.Protocol.V1;
+using CurrentDeliveryEventCodec = Botgram.Backend.Storage.DeliveryEventCodec;
 
 internal static class FrozenOutboxTests
 {
@@ -64,11 +65,21 @@ internal static class FrozenOutboxTests
                 }
             }, "frozen-outbox-test", result => result.ToByteArray());
 
+            var observer = await backend.RegisterAsync(new("presence_observer", "Observer", "isolated-password"));
+            var observerSession = await backend.RequireAsync(Auth.HashToken(observer.Token));
+            await backend.DispatchAsync(observerSession, new P.RpcRequest
+            {
+                AddContact = new() { User = new() { User = new() { ServerDomain = "frozen-outbox-test", UserId = session.UserId } }, FirstName = "Contact" }
+            }, "frozen-outbox-test", result => result.ToByteArray());
+            await backend.DispatchAsync(session, new P.RpcRequest { Foreground = true, GetState = new() },
+                "frozen-outbox-test", result => result.ToByteArray());
+
             var before = await ReadOutbox(source);
-            Check(before.Count == 2 && before.All(row => row.State == "Pending" && row.NoLease && row.NoBrokerPosition) &&
+            Check(before.Count == 3 && before.All(row => row.State == "Pending" && row.NoLease && row.NoBrokerPosition) &&
                 before[0].Type == "message.created" && before[0].SchemaVersion == 1 && before[0].OldSourceMatches &&
                 before[1].Type == "wallpaper.changed" && before[1].SchemaVersion == 2 && before[1].NoMessageId &&
-                !before[1].OldSourceMatches, "v1 precedes v2, which is invisible to the frozen inner join");
+                !before[1].OldSourceMatches && before[2].Type == "user.presence_changed" && before[2].SchemaVersion == 3,
+                "v1 precedes non-message v2/v3 events, invisible to the frozen inner join");
 
             for (var attempt = 0; attempt < 2; attempt++)
             {
@@ -86,11 +97,17 @@ internal static class FrozenOutboxTests
                     "frozen outbox rejects and rolls back its complete lease transaction");
             }
 
-            var current = await currentOutbox.ClaimAsync(2, TimeSpan.FromSeconds(15), CancellationToken.None);
-            Check(current.Count == 2 && current.Any(item => item.Delivery.OutboxId == before[1].Id &&
-                item.Delivery.SchemaVersion == 2 && item.Delivery.Type == "wallpaper.changed"),
-                "current outbox can claim both events");
-            Console.WriteLine("PASS: frozen old outbox rolls back the full mixed v1/v2 claim; current outbox claims both");
+            var current = await currentOutbox.ClaimAsync(3, TimeSpan.FromSeconds(15), CancellationToken.None);
+            Check(current.Count == 2 && current.All(item => item.Delivery.SchemaVersion != 3),
+                "presence waits for the earlier wallpaper in the same user partition");
+            var wallpaper = current.Single(item => item.Delivery.OutboxId == before[1].Id);
+            Check(await currentOutbox.ConfirmPublishedAsync(wallpaper.Delivery.OutboxId, wallpaper.LeaseToken,
+                new(new("presence-test", 0, 1)), CancellationToken.None), "acknowledge wallpaper predecessor");
+            var presence = (await currentOutbox.ClaimAsync(3, TimeSpan.FromSeconds(15), CancellationToken.None)).Single();
+            var decoded = CurrentDeliveryEventCodec.Decode(CurrentDeliveryEventCodec.Encode(presence.Delivery));
+            Check(decoded.SchemaVersion == 3 && decoded.Payload is PresenceChanged && decoded.OutboxId == before[2].Id,
+                "current outbox and codec deliver presence after its predecessor");
+            Console.WriteLine("PASS: frozen old outbox rolls back mixed v1/v2/v3; current outbox delivers all three in partition order");
         }
         finally
         {

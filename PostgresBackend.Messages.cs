@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Google.Protobuf;
 using P = Botgram.Protocol.V1;
 
 namespace Botgram.Backend.Storage;
@@ -133,6 +134,7 @@ public sealed partial class PostgresBackend
         var owned = (await Owned(work, uid)).ToDictionary(c => c.Id);
         for (var i = 0; i < difference.Events.Length; i++)
         {
+            if (difference.Events[i].ExpiresAt is { } expires && expires <= DateTimeOffset.UtcNow) continue;
             switch (difference.Events[i].Payload)
             {
                 case GidChanged changed:
@@ -140,6 +142,14 @@ public sealed partial class PostgresBackend
                     page.Updates.Add(new P.Update { GidChanged = new()
                     {
                         User = new() { ServerDomain = domain, UserId = user.Id }, Gid = user.Gid
+                    } });
+                    break;
+                case PresenceChanged presence:
+                    var changedPresence = (await Profiles(work, uid, "a.id=$2", presence.UserId)).Single();
+                    page.Updates.Add(new P.Update { PresenceChanged = new()
+                    {
+                        User = new() { ServerDomain = domain, UserId = presence.UserId },
+                        Status = ProtobufRpcMapper.MapStatus(changedPresence)
                     } });
                     break;
                 case Receipt receipt:
@@ -150,9 +160,47 @@ public sealed partial class PostgresBackend
                         Pts = difference.PreviousCount + i + 2, PtsCount = 1 };
                     page.Updates.Add(receipt.UserId == uid ? new P.Update { ReadInbox = read } : new P.Update { ReadOutbox = read });
                     break;
+                case Call call:
+                {
+                    // Replay converges every call event onto the persisted state; stale or foreign calls stay invisible.
+                    var current = (await work.Rows(CallRows + " WHERE id=$1", CallRow, call.Id)).SingleOrDefault();
+                    if (current is null || (current.CallerId != uid && current.CalleeId != uid)) break;
+                    var ids = await UserIdentities(work, [current.CallerId, current.CalleeId]);
+                    page.Updates.Add(new P.Update
+                    {
+                        PhoneCall = new()
+                        {
+                            PhoneCall = ProtobufRpcMapper.MapPhoneCall(current, ids[current.CallerId],
+                                ids[current.CalleeId], current.CallerId == uid)
+                        }
+                    });
+                    break;
+                }
+                case CallSignal signal when signal.Type == "tl":
+                {
+                    // Expired or obsolete signaling must not resurrect a finished call.
+                    var current = (await work.Rows(CallRows + " WHERE id=$1", CallRow, signal.CallId)).SingleOrDefault();
+                    if (current is null || current.State != "active" ||
+                        (current.CallerId != uid && current.CalleeId != uid)) break;
+                    page.Updates.Add(new P.Update
+                    {
+                        PhoneCallSignaling = new()
+                        {
+                            CallId = current.TelegramId,
+                            Data = ByteString.CopyFrom(Convert.FromBase64String(signal.Data))
+                        }
+                    });
+                    break;
+                }
             }
         }
-        page.Users.Add((await Related(work, uid, true)).Select(u => ProtobufRpcMapper.MapUser(u, domain)));
+        var subjects = difference.Events.Select(e => e.Payload).OfType<PresenceChanged>().Select(p => p.UserId)
+            .Concat(difference.Events.Select(e => e.Payload).OfType<Call>()
+                .SelectMany(c => new[] { c.CallerId, c.CalleeId }))
+            .Distinct().ToArray();
+        var presenceUsers = await Profiles(work, uid, "a.id=ANY($2)", (object)subjects);
+        page.Users.Add((await Related(work, uid, true)).Concat(presenceUsers).DistinctBy(u => u.Id)
+            .Select(u => ProtobufRpcMapper.MapUser(u, domain)));
         return difference.Kind == DifferenceKind.Slice ? new() { Slice = page } : new() { Complete = page };
     }
 

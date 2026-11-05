@@ -120,7 +120,7 @@ public sealed class PostgresRelationalValidation(NpgsqlDataSource source)
         long imported = 0;
         foreach (var e in database.Events)
         {
-            var counted = e.Type is "message.created" or "receipt.updated" or "user.gid_changed";
+            var counted = e.Type is "message.created" or "receipt.updated" or "user.gid_changed" or "user.presence_changed";
             if (counted) foreach (var uid in e.Recipients.Distinct()) recipientPts[uid]++;
             if (e.Type != "message.created" || e.Payload is not Message message ||
                 !database.Messages.Any(m => m.Id == message.Id && JsonSerializer.Serialize(m) == JsonSerializer.Serialize(message))) continue;

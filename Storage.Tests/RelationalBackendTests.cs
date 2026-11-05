@@ -167,14 +167,16 @@ static class RelationalBackendTests
             actor ??= session;
             request.ProtocolMajor = 1;
             request.RequestId = "user-parity";
+            long started = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             var expectedResponse = ProtobufRpcMapper.Execute(legacy, actor.UserId, request, domain);
             // This fixture has no wallpaper records; the new PG extension must explicitly report cleared.
             if (expectedResponse.GetFullUser is { } fullUser) fullUser.Wallpaper = new() { Cleared = new() };
             if (expectedResponse.GetFullGroup is { } fullGroup) fullGroup.Wallpaper = new() { Cleared = new() };
-            var expected = expectedResponse.ToByteArray();
             var actual = await Rpc(actor, request);
-            Check(actual.SequenceEqual(expected), $"User RPC parity: {request.OperationCase}");
-            return P.RpcResponse.Parser.ParseFrom(actual);
+            var actualResponse = P.RpcResponse.Parser.ParseFrom(actual);
+            Check(ProtobufParity.Equal(expectedResponse, actualResponse, started),
+                $"User RPC parity: {request.OperationCase}");
+            return actualResponse;
         }
         P.UserSelector Select(string id) => new() { User = new() { UserId = id, ServerDomain = domain } };
         await Parity(new() { GetUsers = new() { Users = { Select(bob.User.Id), new P.UserSelector { Self = true } } } });

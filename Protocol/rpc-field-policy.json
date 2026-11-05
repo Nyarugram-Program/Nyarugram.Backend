@@ -75,6 +75,19 @@
   ],
   "featureOperations": [
     {
+      "tag": 137, "operation": "get_special_contacts", "message": "GetSpecialContactsRequest", "response": "SpecialContacts",
+      "purpose": "Full authoritative account-private snapshot for periodic and reconnect refresh; no EventHint or pts changes.",
+      "validation": "Authenticated owner only. UUID identities and monotonic account revision persist in privacy state.",
+      "requestFields": [], "responseFields": ["SpecialContacts.revision", "SpecialContacts.users"]
+    },
+    {
+      "tag": 138, "operation": "set_special_contact", "message": "SetSpecialContactRequest", "response": "SpecialContacts",
+      "purpose": "Return the complete authoritative snapshot after durable mutation.",
+      "validation": "Enable requires a real nonself contact and neither party blocking. Disable is idempotent for known users; unknown targets return 404. Only real changes increment revision. Delete/reset/block clear preferences without restoration.",
+      "requestFields": ["SetSpecialContactRequest.user", "SetSpecialContactRequest.enabled"],
+      "responseFields": ["SpecialContacts.revision", "SpecialContacts.users"]
+    },
+    {
       "tag": 122, "operation": "get_wallpapers", "message": "GetWallpapersRequest", "response": "WallpaperList",
       "purpose": "Account-private NoFile catalogue and durable revision query; reconnect/login/foreground recovery must query even when EventHint was lost.",
       "validation": "Optional hash is an account revision, not pts. A hash hit still returns installed state and revision; missing state is unknown, explicit cleared is authoritative.",
@@ -101,7 +114,89 @@
       "validation": "Membership checked. Groups/saved allow personal view only. for_both requires direct and removes both overrides; revert requires no selection and for_both false. clear explicitly suppresses shared wallpaper. Service-message adoption is 501; no synthetic service message, message sequence or pts.",
       "requestFields": ["SetChatWallpaperRequest.peer", "SetChatWallpaperRequest.wallpaper", "SetChatWallpaperRequest.clear", "SetChatWallpaperRequest.service_message_id", "SetChatWallpaperRequest.for_both", "SetChatWallpaperRequest.revert"],
       "responseFields": ["ChatWallpaperResult.updates", "ChatWallpaperResult.state", "ChatWallpaperResult.revision"]
+    },
+    {
+      "tag": 126,
+      "operation": "account_privacy",
+      "message": "AccountPrivacyRequest",
+      "response": "AccountPrivacyResponse",
+      "purpose": "Authenticated account privacy and security operations.",
+      "validation": "Reuse AccountPrivacyService validation, local user references, ownership and persistence checks.",
+      "requestFields": [
+        "AccountPrivacyRequest.get_rules",
+        "AccountPrivacyRequest.set_rules",
+        "AccountPrivacyRequest.get_global",
+        "AccountPrivacyRequest.set_global",
+        "AccountPrivacyRequest.get_account_ttl",
+        "AccountPrivacyRequest.set_account_ttl",
+        "AccountPrivacyRequest.get_default_history_ttl",
+        "AccountPrivacyRequest.set_default_history_ttl",
+        "AccountPrivacyRequest.get_blocked",
+        "AccountPrivacyRequest.block_user",
+        "AccountPrivacyRequest.unblock_user",
+        "AccountPrivacyRequest.get_authorizations",
+        "AccountPrivacyRequest.reset_authorization",
+        "AccountPrivacyRequest.reset_other_authorizations",
+        "AccountPrivacyRequest.get_password",
+        "AccountPrivacyRequest.get_password_settings",
+        "AccountPrivacyRequest.update_password_settings",
+        "AccountPrivacyRequest.delete_contacts",
+        "AccountPrivacyRequest.reset_saved_contacts",
+        "AccountPrivacyRequest.toggle_top_peers",
+        "AccountPrivacyRequest.get_web_authorizations",
+        "AccountPrivacyRequest.reset_web_authorization",
+        "AccountPrivacyRequest.reset_web_authorizations",
+        "AccountPrivacyRequest.clear_payment_info",
+        "AccountPrivacyRequest.get_passkeys"
+      ],
+      "responseFields": [
+        "AccountPrivacyResponse.users",
+        "AccountPrivacyResponse.groups",
+        "AccountPrivacyResponse.rules",
+        "AccountPrivacyResponse.global",
+        "AccountPrivacyResponse.account_ttl",
+        "AccountPrivacyResponse.history_ttl",
+        "AccountPrivacyResponse.blocked",
+        "AccountPrivacyResponse.applied",
+        "AccountPrivacyResponse.authorizations",
+        "AccountPrivacyResponse.password",
+        "AccountPrivacyResponse.password_settings",
+        "AccountPrivacyResponse.contacts_deleted",
+        "AccountPrivacyResponse.web_authorizations",
+        "AccountPrivacyResponse.passkeys"
+      ]
+    },
+    {
+      "tag": 127,
+      "operation": "add_contact",
+      "message": "AddContactRequest",
+      "response": "Updates",
+      "purpose": "Add an existing local user to the authenticated account contacts and return the target user with contact flags.",
+      "validation": "Reject self, unknown users, unsupported notes and privacy-exception options, and names longer than 64 characters. Retry upserts the same owner/user pair.",
+      "requestFields": [
+        "AddContactRequest.user",
+        "AddContactRequest.first_name",
+        "AddContactRequest.last_name"
+      ],
+      "responseFields": [
+        "Updates.updates",
+        "Updates.users",
+        "Updates.groups",
+        "Updates.date_ms",
+        "Updates.seq"
+      ]
     }
+  ],
+  "phoneOperations": [
+    {"tl":"TL_phone_requestCall","javaType":"org.telegram.tgnet.tl.TL_phone$requestCall","tag":128,"operation":"request_call","message":"PhoneRequestCallRequest","fields":{"flags":"flags","video":{"decision":"map","to":["PhoneRequestCallRequest.video"]},"user_id":{"decision":"map","to":["PhoneRequestCallRequest.user"],"nested":"InputUser"},"random_id":{"decision":"map","to":["PhoneRequestCallRequest.random_id"]},"g_a_hash":{"decision":"map","to":["PhoneRequestCallRequest.g_a_hash"],"conversion":"32-byte SHA-256 of the caller key; any other length is 400 CALL_INVALID_GA_HASH"},"protocol":{"decision":"map","to":["PhoneRequestCallRequest.protocol"]}}},
+    {"tl":"TL_phone_receivedCall","javaType":"org.telegram.tgnet.tl.TL_phone$receivedCall","tag":129,"operation":"received_call","message":"PhoneReceivedCallRequest","fields":{"flags":"flags","peer":{"decision":"map","to":["PhoneReceivedCallRequest.peer"]}}},
+    {"tl":"TL_phone_acceptCall","javaType":"org.telegram.tgnet.tl.TL_phone$acceptCall","tag":130,"operation":"accept_call","message":"PhoneAcceptCallRequest","fields":{"flags":"flags","peer":{"decision":"map","to":["PhoneAcceptCallRequest.peer"]},"g_b":{"decision":"map","to":["PhoneAcceptCallRequest.g_b"],"conversion":"Exactly 256 bytes; replay of the same accepted g_b is idempotent, any other value is 409 CALL_ALREADY_ACCEPTED"},"protocol":{"decision":"map","to":["PhoneAcceptCallRequest.protocol"]}}},
+    {"tl":"TL_phone_confirmCall","javaType":"org.telegram.tgnet.tl.TL_phone$confirmCall","tag":131,"operation":"confirm_call","message":"PhoneConfirmCallRequest","fields":{"flags":"flags","peer":{"decision":"map","to":["PhoneConfirmCallRequest.peer"]},"g_a":{"decision":"map","to":["PhoneConfirmCallRequest.g_a"],"conversion":"Exactly 256 bytes and SHA-256(g_a) must equal the requestCall g_a_hash; mismatch is 400 CALL_HASH_MISMATCH"},"key_fingerprint":{"decision":"map","to":["PhoneConfirmCallRequest.key_fingerprint"],"conversion":"Checked int64; non-zero required. Same value replay is idempotent, conflict is 409 CALL_ALREADY_ACTIVE"},"protocol":{"decision":"map","to":["PhoneConfirmCallRequest.protocol"]}}},
+    {"tl":"TL_phone_discardCall","javaType":"org.telegram.tgnet.tl.TL_phone$discardCall","tag":132,"operation":"discard_call","message":"PhoneDiscardCallRequest","fields":{"flags":"flags","video":{"decision":"map","to":["PhoneDiscardCallRequest.video"]},"peer":{"decision":"map","to":["PhoneDiscardCallRequest.peer"]},"duration":{"decision":"map","to":["PhoneDiscardCallRequest.duration"],"conversion":"Checked int32; negative is 400"},"reason":{"decision":"map","to":["PhoneDiscardCallRequest.reason"]},"connection_id":{"decision":"map","to":["PhoneDiscardCallRequest.connection_id"]}}},
+    {"tl":"TL_phone_sendSignalingData","javaType":"org.telegram.tgnet.tl.TL_phone$sendSignalingData","tag":133,"operation":"send_signaling_data","message":"PhoneSendSignalingDataRequest","fields":{"flags":"flags","peer":{"decision":"map","to":["PhoneSendSignalingDataRequest.peer"]},"data":{"decision":"map","to":["PhoneSendSignalingDataRequest.data"],"conversion":"At most 4096 bytes and only while the call is active; otherwise 400"}}},
+    {"tl":"TL_phone_getCallConfig","javaType":"org.telegram.tgnet.tl.TL_phone$getCallConfig","tag":134,"operation":"get_call_config","message":"PhoneGetCallConfigRequest","fields":{"flags":"flags"}},
+    {"tl":"TL_phone_saveCallDebug","javaType":"org.telegram.tgnet.tl.TL_phone$saveCallDebug","tag":135,"operation":"save_call_debug","message":"PhoneSaveCallDebugRequest","fields":{"flags":"flags","peer":{"decision":"map","to":["PhoneSaveCallDebugRequest.peer"]},"debug":{"decision":"map","to":["PhoneSaveCallDebugRequest.debug"],"conversion":"TL bytes to the diagnostic text field; at most 16384 bytes"}}},
+    {"tl":"TL_messages_getDhConfig","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getDhConfig","tag":136,"operation":"get_dh_config","message":"GetDhConfigRequest","fields":{"version":{"decision":"map","to":["GetDhConfigRequest.version"],"conversion":"Checked int32; 0 requests the full configuration"},"random_length":{"decision":"map","to":["GetDhConfigRequest.random_length"],"conversion":"0..256 bytes; out of range is 400"}}}
   ],
   "nested": {
     "InputPeer": {

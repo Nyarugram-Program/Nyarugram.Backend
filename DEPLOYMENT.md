@@ -6,6 +6,18 @@ TOTP 账号密钥由 ASP.NET Core Data Protection 加密保存到账号隐私状
 
 备份与迁移必须同时保留账号数据和密钥环。仅搬迁 PostgreSQL 隐私状态不会搬迁解密密钥。更换 Windows 运行用户时需要事先安排密钥保护迁移。新恢复码为 10 个八位数字，只保存带版本前缀的 HMAC-SHA256 校验值，使用受保护的 TOTP 密钥计算。既有 SHA-256 格式恢复码继续可用，每个码成功使用后在同一事务中移除。明文只在生成时返回，邮件找回服务当前未配置。
 
+## 关系存储 schema 离线升级（隔离验证库）
+
+关系后端启动只接受精确的 schema 版本集合（当前 v1..v8），旧库不会被自动迁移。已存在的 v7 隔离库必须先停止后端、四组件工作进程和所有读写者，备份数据、配置与 `Privacy:KeyDirectory` 密钥环，再按 `STORAGE-MIGRATION.md` 第 16 节执行：
+
+```powershell
+dotnet build Storage.Admin/Storage.Admin.csproj -c Release
+dotnet Storage.Admin/bin/Release/net8.0/Storage.Admin.dll inspect D:\BotgramBuild\private\schema-upgrade.json
+dotnet Storage.Admin/bin/Release/net8.0/Storage.Admin.dll upgrade D:\BotgramBuild\private\schema-upgrade.json
+```
+
+`inspect` 只读，`upgrade` 在事务内应用 v7→v8；重复执行是 no-op。`BOTGRAM_MIGRATION_TESTS=1` 仍是随机临时库的快照导入导出回归，不能升级指定数据库。连接配置只允许回环 `botgram_test_*` 目标，命令不会打印连接凭据。
+
 公网业务入口为 `https://nyarugram.moe.autos:8521`，事件连接为 `wss://nyarugram.moe.autos:8521/api/ws`。客户端地址未填写端口时默认补齐 **8521**，不使用 HTTPS 的常规默认端口 443。DNS 指向 `43.142.58.20`。
 
 ## 端口与代理
@@ -40,6 +52,24 @@ Caddy 证书保存在其既有持久卷中，重建代理不能删除卷。配�
 公网隔离测试必须使用测试数据目录，并显式设置 `BOTGRAM_HTTPS_TEST_ISOLATED=1`。服务端测试与 TLS 握手通过不等于 Android 真机安装、前后台切换、定位或端到端页面操作已经验证。
 
 # 本机 Windows 部署（保留）
+
+## 本机手机测试后端：固定端口 18524（2026-11-06）
+
+当前统一测试入口为 `http://192.168.2.200:18524`，本机检查用 `http://127.0.0.1:18524/health`。测试端口固定为 **18524**；旧 `18521` 不再作为测试入口。手机中原来保存的服务器地址需要改用新端口，账号数据保留在服务端。
+
+测试部署根目录为 `D:\BotgramBuild\native-calls-test`，以该目录的 `deployment.json`、`process.json` 获取实际 Release、哈希和进程，不以 APK 版本号判断后端版本。升级从后端当前源码发布到新 `releases/<hash>`，通过隔离 Protobuf 联系人/特别关心与通话回归后再切换；不能直接复用历史发布物。
+
+2026-11-06 本次部署 Release 为 `3c02f9453fb6`，DLL SHA-256 为 `3C02F9453FB6E749897AE0A262FE3E1D67585515A9633512B1B8F072D7C51AE1`。已完成 loopback/LAN 健康检查、238 项联系人/特别关心和 242 项通话隔离断言、GID/smoke 回归、TURN 中继探针及私网防火墙核验；详细记录见测试部署目录的 `upgrade-18524-verification.json`。备份位于 `backups/20261106-025330-456`，其包含受限数据与密钥，不提交仓库。
+
+该实例使用原 18521 通话测试实例的 `data\botgram.json` 与 `keys`，保留账号、有效会话、聊天、消息及 TL 身份。此前占用 18524 的 `D:\BotgramBuild\p5-device-20261102-134314` 是另一套旧测试库：停机备份并保留原目录，不与当前库合并、不自动重启。正式 `D:\Botgram\Backend` 的 8521 服务独立，不随测试升级切换。
+
+业务 RPC 和事件连接固定使用 Protobuf（`LegacyJsonRpcEnabled=false`、`LegacyJsonWssEnabled=false`、`ProtobufRolloutPercent=100`）；注册、登录等 REST 继续使用 JSON。特别关心需要包含 typed get/set 接口的匹配版本。
+
+保留现有 STUN/TURN：UDP 3478、中继 UDP 49160–49200、P2P=false。凭据仅保存在受限部署配置中，不写入文档。HTTP 防火墙规则仅允许 18524、原私有网卡和 `192.168.2.0/24`，不扩大到公网；旧 18521 专用规则停用。
+
+启动/停止使用部署目录的 `Run-NativeCallsTest.ps1 -Action start|stop|status`；源码在 `tools/Run-NativeCallsTest.ps1`。启动脚本校验所有监听均为 18524，防火墙脚本为 `tools/Set-NativeCallsTestFirewall.ps1`。隐藏监控会重启子进程，升级前必须先停监控和后端，确认释放数据库，再备份数据、密钥环和配置。Windows 重启后仍需手动启动，未新增自动启动项。
+
+部署后健康检查、协议验证和隔离回归不代表真机媒体或全屏来电通过；实际语音/视频、后台通知和多设备特别关心仍需手机验收。
 
 当前部署位于 `D:\Botgram\Backend`，使用已经发布并通过集成测试的 Release 程序。
 

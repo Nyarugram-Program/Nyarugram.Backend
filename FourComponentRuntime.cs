@@ -113,7 +113,7 @@ public sealed class FourComponentRuntime(NpgsqlDataSource source, FourComponentO
             FROM botgram_backend_v1.runtime_contract WHERE singleton
             """);
         await using var reader = await command.ExecuteReaderAsync(token);
-        if (!await reader.ReadAsync(token) || reader.GetInt32(0) != StorageContractVersions.WallpaperEventSchema ||
+        if (!await reader.ReadAsync(token) || reader.GetInt32(0) != StorageContractVersions.PresenceEventSchema ||
             reader.GetString(1) != options.Topic || reader.GetString(2) != options.Consumer ||
             reader.GetString(3) != options.Keyspace || reader.GetString(4) != options.CacheNamespace || !reader.GetBoolean(5))
             throw new InvalidOperationException("P7 offline runtime contract is missing or incompatible");
@@ -269,13 +269,17 @@ public static class FourComponentSetup
             """, connection, transaction))
             await schema.ExecuteNonQueryAsync(token);
         await using (var schema = new NpgsqlCommand("""
-            INSERT INTO botgram_backend_v1.runtime_contract(singleton,event_schema,topic,consumer_name,keyspace,cache_namespace)
-                VALUES(true,$1,$2,$3,$4,$5) ON CONFLICT DO NOTHING
+            INSERT INTO botgram_backend_v1.runtime_contract AS contract(singleton,event_schema,topic,consumer_name,keyspace,cache_namespace)
+                VALUES(true,$1,$2,$3,$4,$5)
+            ON CONFLICT(singleton) DO UPDATE SET event_schema=excluded.event_schema
+                WHERE contract.event_schema=$6 AND contract.topic=excluded.topic AND contract.consumer_name=excluded.consumer_name
+                    AND contract.keyspace=excluded.keyspace AND contract.cache_namespace=excluded.cache_namespace
             """, connection, transaction))
         {
-            schema.Parameters.AddWithValue(StorageContractVersions.WallpaperEventSchema);
+            schema.Parameters.AddWithValue(StorageContractVersions.PresenceEventSchema);
             schema.Parameters.AddWithValue(options.Topic); schema.Parameters.AddWithValue(options.Consumer);
             schema.Parameters.AddWithValue(options.Keyspace); schema.Parameters.AddWithValue(options.CacheNamespace);
+            schema.Parameters.AddWithValue(StorageContractVersions.WallpaperEventSchema);
             await schema.ExecuteNonQueryAsync(token);
         }
         bool initialized;
@@ -286,7 +290,7 @@ public static class FourComponentSetup
         await using (var reader = await check.ExecuteReaderAsync(token))
         {
             await reader.ReadAsync(token);
-            if (reader.GetInt32(0) != StorageContractVersions.WallpaperEventSchema || reader.GetString(1) != options.Topic ||
+            if (reader.GetInt32(0) != StorageContractVersions.PresenceEventSchema || reader.GetString(1) != options.Topic ||
                 reader.GetString(2) != options.Consumer || reader.GetString(3) != options.Keyspace || reader.GetString(4) != options.CacheNamespace)
                 throw new InvalidOperationException("Offline P7 namespaces or worker schema differ from the prepared contract");
             initialized = reader.GetBoolean(5);

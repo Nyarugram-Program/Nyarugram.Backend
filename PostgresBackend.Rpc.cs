@@ -11,6 +11,7 @@ public sealed partial class PostgresBackend
 
     private async Task<P.RpcResponse> ExecuteRpc(Transaction work, Session session, P.RpcRequest request, string domain)
     {
+        await MaintainPresence(work, session, request.HasForeground ? request.Foreground : null);
         var uid = session.UserId;
         var response = new P.RpcResponse { ProtocolMajor = 1, RequestId = request.RequestId };
         P.UserRef Reference(string id) => new() { ServerDomain = domain, UserId = id };
@@ -23,6 +24,12 @@ public sealed partial class PostgresBackend
         }
         switch (request.OperationCase)
         {
+            case P.RpcRequest.OperationOneofCase.GetSpecialContacts:
+                response.GetSpecialContacts = await SpecialContacts(work, uid, null, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.SetSpecialContact:
+                response.SetSpecialContact = await SpecialContacts(work, uid, request.SetSpecialContact, domain);
+                break;
             case P.RpcRequest.OperationOneofCase.AccountPrivacy:
                 response.AccountPrivacy = await AccountPrivacy(work, session, request.AccountPrivacy, domain);
                 break;
@@ -212,9 +219,31 @@ public sealed partial class PostgresBackend
                 var id = ProtobufRpcMapper.SelectedUserId(request.GetFullUser.User, uid, domain);
                 var users = await Profiles(work, uid, "a.id=$2", id);
                 if (users.Length == 0) throw new ApiException(404, "USER_ID_INVALID");
-                response.GetFullUser = new() { User = Reference(id), Settings = new(), NotifySettings = new() };
+                var privacy = await PostgresPrivacyPolicy.Load(work.Connection, work.NativeTransaction, [id], uid, work.Token);
+                bool calls = AccountPrivacyService.Allowed(privacy, id, uid, P.PrivacyKey.PhoneCall);
+                response.GetFullUser = new()
+                {
+                    User = Reference(id), Settings = new(), NotifySettings = new(),
+                    PhoneCallsAvailable = calls, VideoCallsAvailable = calls,
+                    PhoneCallsPrivate = !AccountPrivacyService.Allowed(privacy, id, uid, P.PrivacyKey.PhoneP2P)
+                };
                 response.GetFullUser.Wallpaper = await ChatWallpaper(work, uid, (await UserWallpaperConversation(work, uid, id))?.Id);
                 response.GetFullUser.Users.Add(Map(users[0]));
+                break;
+            }
+            case P.RpcRequest.OperationOneofCase.AddContact:
+            {
+                var input = request.AddContact;
+                var targetId = ProtobufRpcMapper.SelectedUserId(input.User, uid, domain);
+                if (targetId == uid) throw new ApiException(400, "CONTACT_ADD_SELF");
+                var target = (await SelectedProfiles(work, uid, [targetId])).Single();
+                var names = ContactService.Names(target.DisplayName, input.FirstName, input.LastName, false);
+                await work.Execute("""
+                    INSERT INTO botgram_backend_v1.contacts(owner_id,user_id,first_name,last_name) VALUES($1,$2,$3,$4)
+                    ON CONFLICT(owner_id,user_id) DO UPDATE SET first_name=excluded.first_name,last_name=excluded.last_name
+                    """, uid, targetId, names.First, names.Last);
+                response.AddContact = new() { DateMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() };
+                response.AddContact.Users.Add((await Profiles(work, uid, "a.id=$2", targetId)).Select(Map));
                 break;
             }
             case P.RpcRequest.OperationOneofCase.ImportContacts:
@@ -317,6 +346,33 @@ public sealed partial class PostgresBackend
                         await FindGroup(work, uid, groups.Single(g => g.Value == id).Id), id));
                 break;
             }
+            case P.RpcRequest.OperationOneofCase.RequestCall:
+                response.RequestCall = await PhoneRequestCall(work, session, request.RequestCall, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.ReceivedCall:
+                response.ReceivedCall = await PhoneReceivedCall(work, session, request.ReceivedCall.Peer);
+                break;
+            case P.RpcRequest.OperationOneofCase.AcceptCall:
+                response.AcceptCall = await PhoneAcceptCall(work, session, request.AcceptCall, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.ConfirmCall:
+                response.ConfirmCall = await PhoneConfirmCall(work, session, request.ConfirmCall, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.DiscardCall:
+                response.DiscardCall = await PhoneDiscardCall(work, session, request.DiscardCall, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.SendSignalingData:
+                response.SendSignalingData = await PhoneSignaling(work, session, request.SendSignalingData);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetCallConfig:
+                response.GetCallConfig = PhoneCallConfig();
+                break;
+            case P.RpcRequest.OperationOneofCase.SaveCallDebug:
+                response.SaveCallDebug = PhoneSavedDebug(request.SaveCallDebug);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetDhConfig:
+                response.GetDhConfig = PhoneDhConfig(request.GetDhConfig);
+                break;
             default:
                 throw new ApiException(501, "BOTGRAM_RPC_UNSUPPORTED:" + request.OperationCase);
         }

@@ -69,15 +69,21 @@ public static class ContactService
         return command with { Gid = gid, FirstName = first, LastName = last };
     }
 
+    public static (string First, string Last) Names(string displayName, string firstName, string lastName, bool hasNote)
+    {
+        if (hasNote) throw new ApiException(501, "BOTGRAM_CONTACT_NOTES_UNSUPPORTED");
+        string first = firstName.Trim(), last = lastName.Trim();
+        if (first.Length == 0) first = displayName;
+        if (first.Length == 0 || first.Length > 64 || last.Length > 64)
+            throw new ApiException(400, "FIRSTNAME_INVALID");
+        return (first, last);
+    }
+
     public static UserProfile Add(Database db, string uid, long telegramId, string firstName, string lastName, bool hasNote)
     {
         var user = IdentityService.FindUser(db, telegramId);
         if (user.Id == uid) throw new ApiException(400, "CONTACT_ADD_SELF");
-        if (hasNote) throw new ApiException(501, "BOTGRAM_CONTACT_NOTES_UNSUPPORTED");
-        string first = firstName.Trim(), last = lastName.Trim();
-        if (first.Length == 0) first = user.DisplayName;
-        if (first.Length == 0 || first.Length > 64 || last.Length > 64)
-            throw new ApiException(400, "FIRSTNAME_INVALID");
+        var (first, last) = Names(user.DisplayName, firstName, lastName, hasNote);
         db.Contacts.RemoveAll(c => c.OwnerId == uid && c.UserId == user.Id);
         db.Contacts.Add(new(uid, user.Id, first, last));
         return UserQueryService.Profile(db, user, uid);

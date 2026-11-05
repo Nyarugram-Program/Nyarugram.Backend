@@ -14,6 +14,14 @@ internal static partial class HttpTests
         {
             if (current is JsonObject obj)
             {
+                if (obj["isSelf"]?.GetValue<bool>() == true)
+                {
+                    var until = obj["status"]?["onlineUntilMs"];
+                    long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    Check(until is not null && long.TryParse(until.ToString(), out var expiry)
+                        && expiry > now && expiry <= now + 60_000, "storage response self online expiry");
+                    obj["status"]!["onlineUntilMs"] = "clock";
+                }
                 foreach (var (key, value) in obj.ToArray())
                 {
                     // Only wall clocks vary between replays; retain all business fields, including pts.
@@ -302,7 +310,7 @@ internal static partial class HttpTests
                     : Environment.GetEnvironmentVariable("BOTGRAM_SEND_DIAGNOSTIC") == "1"
                     ? "relational SendMessage only; 10 warmup + 100 timed samples, concurrency 1; HTTP/envelope checks only, no cross-storage response/restart comparison; pooled PG Min=0 Max=20; loopback diagnostic"
                     : "same seed per operation/storage, 5 warmup + 40 timed samples, concurrency 1; complete normalized protobuf response compared on every request; restart retry/conflict, history pagination, nonmember and unsupported rejection checks excluded from timing; pooled PG Min=0 Max=20; loopback diagnostic, not production acceptance",
-                normalization = "complete protobuf JSON; only wall-clock dateMs/createdAtMs/updatedAtMs/joinedAtMs normalized; shared seed retains conversation IDs; pts and all other business values retained" };
+                normalization = "complete protobuf JSON; only validated self online expiry and wall-clock dateMs/createdAtMs/updatedAtMs/joinedAtMs normalized; shared seed retains conversation IDs; pts and all other business values retained" };
             File.WriteAllText(Path.Combine(Root, "storage-parity.json"), JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
             Console.WriteLine(Environment.GetEnvironmentVariable("BOTGRAM_SEND_MATRIX") == "1"
                 ? $"PASS: snapshot-bridge parity plus SendMessage storage/dataset/concurrency matrix; same conversation only, different conversations not covered; {assertions} assertions"

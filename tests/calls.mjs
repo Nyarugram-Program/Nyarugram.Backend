@@ -9,7 +9,7 @@ import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixtureRoot = process.env.BOTGRAM_TEST_ROOT ?? path.join(root, 'obj');
@@ -110,8 +110,9 @@ try {
   assert.equal(alicePts, 1);
   assert.equal(bobPts, 1);
 
-  // 3. Caller opens the call; the invite carries g_a_hash only.
-  const gAHash = bytes(256), randomId = 424242;
+  // 3. Caller opens the call; the invite carries only SHA-256(g_a).
+  const gA = bytes(256), randomId = 424242;
+  const gAHash = { $bytes: createHash('sha256').update(bytesOf(gA)).digest('base64') };
   const waiting = await rpc(alice.token, phone('requestCall'), {
     flags: 0, video: false, user_id: bobPeer, random_id: randomId, g_a_hash: gAHash, protocol: protocol()
   });
@@ -129,10 +130,13 @@ try {
 
   // Retries with the same random_id reuse the existing call instead of ringing twice.
   const replay = await rpc(alice.token, phone('requestCall'), {
-    flags: 0, video: false, user_id: bobPeer, random_id: randomId, g_a_hash: bytes(256), protocol: protocol()
+    flags: 0, video: false, user_id: bobPeer, random_id: randomId, g_a_hash: gAHash, protocol: protocol()
   });
   assert.equal(replay.phone_call.id, callId);
   assert.equal(replay.phone_call.access_hash, waiting.phone_call.access_hash);
+  await rpc(alice.token, phone('requestCall'), {
+    flags: 0, video: false, user_id: bobPeer, random_id: randomId, g_a_hash: bytes(32), protocol: protocol()
+  }, 409).then(x => assert.equal(x.error, 'CALL_IDEMPOTENCY_CONFLICT'));
 
   await rpc(alice.token, phone('requestCall'), {
     flags: 0, user_id: peerOf(aliceTl), random_id: 1, g_a_hash: bytes(32), protocol: protocol()
@@ -145,7 +149,7 @@ try {
   }, 409).then(x => assert.equal(x.error, 'CALL_BUSY'));
   await rpc(carol.token, phone('sendSignalingData'), { peer: callPeer, data: bytes(8) }, 400);
   await rpc(alice.token, phone('confirmCall'), {
-    peer: callPeer, g_a: bytes(256), key_fingerprint: 123456789, protocol: protocol()
+    peer: callPeer, g_a: gA, key_fingerprint: 123456789, protocol: protocol()
   }, 400).then(x => assert.equal(x.error, 'CALL_NOT_ACCEPTED'));
   const wrongHash = { ...callPeer, access_hash: callPeer.access_hash + 1 };
   await rpc(bob.token, phone('receivedCall'), { peer: wrongHash }, 400).then(x => assert.equal(x.error, 'CALL_NOT_FOUND'));
@@ -173,7 +177,11 @@ try {
   const accepted = await rpc(bob.token, phone('acceptCall'), { peer: callPeer, g_b: gB, protocol: protocol() });
   assert.equal(accepted.phone_call.$type, 'org.telegram.tgnet.tl.TL_phone$TL_phoneCallAccepted');
   assert.deepEqual(bytesOf(accepted.phone_call.g_b), bytesOf(gB));
-  await rpc(bob.token, phone('acceptCall'), { peer: callPeer, g_b: bytes(256), protocol: protocol() }, 400)
+  const reaccepted = await rpc(bob.token, phone('acceptCall'), { peer: callPeer, g_b: gB, protocol: protocol() });
+  assert.equal(reaccepted.phone_call.id, callId);
+  assert.equal(reaccepted.phone_call.$type, 'org.telegram.tgnet.tl.TL_phone$TL_phoneCallAccepted');
+  assert.deepEqual(bytesOf(reaccepted.phone_call.g_b), bytesOf(gB), 'identical acceptCall retry returns the same key');
+  await rpc(bob.token, phone('acceptCall'), { peer: callPeer, g_b: bytes(256), protocol: protocol() }, 409)
     .then(x => assert.equal(x.error, 'CALL_ALREADY_ACCEPTED'));
   await rpc(alice.token, phone('acceptCall'), { peer: callPeer, g_b: bytes(256), protocol: protocol() }, 400)
     .then(x => assert.equal(x.error, 'CALL_NOT_FOUND'));
@@ -181,7 +189,7 @@ try {
   assert.equal(callUpdates(diff)[0].phone_call.$type, 'org.telegram.tgnet.tl.TL_phone$TL_phoneCallAccepted');
   aliceCursor = diff.state?.pts ?? aliceCursor;
 
-  const gA = bytes(256), fingerprint = 9007199254740991;
+  const fingerprint = 9007199254740991;
   const active = await rpc(alice.token, phone('confirmCall'), { peer: callPeer, g_a: gA, key_fingerprint: fingerprint, protocol: protocol() });
   const phoneCall = active.phone_call;
   assert.equal(phoneCall.$type, 'org.telegram.tgnet.tl.TL_phone$TL_phoneCall');
@@ -242,13 +250,92 @@ try {
 
   // 10. A finished call no longer blocks new ones.
   const second = await rpc(alice.token, phone('requestCall'), {
-    flags: 0, user_id: bobPeer, random_id: randomId + 1, g_a_hash: bytes(256), protocol: protocol()
+    flags: 0, user_id: bobPeer, random_id: randomId + 1, g_a_hash: bytes(32), protocol: protocol()
   });
   assert.notEqual(second.phone_call.id, callId);
   await rpc(alice.token, phone('discardCall'), {
     peer: { $type: 'org.telegram.tgnet.tl.TL_inputPhoneCall', id: second.phone_call.id, access_hash: second.phone_call.access_hash },
     duration: 0, reason: { $type: 'org.telegram.tgnet.TLRPC$TL_phoneCallDiscardReasonHangup' }, connection_id: 0
   });
+
+  // 10b. Request, reject, confirm and replay all use one stable negotiated protocol.
+  const bobPeer2 = peerOf(bobTl);
+  const negotiationProtocol = (min, max, versions, udpP2p = true) => phone('TL_phoneCallProtocol', {
+    flags: udpP2p ? 3 : 2, udp_p2p: udpP2p, udp_reflector: true,
+    min_layer: min, max_layer: max, library_versions: versions
+  });
+  const gA2 = bytes(256);
+  const gAHash2 = { $bytes: createHash('sha256').update(bytesOf(gA2)).digest('base64') };
+  const negotiated = await rpc(carol.token, phone('requestCall'), {
+    flags: 0, user_id: bobPeer2, random_id: 9001, g_a_hash: gAHash2,
+    protocol: negotiationProtocol(60, 95, ['11.0.0', '10.0.0'])
+  });
+  const negotiatedPeer = {
+    $type: 'org.telegram.tgnet.tl.TL_inputPhoneCall',
+    id: negotiated.phone_call.id, access_hash: negotiated.phone_call.access_hash
+  };
+  const acceptedNegotiated = await rpc(bob.token, phone('acceptCall'), {
+    peer: negotiatedPeer, g_b: bytes(256),
+    protocol: negotiationProtocol(75, 100, ['9.0.0', '10.0.0'])
+  });
+  const acceptedProtocol = acceptedNegotiated.phone_call.protocol;
+  assert.deepEqual([acceptedProtocol.min_layer, acceptedProtocol.max_layer, acceptedProtocol.library_versions],
+    [75, 95, ['10.0.0']], 'accept returns the intersected layer range and library version');
+  // Confirm must echo the caller proposal rather than replace the negotiated result.
+  await rpc(carol.token, phone('confirmCall'), {
+    peer: negotiatedPeer, g_a: gA2, key_fingerprint: 123,
+    protocol: negotiationProtocol(60, 95, ['11.0.0'])
+  }, 409).then(x => assert.equal(x.error, 'CALL_PROTOCOL_MISMATCH'));
+  await rpc(carol.token, phone('confirmCall'), {
+    peer: negotiatedPeer, g_a: gA2, key_fingerprint: 123,
+    protocol: negotiationProtocol(60, 95, ['11.0.0', '10.0.0'])
+  }).then(x => {
+    assert.equal(x.phone_call.$type, 'org.telegram.tgnet.tl.TL_phone$TL_phoneCall');
+    assert.deepEqual([x.phone_call.protocol.min_layer, x.phone_call.protocol.max_layer,
+      x.phone_call.protocol.library_versions], [75, 95, ['10.0.0']]);
+  });
+  await rpc(carol.token, phone('discardCall'), {
+    peer: negotiatedPeer, duration: 0, reason: { $type: 'org.telegram.tgnet.TLRPC$TL_phoneCallDiscardReasonHangup' },
+    connection_id: 0
+  });
+
+  // 10c. Incompatible proposals and malformed protocol fields are rejected explicitly.
+  const incompatible = await rpc(carol.token, phone('requestCall'), {
+    flags: 0, user_id: bobPeer2, random_id: 9002, g_a_hash: bytes(32),
+    protocol: negotiationProtocol(90, 95, ['10.0.0'])
+  });
+  const incompatiblePeer = {
+    $type: 'org.telegram.tgnet.tl.TL_inputPhoneCall',
+    id: incompatible.phone_call.id, access_hash: incompatible.phone_call.access_hash
+  };
+  await rpc(bob.token, phone('acceptCall'), {
+    peer: incompatiblePeer, g_b: bytes(256), protocol: negotiationProtocol(60, 80, ['10.0.0'])
+  }, 409).then(x => assert.equal(x.error, 'CALL_PROTOCOL_INCOMPATIBLE'));
+  await rpc(bob.token, phone('acceptCall'), {
+    peer: incompatiblePeer, g_b: bytes(256), protocol: negotiationProtocol(60, 80, ['9.0.0'])
+  }, 409).then(x => assert.equal(x.error, 'CALL_PROTOCOL_INCOMPATIBLE'));
+  await rpc(bob.token, phone('acceptCall'), {
+    peer: incompatiblePeer, g_b: bytes(256), protocol: negotiationProtocol(60, 80, [])
+  }, 400).then(x => assert.equal(x.error, 'CALL_INVALID_PROTOCOL_LIBRARY'));
+  await rpc(bob.token, phone('acceptCall'), {
+    peer: incompatiblePeer, g_b: bytes(256), protocol: negotiationProtocol(60, 100, ['10.0.0'], false)
+  }, 200);
+  await rpc(carol.token, phone('discardCall'), {
+    peer: incompatiblePeer, duration: 0, reason: { $type: 'org.telegram.tgnet.TLRPC$TL_phoneCallDiscardReasonHangup' },
+    connection_id: 0
+  });
+  await rpc(carol.token, phone('requestCall'), {
+    flags: 0, user_id: bobPeer2, random_id: 9003, g_a_hash: bytes(32),
+    protocol: negotiationProtocol(0, 92, ['10.0.0'])
+  }, 400).then(x => assert.equal(x.error, 'CALL_INVALID_PROTOCOL_LAYERS'));
+  await rpc(carol.token, phone('requestCall'), {
+    flags: 0, user_id: bobPeer2, random_id: 9004, g_a_hash: bytes(32),
+    protocol: negotiationProtocol(65, 1001, ['10.0.0'])
+  }, 400).then(x => assert.equal(x.error, 'CALL_INVALID_PROTOCOL_LAYERS'));
+  await rpc(carol.token, phone('requestCall'), {
+    flags: 0, user_id: bobPeer2, random_id: 9005, g_a_hash: bytes(32),
+    protocol: negotiationProtocol(65, 92, [''])
+  }, 400).then(x => assert.equal(x.error, 'CALL_INVALID_PROTOCOL_LIBRARY'));
 
   // 11. Call records and the update stream survive a restart.
   await stop();
@@ -258,8 +345,10 @@ try {
   assert.equal(stored.state, 'ended');
   await start();
   diff = await difference(bob.token, bobPts);
-  assert(callUpdates(diff).some(u => u.phone_call.id === callId && u.phone_call.$type.endsWith('phoneCallRequested')));
-  assert(callUpdates(diff).some(u => u.phone_call.id === callId && u.phone_call.$type.endsWith('TL_phoneCallDiscarded')));
+  const replayed = callUpdates(diff).filter(u => u.phone_call.id === callId);
+  assert(replayed.length > 0, 'finished call remains in the update stream');
+  assert(replayed.every(u => u.phone_call.$type.endsWith('TL_phoneCallDiscarded')),
+    'finished call converges to its terminal state instead of replaying stale ringing states');
   await stop();
   await writeFile(path.join(fixtureRoot, 'call-tl-fixtures.json'), JSON.stringify(fixtures));
   console.log(`PASS: TL-JSON 1:1 calls (DH config, request/receive/accept/confirm, difference updates, signaling relay, hangup, busy/idempotent/invalid, TURN+STUN relays, restart persistence); ${fixtures.length} TL fixtures`);

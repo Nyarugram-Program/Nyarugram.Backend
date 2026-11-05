@@ -14,6 +14,8 @@ public sealed class AccountPrivacyState
     public AccountPasswordState Password { get; set; } = new();
     public AccountTotpState Totp { get; set; } = new();
     public bool TopPeersEnabled { get; set; } = true;
+    public HashSet<string> SpecialContacts { get; set; } = [];
+    public long SpecialContactsRevision { get; set; }
 }
 
 public static class AccountPrivacyService
@@ -21,7 +23,40 @@ public static class AccountPrivacyService
     public static bool IsDefault(AccountPrivacyState state) => state.Rules.Count == 0 && state.Global.Length == 0
         && state.Blocked.Count == 0 && state.AccountTtlDays == 365 && state.DefaultHistoryTtlSeconds == 0
         && state.Password.Verifier.Length == 0 && state.Totp.Secret.Length == 0 && state.Totp.PendingSecret.Length == 0
-        && state.TopPeersEnabled;
+        && state.TopPeersEnabled && state.SpecialContacts.Count == 0 && state.SpecialContactsRevision == 0;
+
+    public static P.SpecialContacts SpecialSnapshot(AccountPrivacyState state, string domain)
+    {
+        var result = new P.SpecialContacts { Revision = state.SpecialContactsRevision };
+        result.Users.Add(state.SpecialContacts.Order(StringComparer.Ordinal)
+            .Select(id => new P.UserRef { ServerDomain = domain, UserId = id }));
+        return result;
+    }
+
+    public static void RemoveSpecial(AccountPrivacyState state, Func<string, bool> remove)
+    {
+        if (state.SpecialContacts.RemoveWhere(id => remove(id)) != 0)
+            state.SpecialContactsRevision = checked(state.SpecialContactsRevision + 1);
+    }
+
+    public static P.SpecialContacts SpecialContacts(Database db, string uid, P.SetSpecialContactRequest? input, string domain)
+    {
+        var state = State(db, uid);
+        if (input is not null)
+        {
+            var id = ProtobufRpcMapper.SelectedUserId(input.User, uid, domain);
+            if (!db.Users.Any(u => u.Id == id)) throw new ApiException(404, "USER_ID_INVALID");
+            if (input.Enabled)
+            {
+                if (id == uid || !db.Contacts.Any(c => c.OwnerId == uid && c.UserId == id))
+                    throw new ApiException(400, "CONTACT_ID_INVALID");
+                if (IsBlocked(db, uid, id) || IsBlocked(db, id, uid)) throw new ApiException(403, "USER_IS_BLOCKED");
+                if (state.SpecialContacts.Add(id)) state.SpecialContactsRevision = checked(state.SpecialContactsRevision + 1);
+            }
+            else RemoveSpecial(state, candidate => candidate == id);
+        }
+        return SpecialSnapshot(state, domain);
+    }
 
     public static AccountPrivacyState State(Database db, string uid)
     {
@@ -97,11 +132,13 @@ public static class AccountPrivacyService
                 if (request.DeleteContacts.Users.Count > 10000) throw new ApiException(400, "CONTACTS_TOO_MUCH");
                 var deletedIds = request.DeleteContacts.Users.Select(User).ToHashSet();
                 db.Contacts.RemoveAll(c => c.OwnerId == uid && deletedIds.Contains(c.UserId));
+                RemoveSpecial(state, deletedIds.Contains);
                 result.ContactsDeleted = new();
                 break;
             case P.AccountPrivacyRequest.OperationOneofCase.ResetSavedContacts:
                 // Imported contacts are the only server-side address book representation.
                 db.Contacts.RemoveAll(c => c.OwnerId == uid);
+                RemoveSpecial(state, _ => true);
                 result.Applied = true;
                 break;
             case P.AccountPrivacyRequest.OperationOneofCase.ToggleTopPeers:
@@ -185,6 +222,9 @@ public static class AccountPrivacyService
                 var blockedId = User(request.BlockUser);
                 if (blockedId == uid) throw new ApiException(400, "USER_ID_INVALID");
                 state.Blocked.TryAdd(blockedId, DateTimeOffset.UtcNow);
+                RemoveSpecial(state, id => id == blockedId);
+                if (db.AccountPrivacy!.TryGetValue(blockedId, out var blockedState))
+                    RemoveSpecial(blockedState, id => id == uid);
                 result.Applied = true;
                 break;
             case P.AccountPrivacyRequest.OperationOneofCase.UnblockUser:
