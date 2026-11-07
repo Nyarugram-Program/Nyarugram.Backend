@@ -242,6 +242,20 @@ public static class PostgresBackendSchema
                     updated_at timestamptz NOT NULL);
                 CREATE INDEX IF NOT EXISTS e2ee_conversations_state_idx
                     ON botgram_backend_v1.e2ee_conversations(state);
+                -- Legacy snapshots contain schema-1 call.tl_signal events with no
+                -- expiry and no pts. DeliveryEventCodec already accepts those as
+                -- legacy call events on replay; the persisted shape must agree.
+                ALTER TABLE botgram_intake_v1.events DROP CONSTRAINT backend_event_shape;
+                ALTER TABLE botgram_intake_v1.events ADD CONSTRAINT backend_event_shape CHECK (
+                    (schema_version=1 AND (
+                        (type='message.created' AND message_id IS NOT NULL)
+                        OR (type IN ('conversation.created','receipt.updated','call.updated','call.signal','user.gid_changed')
+                            AND message_id IS NULL AND payload IS NOT NULL)
+                        OR (type='call.tl_signal' AND message_id IS NULL AND payload IS NOT NULL)))
+                    OR (schema_version=2 AND type='wallpaper.changed' AND message_id IS NULL AND payload IS NOT NULL)
+                    OR (schema_version=3 AND type='user.presence_changed' AND message_id IS NULL AND payload IS NOT NULL)
+                    OR (schema_version=4 AND type IN ('call.updated','call.tl_signal')
+                        AND message_id IS NULL AND payload IS NOT NULL));
                 INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(9);
             END IF;
             END $migration$;

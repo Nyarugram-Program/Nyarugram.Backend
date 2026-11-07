@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Google.Protobuf;
 using Botgram.Backend;
 using Botgram.Backend.Storage;
@@ -36,10 +37,21 @@ internal static class SnapshotMigrationTests
         ConversationMessageService.Send(db, saved, alice.Id, new("saved-key", "saved text"), MessageWriteContract.Rest);
         ContactService.Import(db, alice.Id, 1, [new(7, bob.Gid, "Private", "Name", false)]);
         PresenceService.Report(db, db.Sessions.Single(s => s.TokenHash == Auth.HashToken(auth.Token)), true);
-        var call = new Call(Guid.NewGuid().ToString("N"), conversation.Id, alice.Id, bob.Id, "ended", DateTimeOffset.UtcNow);
+        // Legacy-shaped call state: a schema-1 call.tl_signal event without an
+        // expiry, an unsorted jsonb protocol document and an advanced call id
+        // counter. All three must survive import/export with the same fingerprint.
+        var protocol = new JsonObject
+        {
+            ["udp_p2p"] = true, ["library_versions"] = new JsonArray("2.7.7", "10.0.0"),
+            ["max_layer"] = 92, ["nested"] = new JsonObject { ["z"] = 1, ["a"] = 2 }, ["min_layer"] = 65
+        };
+        var call = new Call(Guid.NewGuid().ToString("N"), conversation.Id, alice.Id, bob.Id, "ended", DateTimeOffset.UtcNow,
+            TelegramId: 1_000_000_000, Protocol: protocol);
+        db.NextCallId = 1_000_000_001;
         db.Calls.Add(call);
         db.Emit(conversation.Members, "call.updated", call);
         db.Emit([bob.Id], "call.signal", new CallSignal(call.Id, alice.Id, "offer", "synthetic-offer"), DateTimeOffset.UtcNow.AddHours(1));
+        db.Emit([bob.Id], "call.tl_signal", new CallSignal(call.Id, alice.Id, "tl", "synthetic-tl"));
         // E2EE public-key directory, one-time pre-keys (including consumed),
         // per-chat state and an opaque ciphertext envelope must survive the
         // offline migration with the same fingerprint.
@@ -92,6 +104,9 @@ internal static class SnapshotMigrationTests
         Check(!await migration.ImportAsync(db), "same source imported twice");
         var restored = await migration.ExportAsync();
         Check(PostgresSnapshotMigration.Fingerprint(restored) == PostgresSnapshotMigration.Fingerprint(db), "full business snapshot roundtrip");
+        Check(restored.NextCallId == db.NextCallId, "legacy call id counter lost");
+        Check(restored.Events.Any(e => e.Type == "call.tl_signal" && e.ExpiresAt is null), "legacy TL signaling replay lost");
+        Check(restored.Calls.Single().Protocol is not null, "call protocol document lost");
         Check(restored.E2eeDevices.Count == 2 && restored.E2eeConversations.Count == 1,
             "E2EE device directory or chat state lost during import");
         Check(restored.E2eeDevices.SelectMany(d => d.OneTimePreKeys).Count() == 3 &&

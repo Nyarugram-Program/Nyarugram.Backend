@@ -9,11 +9,41 @@ namespace Botgram.Backend.Storage;
 public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
 {
     private static DateTimeOffset Time(DateTimeOffset value) => new(value.UtcTicks - value.UtcTicks % 10, TimeSpan.Zero);
+    // PostgreSQL jsonb reorders object keys. Canonicalize JsonNode payloads so a
+    // legacy snapshot and its relational roundtrip hash identically.
+    private static void Sort(JsonNode? node)
+    {
+        if (node is JsonObject obj)
+        {
+            var entries = obj.Select(p => (p.Key, Value: p.Value?.DeepClone()))
+                .OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();
+            obj.Clear();
+            foreach (var (key, child) in entries) { Sort(child); obj.Add(key, child); }
+        }
+        else if (node is JsonArray array)
+        {
+            foreach (var child in array) Sort(child);
+        }
+    }
+
+    private static JsonObject? Canonical(JsonObject? value)
+    {
+        if (value is null) return null;
+        var copy = (JsonObject)value.DeepClone();
+        Sort(copy);
+        return copy;
+    }
+
     private static IEventPayload Payload(IEventPayload value) => value switch
     {
         Message m => m with { CreatedAt = Time(m.CreatedAt) },
         Conversation c => c with { CreatedAt = Time(c.CreatedAt) },
-        Call c => c with { UpdatedAt = Time(c.UpdatedAt) },
+        Call c => c with
+        {
+            UpdatedAt = Time(c.UpdatedAt), Protocol = Canonical(c.Protocol),
+            Connections = c.Connections?.Select(v => (JsonObject)Canonical(v)!).ToArray(),
+            RequestProtocol = Canonical(c.RequestProtocol), AcceptProtocol = Canonical(c.AcceptProtocol)
+        },
         _ => value
     };
 
@@ -311,10 +341,13 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
                 call.KeyFingerprint, call.Date, call.ReceiveDate, call.StartDate, call.Reason, call.Duration,
                 call.Connections is null ? (object)DBNull.Value : new JsonArray(call.Connections.Select(c => c.DeepClone()).ToArray()).ToJsonString(),
                 call.P2pAllowed);
+        // The legacy call counter can be ahead of the highest surviving call id.
+        // Keep the sequence at both boundaries so replay and new calls never
+        // reuse an id, and export can reconstruct the exact source counter.
         await Execute("""
             SELECT setval('botgram_backend_v1.call_identity',
-                GREATEST(999999,(SELECT COALESCE(MAX(telegram_id),0) FROM botgram_backend_v1.calls)))
-            """);
+                GREATEST(999999,(SELECT COALESCE(MAX(telegram_id),0) FROM botgram_backend_v1.calls),$1::bigint))
+            """, Math.Max(0L, db.NextCallId - 1));
         foreach (var identity in db.TelegramIds)
             await Execute("INSERT INTO botgram_backend_v1.identities(key,value) VALUES($1,$2)", identity.Key, identity.Value);
         var pts = db.Users.ToDictionary(u => u.Id, _ => 1);
@@ -358,7 +391,8 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
         await Execute("SELECT setval('botgram_backend_v1.telegram_identity',$1,false)", db.NextTelegramId);
         await Execute("UPDATE botgram_intake_v1.event_cursor SET value=$1 WHERE singleton", db.NextEventId - 1);
         var hash = Fingerprint(db);
-        if (Fingerprint(await Export(connection, transaction, token)) != hash) throw new InvalidDataException("Imported state does not match its canonical source");
+        if (Fingerprint(await Export(connection, transaction, token)) != hash)
+            throw new InvalidDataException("Imported state does not match its canonical source");
         await Execute("INSERT INTO botgram_backend_v1.migration_snapshot(singleton,source_hash,state_hash) VALUES(true,$1,$2)", originalHash, hash);
         await transaction.CommitAsync(token);
         return true;
@@ -459,6 +493,14 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
         await Rows("SELECT last_value+CASE WHEN is_called THEN 1 ELSE 0 END FROM botgram_intake_v1.messages_id_seq", r => db.NextMessageId = r.GetInt64(0));
         await Rows("SELECT value+1 FROM botgram_intake_v1.event_cursor WHERE singleton", r => db.NextEventId = r.GetInt64(0));
         await Rows("SELECT last_value+CASE WHEN is_called THEN 1 ELSE 0 END FROM botgram_backend_v1.telegram_identity", r => db.NextTelegramId = r.GetInt64(0));
+        // Import pins the sequence at 999999 for a legacy snapshot that never
+        // allocated a real call id; that sentinel reconstructs NextCallId=0
+        // (lazy 1_000_000_000 initialization). Otherwise the sequence is authoritative.
+        await Rows("""
+            SELECT CASE WHEN last_value=999999 THEN 0
+                ELSE last_value+CASE WHEN is_called THEN 1 ELSE 0 END END
+            FROM botgram_backend_v1.call_identity
+            """, r => db.NextCallId = r.GetInt64(0));
         return Normalize(db);
     }
 }

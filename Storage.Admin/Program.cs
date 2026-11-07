@@ -75,8 +75,14 @@ if (args[0] == "init")
 if (!primary && (!string.Equals(builder.Configuration["Storage:Mode"], nameof(StorageMode.NewStorageValidation), StringComparison.Ordinal) ||
     !string.Equals(builder.Configuration["Storage:ValidationAcknowledged"], "true", StringComparison.OrdinalIgnoreCase)))
     throw new InvalidOperationException("Isolated prepare/import/export require NewStorageValidation and ValidationAcknowledged=true");
-if (backendName != "FourComponent")
-    throw new InvalidOperationException("Storage.Admin prepare/import/export require ValidationBackend=FourComponent");
+// Snapshot import/export are pure PostgreSQL operations. A production cutover
+// that intentionally uses PostgreSQL as the sole authority (RelationalBackend)
+// must be able to migrate without provisioning Kafka/Scylla/Redis. Only the
+// four-component prepare step keeps the full-stack requirement.
+if (backendName is not ("RelationalBackend" or "FourComponent"))
+    throw new InvalidOperationException("Storage.Admin prepare/import/export require ValidationBackend=RelationalBackend or FourComponent");
+if (args[0] == "prepare" && backendName != "FourComponent")
+    throw new InvalidOperationException("Storage.Admin prepare requires ValidationBackend=FourComponent; use init for a PostgreSQL-only target");
 await using var stack = NpgsqlDataSource.Create(connectionString);
 switch (args[0])
 {
