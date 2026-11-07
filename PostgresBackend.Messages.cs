@@ -57,7 +57,8 @@ public sealed partial class PostgresBackend
             result.Groups.Add(groups.Select(c => ProtobufRpcMapper.MapGroup(c, mappings[c.Id])));
         }
         var message = (await MappedMessages(work, uid, domain, [accepted.Message])).Single();
-        result.Updates_.Add(new P.Update { NewMessage = new() { Message = message, Pts = accepted.Pts, PtsCount = 1 } });
+        result.Updates_.Add(new P.Update { NewMessage = new() {
+            Message = message, Pts = accepted.Pts, PtsCount = accepted.PtsCount } });
         result.Users.Add((await Related(work, uid, false)).Select(u => ProtobufRpcMapper.MapUser(u, domain)));
         return result;
     }

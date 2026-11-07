@@ -16,7 +16,10 @@ public static class StorageContractVersions
 public sealed record MessageAcceptance(string SessionTokenHash, string UserId, string ConversationId,
     SendMessageCommand Command, MessageWriteContract Contract);
 // Pts is the sender's CURRENT pts, including on a duplicate; it is not the original event's pts.
-public sealed record AcceptedMessage(Message Message, bool Duplicate, int Pts);
+// Pts is the persistent per-user pts of the original message.created event, both
+// for a new commit and for an idempotent replay. PtsCount stays 1 because one
+// message acceptance emits exactly one event for each recipient.
+public sealed record AcceptedMessage(Message Message, bool Duplicate, int Pts, int PtsCount = 1);
 public sealed record MessageDeduplicationKey(string ConversationId, string SenderId, string ClientKey);
 public sealed record RecipientPosition(string UserId, int? Pts);
 

@@ -110,6 +110,24 @@ jobs:
         env:
           BOTGRAM_E2EE_PG: 'Host=127.0.0.1;Port=5432;Database=botgram_test_outbox;Username=botgram_test'
         run: node tests/relational-outbox.mjs
+      - name: Initialize idempotent-pts regression database
+        run: |
+          psql -h 127.0.0.1 -U botgram_test -d postgres -c 'CREATE DATABASE botgram_test_pts'
+          cat > "$RUNNER_TEMP/pg-pts.json" <<'JSON'
+          {
+            "Storage": {
+              "Mode": "NewStorageValidation",
+              "ValidationAcknowledged": true,
+              "ValidationBackend": "RelationalBackend",
+              "ValidationConnectionString": "Host=127.0.0.1;Port=5432;Database=botgram_test_pts;Username=botgram_test"
+            }
+          }
+          JSON
+          dotnet Storage.Admin/bin/Release/net8.0/Storage.Admin.dll init "$RUNNER_TEMP/pg-pts.json"
+      - name: Idempotent retry returns the original persistent pts
+        env:
+          BOTGRAM_E2EE_PG: 'Host=127.0.0.1;Port=5432;Database=botgram_test_pts;Username=botgram_test'
+        run: node tests/idempotent-pts.mjs
       - name: Protobuf schema fingerprint and frozen fixtures
         run: |
           node tests/proto-fingerprint.cjs

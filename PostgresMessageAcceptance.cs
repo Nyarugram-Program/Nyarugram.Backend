@@ -223,9 +223,21 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
                 (existing.ReplyToMessageId != command.ReplyId || existing.Silent != command.Silent ||
                  !MessageEntityService.Equal(existing.TelegramEntities, command.Entities))))
                 throw new ApiException(409, input.Contract == MessageWriteContract.Telegram ? "RANDOM_ID_DUPLICATE" : "idempotency_conflict");
-            var pts = (int?)await Scalar("SELECT pts FROM botgram_intake_v1.sync WHERE user_id = $1", input.UserId) ?? 1;
-            var duplicateResponse = prepareResponse(new(existing, true, pts));
-            return duplicateResponse;
+            // The retry must report the pts this message originally received for the
+            // current user, never the current sync cursor. A cursor fallback would make
+            // the client jump over intervening updates it has not fetched yet.
+            var originalPts = await Scalar("""
+                SELECT r.pts FROM botgram_intake_v1.events e
+                JOIN botgram_intake_v1.event_recipients r ON r.event_id = e.id
+                WHERE e.message_id = $1 AND r.user_id = $2
+                """, existing.Id, input.UserId);
+            if (originalPts is not int pts)
+            {
+                Console.Error.WriteLine(
+                    $"BOTGRAM_MESSAGE_EVENT_PTS_MISSING conversation={input.ConversationId} message_id={existing.Id} user={input.UserId}");
+                throw new ApiException(500, "BOTGRAM_MESSAGE_EVENT_PTS_MISSING");
+            }
+            return prepareResponse(new(existing, true, pts));
         }
 
         // Durable idempotency is settled: this is a brand-new message. Only now does

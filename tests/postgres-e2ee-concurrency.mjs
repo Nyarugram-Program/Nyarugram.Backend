@@ -130,7 +130,7 @@ try {
   const generations = replacements.map(result => Number(first(outcome(result, 139), 11).value));
   assert.ok(new Set(generations).size >= 1 && Math.max(...generations) >= 2);
   const storedGeneration = Number(sql(
-    'SELECT max(generation) FROM botgram_backend_v1.e2ee_devices'));
+    `SELECT max(generation) FROM botgram_backend_v1.e2ee_devices WHERE user_id='${bId.replaceAll("'", "''")}'`));
   assert.equal(storedGeneration, Math.max(...generations));
   checks++;
 
