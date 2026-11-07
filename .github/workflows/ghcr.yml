@@ -84,7 +84,17 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
+          outputs: type=docker,dest=${{ runner.temp }}/botgram-backend-image.tar
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Upload deployable image archive
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-image-${{ github.sha }}
+          path: ${{ runner.temp }}/botgram-backend-image.tar
+          compression-level: 1
+          retention-days: 3
