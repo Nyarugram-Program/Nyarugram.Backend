@@ -3,6 +3,9 @@
 !*.csproj
 !appsettings.json
 !global.json
+!packages.lock.json
+!Protocol/
+!Protocol/BotgramRpc.cs
 !Resources/
 !Resources/M49/
 !Resources/M49/botgram-m49.json
