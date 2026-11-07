@@ -91,7 +91,7 @@ jobs:
       - name: PostgreSQL storage contracts, delivery fencing and capacity
         env:
           BOTGRAM_PG_TEST_CONNECTION_STRING: 'Host=127.0.0.1;Port=5432;Database=botgram_test_ci;Username=botgram_test'
-        run: dotnet run --no-build -c Release --project Storage.Tests
+        run: dotnet run -c Release --project Storage.Tests
       - name: Initialize dedicated outbox-completion database
         run: |
           psql -h 127.0.0.1 -U botgram_test -d postgres -c 'CREATE DATABASE botgram_test_outbox'
