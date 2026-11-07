@@ -40,6 +40,28 @@ internal static class SnapshotMigrationTests
         db.Calls.Add(call);
         db.Emit(conversation.Members, "call.updated", call);
         db.Emit([bob.Id], "call.signal", new CallSignal(call.Id, alice.Id, "offer", "synthetic-offer"), DateTimeOffset.UtcNow.AddHours(1));
+        // E2EE public-key directory, one-time pre-keys (including consumed),
+        // per-chat state and an opaque ciphertext envelope must survive the
+        // offline migration with the same fingerprint.
+        var identityKey = RandomNumberGenerator.GetBytes(33);
+        var e2eeDevice = new E2eeDevice(alice.Id, 1, 1234, identityKey, 10, RandomNumberGenerator.GetBytes(33),
+            RandomNumberGenerator.GetBytes(32), 11, RandomNumberGenerator.GetBytes(800), RandomNumberGenerator.GetBytes(32),
+            1, DateTimeOffset.UtcNow,
+            [new E2eeOneTimePreKey(100, RandomNumberGenerator.GetBytes(33), false),
+             new E2eeOneTimePreKey(101, RandomNumberGenerator.GetBytes(33), true)]);
+        db.E2eeDevices.Add(e2eeDevice);
+        db.E2eeDevices.Add(e2eeDevice with { UserId = bob.Id, IdentityKey = RandomNumberGenerator.GetBytes(33),
+            OneTimePreKeys = [new E2eeOneTimePreKey(200, RandomNumberGenerator.GetBytes(33), false)] });
+        var sealedEnvelope = new P.E2eeEnvelope
+        {
+            ProtocolVersion = 1, ConversationId = conversation.Id, SenderUserId = alice.Id, SenderDeviceId = 1,
+            RecipientUserId = bob.Id, RecipientDeviceId = 1, KeyEpoch = 1, RandomId = 424242,
+            Ciphertext = ByteString.CopyFrom(RandomNumberGenerator.GetBytes(48)), MessageType = 3
+        }.ToByteArray();
+        ConversationMessageService.AddMessage(db, conversation, alice.Id, "e2ee:snapshot", "",
+            e2eeEnvelope: sealedEnvelope);
+        db.E2eeConversations.Add(new E2eeConversation(conversation.Id, "active", 2, 1, alice.Id,
+            first.Id, 0, null, conversation.Members, DateTimeOffset.UtcNow, 3));
         foreach (var user in db.Users) IdentityService.UserId(db, user.Id);
         foreach (var group in db.Conversations.Where(c => c.Kind == "group")) IdentityService.ChatId(db, group);
         var privacy = AccountPrivacyService.State(db, alice.Id);
@@ -70,6 +92,14 @@ internal static class SnapshotMigrationTests
         Check(!await migration.ImportAsync(db), "same source imported twice");
         var restored = await migration.ExportAsync();
         Check(PostgresSnapshotMigration.Fingerprint(restored) == PostgresSnapshotMigration.Fingerprint(db), "full business snapshot roundtrip");
+        Check(restored.E2eeDevices.Count == 2 && restored.E2eeConversations.Count == 1,
+            "E2EE device directory or chat state lost during import");
+        Check(restored.E2eeDevices.SelectMany(d => d.OneTimePreKeys).Count() == 3 &&
+            restored.E2eeDevices.SelectMany(d => d.OneTimePreKeys).Count(k => k.Consumed) == 1,
+            "E2EE one-time pre-keys or consumed flags lost");
+        Check(restored.E2eeConversations.Single().IdentityGeneration == 3, "E2EE identity generation lost");
+        Check(restored.Messages.Single(m => m.ClientMessageId == "e2ee:snapshot").E2eeEnvelope is { } restoredEnvelope &&
+            restoredEnvelope.AsSpan().SequenceEqual(sealedEnvelope), "E2EE ciphertext envelope lost");
         Check(originalHash.SequenceEqual(SHA256.HashData(await File.ReadAllBytesAsync(original))), "source snapshot was modified");
         var backend = new PostgresBackend(source);
         var session = await backend.RequireAsync(Auth.HashToken(auth.Token));

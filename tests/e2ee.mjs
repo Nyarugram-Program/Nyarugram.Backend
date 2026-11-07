@@ -4,11 +4,16 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdtemp, readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { register, profile } from './protobuf-plane.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// BOTGRAM_E2EE_POSTGRES=1 runs the exact same protocol regression against a
+// real PostgreSQL-authoritative backend (NewStorageValidation/RelationalBackend).
+const postgres = process.env.BOTGRAM_E2EE_POSTGRES === '1';
 const fixtureRoot = process.env.BOTGRAM_TEST_ROOT ?? path.join(root, 'obj');
 const temp = await mkdtemp(path.join(fixtureRoot, 'e2ee-'));
 const database = path.join(temp, 'db.json');
@@ -23,9 +28,23 @@ let server;
 let sequence = 0;
 
 async function start() {
+  const isolated = {
+    ASPNETCORE_ENVIRONMENT: 'Development',
+    Storage__Mode: 'NewStorageValidation',
+    Storage__ValidationBackend: 'RelationalBackend',
+    Storage__ValidationAcknowledged: 'true',
+    Storage__ValidationConnectionString: process.env.BOTGRAM_E2EE_PG,
+    Protocol__LegacyJsonRpcEnabled: 'false',
+    Protocol__LegacyJsonWssEnabled: 'false',
+    Protocol__ProtobufRolloutPercent: '100',
+    DataPath: path.join(temp, 'keys.json')
+  };
+  if (postgres && !isolated.Storage__ValidationConnectionString)
+    throw new Error('BOTGRAM_E2EE_POSTGRES=1 requires BOTGRAM_E2EE_PG');
   server = spawn('dotnet', [process.env.BOTGRAM_TEST_DLL ?? path.join(root, 'bin/Debug/net8.0/Botgram.Backend.dll'),
     '--urls', base], {
-    cwd: root, env: { ...process.env, DataPath: database }, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe']
+    cwd: root, env: { ...process.env, ...(postgres ? isolated : { DataPath: database }) },
+    windowsHide: true, stdio: ['ignore', 'pipe', 'pipe']
   });
   server.stdout.on('data', value => logs += value);
   server.stderr.on('data', value => logs += value);
@@ -181,10 +200,18 @@ function rpcCode(response, expected, code) {
 
 try {
   await start();
-  const alice = await rest('POST', '/api/auth/register', null, { username: 'e2eealice', displayName: 'Alice', password: 'e2ee-test-123' });
-  const bob = await rest('POST', '/api/auth/register', null, { username: 'e2eebob', displayName: 'Bob', password: 'e2ee-test-123' });
-  const carol = await rest('POST', '/api/auth/register', null, { username: 'e2eecarol', displayName: 'Carol', password: 'e2ee-test-123' });
-  const aliceId = alice.user.id, bobId = bob.user.id, carolId = carol.user.id;
+  // Authentication now uses the Protobuf auth plane; the legacy JSON REST
+  // register/login endpoints are retired (see tests/json-retirement.mjs).
+  // A fresh suffix makes the regression repeatable against a persistent
+  // PostgreSQL database without creating accounts in any production store.
+  const suffix = postgres ? Date.now().toString(36) : '';
+  const aliceAccount = await register(base, 'e2eealice' + suffix, 'e2ee-test-123', 'Alice');
+  const bobAccount = await register(base, 'e2eebob' + suffix, 'e2ee-test-123', 'Bob');
+  const carolAccount = await register(base, 'e2eecarol' + suffix, 'e2ee-test-123', 'Carol');
+  const alice = { token: aliceAccount.token }, bob = { token: bobAccount.token }, carol = { token: carolAccount.token };
+  const aliceId = profile(aliceAccount.user).userId,
+        bobId = profile(bobAccount.user).userId,
+        carolId = profile(carolAccount.user).userId;
 
   // Both peers must publish public pre-key material before an invitation can be accepted.
   const alicePublish = await protoRpc(alice.token, 139, publishBody(Buffer.alloc(33, 0x11)));
@@ -353,11 +380,33 @@ try {
   assert.equal(statusState(statusFor(statusAfterRestart, 141, bobId)), 2);
 
   // Legacy database fields stay absent and no plaintext appears in the snapshot.
-  const snapshot = await readFile(database, 'utf8');
-  assert.ok(!snapshot.includes('plaintext leak'));
-  assert.ok(snapshot.toLowerCase().includes('e2eeenvelope'));
+  if (postgres) {
+    // Same invariants against the PostgreSQL authority: ciphertext envelopes
+    // live in messages.body jsonb, device/session state in dedicated v9 tables,
+    // and no decrypted text is ever persisted on the server.
+    if (!process.env.BOTGRAM_PSQL) throw new Error('BOTGRAM_E2EE_POSTGRES=1 requires BOTGRAM_PSQL');
+    const settings = Object.fromEntries(process.env.BOTGRAM_E2EE_PG.split(';').filter(Boolean).map(pair => {
+      const index = pair.indexOf('=');
+      return [pair.slice(0, index).trim().toLowerCase(), pair.slice(index + 1).trim()];
+    }));
+    const args = ['-h', settings.host ?? '127.0.0.1', '-p', settings.port ?? '5432',
+      '-U', settings.username, '-d', settings.database, '-tAc'];
+    const query = sql => Number(execFileSync(process.env.BOTGRAM_PSQL, [...args, sql], { encoding: 'utf8' }).trim());
+    assert.ok(query("SELECT count(*) FROM botgram_intake_v1.messages WHERE body::text ILIKE '%E2eeEnvelope%'") > 0);
+    assert.equal(query("SELECT count(*) FROM botgram_intake_v1.messages WHERE body::text LIKE '%plaintext leak%'"), 0);
+    assert.ok(query("SELECT count(*) FROM botgram_backend_v1.e2ee_devices") >= 2);
+    assert.ok(query("SELECT count(*) FROM botgram_backend_v1.e2ee_conversations") >= 1);
+    assert.ok(query("SELECT count(*) FROM botgram_backend_v1.e2ee_one_time_pre_keys") >= 1);
+  } else {
+    const snapshot = await readFile(database, 'utf8');
+    assert.ok(!snapshot.includes('plaintext leak'));
+    assert.ok(snapshot.toLowerCase().includes('e2eeenvelope'));
+  }
 
-  console.log('PASS: directional E2EE without recipient keys, normal reverse direction, persistent old placeholders, independent disabling, protocol version guard, Signal activation, identity and restart');
+  console.log(`PASS: directional E2EE without recipient keys, normal reverse direction, persistent old placeholders, independent disabling, protocol version guard, Signal activation, identity and restart (${postgres ? 'PostgreSQL' : 'legacy file'} authority)`);
+} catch (error) {
+  if (logs.trim()) console.error('BACKEND LOGS:\n' + logs);
+  throw error;
 } finally {
   await stop();
 }

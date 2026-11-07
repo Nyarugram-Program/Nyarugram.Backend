@@ -93,8 +93,13 @@ public static class ProtobufRpcEndpoint
             await context.Response.Body.WriteAsync(bytes, context.RequestAborted);
         }
         catch (ApiException ex) { await Error(context, requestId, ex.Status, ex.Message); }
-        catch (Npgsql.NpgsqlException) when (!context.Response.HasStarted)
-        { await Error(context, requestId, 500, "BOTGRAM_STORAGE_FAILURE"); }
+        catch (Npgsql.NpgsqlException ex) when (!context.Response.HasStarted)
+        {
+            // Never expose connection strings or query parameters in the API
+            // response; the host log keeps the symbolic PostgreSQL error only.
+            Console.Error.WriteLine("BOTGRAM_STORAGE_FAILURE " + ex.GetType().Name + ": " + ex.Message);
+            await Error(context, requestId, 500, "BOTGRAM_STORAGE_FAILURE");
+        }
         catch (InvalidProtocolBufferException) { await Error(context, requestId, 400, "BOTGRAM_PROTOBUF_MALFORMED"); }
         catch (BadHttpRequestException ex) { await Error(context, requestId, ex.StatusCode == 413 ? 413 : 400, "BOTGRAM_REQUEST_INVALID"); }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }

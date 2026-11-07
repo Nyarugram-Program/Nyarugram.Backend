@@ -31,7 +31,9 @@ if (knownProxies.Length > 0)
 }
 var relationalValidation = storagePolicy.Mode == StorageMode.NewStorageValidation &&
     builder.Configuration["Storage:ValidationBackend"] == "RelationalThreeRpc";
-var relationalBackend = storagePolicy.Mode == StorageMode.NewStorageValidation &&
+// NewStoragePrimary is the production cutover: the same relational/四组件
+// implementation, with a dedicated connection string and no Development bypass.
+var relationalBackend = (storagePolicy.Mode == StorageMode.NewStorageValidation || storagePolicy.IsPrimary) &&
     builder.Configuration["Storage:ValidationBackend"] is "RelationalBackend" or "FourComponent";
 var fourComponent = builder.Configuration["Storage:ValidationBackend"] == "FourComponent";
 var privacyKeys = builder.Configuration["Privacy:KeyDirectory"];
@@ -52,7 +54,8 @@ if (fourComponent)
 if (!relationalBackend) builder.Services.AddSingleton<Store>();
 if (relationalValidation || relationalBackend)
 {
-    var connection = new Npgsql.NpgsqlConnectionStringBuilder(PostgresValidationStore.Validate(builder.Configuration)) { Pooling = true };
+    var connection = new Npgsql.NpgsqlConnectionStringBuilder(
+        StoragePolicy.ResolveConnectionString(builder.Configuration, storagePolicy)) { Pooling = true };
     builder.Services.AddSingleton(_ => Npgsql.NpgsqlDataSource.Create(connection.ConnectionString));
     if (relationalValidation) builder.Services.AddSingleton<PostgresRelationalValidation>();
     else
@@ -83,6 +86,9 @@ var legacyJsonEnabled = protocolPolicy.LegacyJsonRpcEnabled;
 var auditRpc = builder.Configuration.GetValue<bool>("Protocol:AuditRpc");
 var app = builder.Build();
 if (knownProxies.Length > 0) app.UseForwardedHeaders();
+// Retired JSON API gate: before authentication, routing, rate limiting and any
+// storage access. Every retired path gets the same explicit non-JSON 410.
+app.Use((context, next) => JsonApiRetirement.Guard(context, next));
 app.Use((context, next) => app.Services.GetRequiredService<ProtocolUsage>().Observe(context, next));
 // Fail at startup if the database is invalid or already in use.
 if (relationalBackend)
@@ -146,32 +152,42 @@ app.Use(async (context, next) =>
             completed, context.RequestAborted.IsCancellationRequested);
     }
 });
+// All framework-level failures use the same non-JSON error format. Protobuf
+// endpoints encode their own RpcError before this handler is reached.
+static Task PlainError(HttpContext context, int status, string code)
+{
+    context.Response.StatusCode = status;
+    context.Response.ContentType = "text/plain; charset=utf-8";
+    context.Response.Headers.CacheControl = "no-store";
+    var body = code + "\nstatus=" + status + "\n";
+    context.Response.ContentLength = System.Text.Encoding.UTF8.GetByteCount(body);
+    return context.Response.WriteAsync(body, context.RequestAborted);
+}
 app.Use(async (context, next) =>
 {
     try { await next(context); }
     catch (ApiException ex)
     {
         context.Items["rpc_error"] = ex.Message;
-        context.Response.StatusCode = ex.Status;
-        await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+        await PlainError(context, ex.Status, ex.Message);
     }
     catch (BadHttpRequestException)
     {
         context.Items["rpc_error"] = "invalid_request";
-        context.Response.StatusCode = 400;
-        await context.Response.WriteAsJsonAsync(new { error = "invalid_request" });
+        await PlainError(context, 400, "invalid_request");
     }
     catch (Npgsql.NpgsqlException) when (fourComponent)
     {
-        context.Response.StatusCode = 503;
-        await context.Response.WriteAsJsonAsync(new { error = "storage_unavailable" });
+        await PlainError(context, 503, "storage_unavailable");
     }
 });
 if (relationalValidation) app.Use(async (context, next) =>
 {
-    var path = context.Request.Path.Value?.TrimEnd('/');
+    var path = JsonApiRetirement.Normalize(context.Request.Path.Value);
     if (!string.Equals(path, "/health", StringComparison.OrdinalIgnoreCase) &&
-        !string.Equals(path, ProtobufRpcEndpoint.Path, StringComparison.OrdinalIgnoreCase))
+        !string.Equals(path, ProtobufRpcEndpoint.Path, StringComparison.OrdinalIgnoreCase) &&
+        !string.Equals(path, AuthProtobufEndpoint.AuthPath, StringComparison.OrdinalIgnoreCase) &&
+        !string.Equals(path, AuthProtobufEndpoint.AccountPath, StringComparison.OrdinalIgnoreCase))
         throw new ApiException(501, "BOTGRAM_RELATIONAL_ROUTE_UNSUPPORTED");
     await next(context);
 });
@@ -183,7 +199,13 @@ app.Use(async (context, next) =>
     if (fourComponent && path.StartsWithSegments("/api"))
         await context.RequestServices.GetRequiredService<Botgram.Backend.Storage.FourComponentRuntime>()
             .EnsureOwnershipAsync(context.RequestAborted);
-    if (path.StartsWithSegments("/api") && path != "/api/auth/register" && path != "/api/auth/login" && path != "/api/auth/password")
+    var normalizedPath = JsonApiRetirement.Normalize(path.Value);
+    // /api/v1/auth is pre-authentication; /api/v1/account validates its own
+    // bearer inside the Protobuf endpoint so it can return a typed RpcError.
+    if (normalizedPath.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) &&
+        normalizedPath != "/api/auth/register" && normalizedPath != "/api/auth/login" &&
+        normalizedPath != "/api/auth/password" && normalizedPath != AuthProtobufEndpoint.AuthPath &&
+        normalizedPath != AuthProtobufEndpoint.AccountPath)
     {
         var session = relationalBackend
             ? await Botgram.Backend.Storage.RelationalHttpRoutes.RequireAsync(context)
@@ -202,6 +224,38 @@ app.Use(async (context, next) =>
     await next(context);
 });
 app.UseRateLimiter();
+// Protobuf-only planes are shared by both storage backends.
+app.MapGet("/health", async (HttpContext context) =>
+{
+    var fields = new List<KeyValuePair<string, string>>
+    {
+        new("storage", relationalBackend ? "postgresql" : "legacy-file"),
+        new("json_api", JsonApiRetirement.Code)
+    };
+    var status = 200;
+    if (fourComponent)
+    {
+        var runtime = context.RequestServices.GetService<Botgram.Backend.Storage.FourComponentRuntime>();
+        if (runtime is not null)
+        {
+            var health = await runtime.HealthAsync(context.RequestAborted);
+            fields.Add(new("full_stack_ready", health.FullStackReady ? "true" : "false"));
+            fields.Add(new("postgres", health.Postgres ? "up" : "down"));
+            fields.Add(new("kafka", health.Kafka ? "up" : "down"));
+            fields.Add(new("scylla", health.Scylla ? "up" : "down"));
+            fields.Add(new("redis", health.Redis ? "up" : "down"));
+            fields.Add(new("workers", health.Workers ? "up" : "down"));
+            fields.Add(new("pending_outbox", health.PendingOutbox.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            fields.Add(new("pending_projection", health.PendingProjection.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            if (!health.FullStackReady) status = 503;
+        }
+    }
+    await JsonApiRetirement.Health(context, fields, status);
+});
+app.MapPost(AuthProtobufEndpoint.AuthPath, (HttpContext context) => AuthProtobufEndpoint.Handle(context, true))
+    .RequireRateLimiting("auth");
+app.MapPost(AuthProtobufEndpoint.AccountPath, (HttpContext context) => AuthProtobufEndpoint.Handle(context, false))
+    .RequireRateLimiting("api");
 if (relationalBackend)
 {
     Botgram.Backend.Storage.RelationalHttpRoutes.Map(app, builder.Configuration, protocolPolicy);
@@ -211,7 +265,6 @@ if (relationalBackend)
 string Uid(HttpContext context) => (string)context.Items["uid"]!;
 void Check(bool valid, string code) { if (!valid) throw new ApiException(400, code); }
 
-app.MapGet("/health", () => Results.Ok(new { status = "ok", protocol = "botgram-v1" }));
 app.MapPost("/api/auth/register", (RegisterInput input, Store store) =>
 {
     var user = Auth.PrepareRegistration(input);

@@ -16,9 +16,12 @@ public sealed class AccountPasswordState
 
 public static class AccountPasswordService
 {
+    public static byte[] LoginInfoBytes(User user, AccountPasswordState state) =>
+        Info(user.Id, "login:" + user.PasswordHash, state).ToByteArray();
+
     public static object LoginInfo(User user, AccountPasswordState state) => new
     {
-        passwordInfo = Convert.ToBase64String(Info(user.Id, "login:" + user.PasswordHash, state).ToByteArray())
+        passwordInfo = Convert.ToBase64String(LoginInfoBytes(user, state))
     };
 
     public static void VerifyLogin(User user, AccountPasswordState state, string? encodedProof)

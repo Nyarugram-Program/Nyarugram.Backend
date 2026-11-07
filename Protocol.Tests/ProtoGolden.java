@@ -189,11 +189,11 @@ public final class ProtoGolden {
     static void wireChecks() throws Exception {
         check(Arrays.equals(fixtures().get("request-golden").toByteArray(), hex(SEND_HEX)), "manual golden");
         check("A😀Z".length() == 4 && "A😀Z".substring(1, 3).equals("😀"), "UTF16 span");
-        byte[] unknown = hex("ca0c03010203"); // unknown length-delimited field 201
+        byte[] unknown = hex("e20d03010203"); // unknown length-delimited field 220
         RpcRequest u = RpcRequest.parseFrom(unknown);
         check(u.getOperationCase() == RpcRequest.OperationCase.OPERATION_NOT_SET, "unknown operation NOT_SET");
         check(Arrays.equals(unknown, u.toByteArray()), "unknown operation retained");
-        byte[] responseUnknown = hex("ca0c03010203");
+        byte[] responseUnknown = hex("e20d03010203");
         RpcResponse ur = RpcResponse.parseFrom(responseUnknown);
         check(ur.getOutcomeCase() == RpcResponse.OutcomeCase.OUTCOME_NOT_SET && Arrays.equals(responseUnknown, ur.toByteArray()), "unknown outcome retained");
         check(RpcRequest.parseFrom(hex("a20600da0600")).getOperationCase() == RpcRequest.OperationCase.SEND_MESSAGE, "request oneof last wins");
@@ -276,8 +276,8 @@ public final class ProtoGolden {
         if (args[0].equals("write")) {
             Files.createDirectories(dir);
             for (var entry : samples.entrySet()) Files.write(dir.resolve(entry.getKey() + ".bin"), entry.getValue().toByteArray());
-            Files.write(dir.resolve("request-unknown.bin"), hex("0801ca0c03010203"));
-            Files.write(dir.resolve("response-unknown.bin"), hex("0801ca0c03010203"));
+            Files.write(dir.resolve("request-unknown.bin"), hex("0801e20d03010203"));
+            Files.write(dir.resolve("response-unknown.bin"), hex("0801e20d03010203"));
             Files.write(dir.resolve("compat-through-old.bin"), CompatV1.Envelope.parseFrom(samples.get("compat-new").toByteArray()).toByteArray());
         } else if (args[0].equals("verify")) {
             for (var entry : samples.entrySet()) {
@@ -285,8 +285,8 @@ public final class ProtoGolden {
                 var parsed = entry.getValue().getParserForType().parseFrom(data);
                 check(entry.getValue().equals(parsed), "C# → Java " + entry.getKey());
             }
-            check(Arrays.equals(RpcRequest.parseFrom(Files.readAllBytes(dir.resolve("request-unknown.bin"))).toByteArray(), hex("0801ca0c03010203")), "C# retained request unknown");
-            check(Arrays.equals(RpcResponse.parseFrom(Files.readAllBytes(dir.resolve("response-unknown.bin"))).toByteArray(), hex("0801ca0c03010203")), "C# retained response unknown");
+            check(Arrays.equals(RpcRequest.parseFrom(Files.readAllBytes(dir.resolve("request-unknown.bin"))).toByteArray(), hex("0801e20d03010203")), "C# retained request unknown");
+            check(Arrays.equals(RpcResponse.parseFrom(Files.readAllBytes(dir.resolve("response-unknown.bin"))).toByteArray(), hex("0801e20d03010203")), "C# retained response unknown");
             CompatV2.Envelope back = CompatV2.Envelope.parseFrom(Files.readAllBytes(dir.resolve("compat-through-old.bin")));
             check(back.getStatusValue() == 7 && back.getExtra().equals("extra😀"), "cross-runtime old-schema retention");
         } else throw new IllegalArgumentException("write|verify");

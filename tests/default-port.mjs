@@ -29,14 +29,21 @@ try {
     if (server.exitCode !== null) throw Error(logs);
     try {
       const response = await fetch('http://127.0.0.1:8521/health');
-      if (response.ok) { assert.equal((await response.json()).status, 'ok'); ready = true; break; }
+      if (response.ok) {
+        // Health is a non-JSON key/value document after JSON API retirement.
+        assert.match(response.headers.get('content-type') ?? '', /^text\/plain/);
+        assert.match(await response.text(), /status=ok/);
+        ready = true; break;
+      }
     } catch {}
     await new Promise(resolve => setTimeout(resolve, 100));
   }
   assert(ready, logs);
-  const denied = await fetch('http://127.0.0.1:8521/api/me');
-  assert.equal(denied.status, 401);
-  console.log('PASS: published default port 8521 without --urls, health and authentication; isolated database');
+  const retired = await fetch('http://127.0.0.1:8521/api/me');
+  assert.equal(retired.status, 410);
+  assert.match(retired.headers.get('content-type') ?? '', /^text\/plain/);
+  assert.ok((await retired.text()).startsWith('BOTGRAM_JSON_API_RETIRED'));
+  console.log('PASS: published default port 8521, non-JSON health probe and retired JSON ingress; isolated database');
 } finally {
   if (server.exitCode === null) { const exit = once(server, 'exit'); server.kill(); await exit; }
 }

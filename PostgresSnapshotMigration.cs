@@ -37,6 +37,19 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
             Recipients = e.Recipients.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray(), Payload = Payload(e.Payload)
         }).ToList();
         db.TelegramIds = db.TelegramIds.OrderBy(p => p.Key, StringComparer.Ordinal).ToDictionary(p => p.Key, p => p.Value);
+        // E2EE directory and state are part of the canonical migration fingerprint.
+        // Ordering is deterministic so import/export comparisons are stable.
+        db.E2eeDevices = db.E2eeDevices.OrderBy(d => d.UserId, StringComparer.Ordinal).Select(d => d with
+        {
+            UpdatedAt = Time(d.UpdatedAt),
+            OneTimePreKeys = d.OneTimePreKeys.OrderBy(k => k.KeyId).ToArray()
+        }).ToList();
+        db.E2eeConversations = db.E2eeConversations.OrderBy(c => c.ConversationId, StringComparer.Ordinal)
+            .Select(c => c with
+            {
+                UpdatedAt = Time(c.UpdatedAt),
+                IdentityConfirmedBy = c.IdentityConfirmedBy.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray()
+            }).ToList();
         if (db.AccountPrivacy is not null)
         {
             db.AccountPrivacy = db.AccountPrivacy.Where(p => !AccountPrivacyService.IsDefault(p.Value))
@@ -90,13 +103,41 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
             throw new InvalidDataException("Every snapshot message requires its original matching durable event");
         if (db.Events.Any(e => e.Type == "wallpaper.changed"))
             throw new InvalidDataException("Legacy snapshot cannot represent independent wallpaper state");
+        foreach (var device in db.E2eeDevices)
+        {
+            if (!db.Users.Any(u => u.Id == device.UserId) || device.DeviceId != 1 || device.Generation < 1 ||
+                device.RegistrationId is < 1 or > 16383 || device.SignedPreKeyId < 1 || device.KyberPreKeyId < 1 ||
+                device.IdentityKey.Length is < 32 or > 4096 || device.SignedPreKey.Length is < 32 or > 4096 ||
+                device.KyberPreKey.Length is < 32 or > 4096 ||
+                device.OneTimePreKeys.Length > 100 ||
+                device.OneTimePreKeys.Select(k => k.KeyId).Distinct().Count() != device.OneTimePreKeys.Length ||
+                device.OneTimePreKeys.Any(k => k.KeyId < 1 || k.PublicKey.Length is < 32 or > 4096))
+                throw new InvalidDataException("Invalid snapshot E2EE device directory");
+            if (db.E2eeDevices.Select(d => d.UserId).Distinct().Count() != db.E2eeDevices.Count)
+                throw new InvalidDataException("Duplicate snapshot E2EE device");
+        }
+        foreach (var chat in db.E2eeConversations)
+        {
+            if (!db.Conversations.Any(c => c.Id == chat.ConversationId) ||
+                chat.State is not ("pending" or "active" or "closing" or "suspended" or "closed") ||
+                chat.ProtocolVersion != 2 || chat.Epoch < 1 ||
+                !db.Users.Any(u => u.Id == chat.InitiatorId) ||
+                chat.CloseRequestedBy is { Length: > 0 } && !db.Users.Any(u => u.Id == chat.CloseRequestedBy) ||
+                chat.IdentityConfirmedBy.Any(id => !db.Users.Any(u => u.Id == id)))
+                throw new InvalidDataException("Invalid snapshot E2EE conversation state");
+            if (db.E2eeConversations.Select(c => c.ConversationId).Distinct().Count() != db.E2eeConversations.Count)
+                throw new InvalidDataException("Duplicate snapshot E2EE conversation");
+        }
     }
 
     private async Task<NpgsqlTransaction> Begin(NpgsqlConnection connection, CancellationToken token)
     {
         var target = new NpgsqlConnectionStringBuilder(source.ConnectionString);
-        if (!FourComponentOptions.Loopback(target.Host) || target.Database?.StartsWith("botgram_test_", StringComparison.Ordinal) != true)
-            throw new InvalidOperationException("Snapshot migration requires a loopback botgram_test_* database");
+        var isolated = FourComponentOptions.Loopback(target.Host) &&
+            target.Database?.StartsWith("botgram_test_", StringComparison.Ordinal) == true;
+        if (!isolated && !PostgresSchemaUpgrade.PrimaryAuthorized(target.Database))
+            throw new InvalidOperationException(
+                "Snapshot migration requires a loopback botgram_test_* database or BOTGRAM_PRIMARY_MAINTENANCE=1 with a dedicated production database");
         var transaction = await connection.BeginTransactionAsync(token);
         try
         {
@@ -114,6 +155,18 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
                     IN ACCESS EXCLUSIVE MODE NOWAIT
                 """, connection, transaction);
             await tables.ExecuteNonQueryAsync(token);
+            // v9 tables may be absent on an un-upgraded database; lock them when
+            // present so E2EE state is part of the same consistent snapshot.
+            await using var e2eeTables = new NpgsqlCommand("""
+                DO $lock$ BEGIN
+                IF to_regclass('botgram_backend_v1.e2ee_devices') IS NOT NULL THEN
+                    LOCK TABLE botgram_backend_v1.e2ee_devices,
+                        botgram_backend_v1.e2ee_one_time_pre_keys,
+                        botgram_backend_v1.e2ee_conversations IN ACCESS EXCLUSIVE MODE NOWAIT;
+                END IF;
+                END $lock$;
+                """, connection, transaction);
+            await e2eeTables.ExecuteNonQueryAsync(token);
             return transaction;
         }
         catch { await transaction.DisposeAsync(); throw; }
@@ -129,6 +182,16 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
         {
             await using var command = Command(connection, transaction, sql, values);
             await command.ExecuteNonQueryAsync(token);
+        }
+        // Explicit schema compatibility boundary: E2EE tables are required.
+        await using (var check = Command(connection, transaction,
+            "SELECT ARRAY(SELECT version FROM botgram_backend_v1.schema_versions ORDER BY version)"))
+        {
+            var versions = (int[])(await check.ExecuteScalarAsync(token))!;
+            if (!versions.SequenceEqual(Enumerable.Range(1, PostgresBackendSchema.CurrentVersion)))
+                throw new InvalidOperationException(
+                    "Snapshot import requires offline schema versions 1.." + PostgresBackendSchema.CurrentVersion
+                    + "; run Storage.Admin upgrade before importing");
         }
         await Execute("""
             CREATE TABLE IF NOT EXISTS botgram_backend_v1.migration_snapshot (
@@ -152,6 +215,8 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
         await using (var empty = Command(connection, transaction, """
             SELECT EXISTS(SELECT 1 FROM botgram_intake_v1.users) OR EXISTS(SELECT 1 FROM botgram_intake_v1.events)
                 OR EXISTS(SELECT 1 FROM botgram_backend_v1.identities)
+                OR EXISTS(SELECT 1 FROM botgram_backend_v1.e2ee_devices)
+                OR EXISTS(SELECT 1 FROM botgram_backend_v1.e2ee_conversations)
             """))
             if ((bool)(await empty.ExecuteScalarAsync(token))!) throw new InvalidOperationException("Import requires an empty isolated target");
         Gids.Migrate(db);
@@ -190,6 +255,34 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
                 await Execute("INSERT INTO botgram_intake_v1.members(conversation_id,user_id,position) VALUES($1,$2,$3)",
                     conversation.Id, conversation.Members[i], i);
         }
+        // E2EE public-key directory, one-time pre-keys (including consumed flags)
+        // and per-chat state. UUIDs, GIDs, TL identities and message IDs are untouched.
+        foreach (var device in db.E2eeDevices)
+        {
+            await Execute("""
+                INSERT INTO botgram_backend_v1.e2ee_devices
+                    (user_id,device_id,registration_id,identity_key,signed_pre_key_id,signed_pre_key,
+                     signed_pre_key_signature,kyber_pre_key_id,kyber_pre_key,kyber_pre_key_signature,generation,updated_at)
+                VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+                """, device.UserId, (int)device.DeviceId, device.RegistrationId, device.IdentityKey,
+                device.SignedPreKeyId, device.SignedPreKey, device.SignedPreKeySignature,
+                device.KyberPreKeyId, device.KyberPreKey, device.KyberPreKeySignature,
+                device.Generation, device.UpdatedAt);
+            foreach (var key in device.OneTimePreKeys)
+                await Execute("""
+                    INSERT INTO botgram_backend_v1.e2ee_one_time_pre_keys(user_id,key_id,public_key,consumed)
+                    VALUES($1,$2,$3,$4)
+                    """, device.UserId, key.KeyId, key.PublicKey, key.Consumed);
+        }
+        foreach (var chat in db.E2eeConversations)
+            await Execute("""
+                INSERT INTO botgram_backend_v1.e2ee_conversations
+                    (conversation_id,state,protocol_version,epoch,initiator_id,boundary_message_id,
+                     close_boundary_message_id,close_requested_by,identity_confirmed_by,identity_generation,updated_at)
+                VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+                """, chat.ConversationId, chat.State, (int)chat.ProtocolVersion, chat.Epoch, chat.InitiatorId,
+                chat.BoundaryMessageId, chat.CloseBoundaryMessageId, (object?)chat.CloseRequestedBy ?? DBNull.Value,
+                chat.IdentityConfirmedBy, chat.IdentityGeneration, chat.UpdatedAt);
         foreach (var group in db.Messages.GroupBy(m => m.ConversationId))
         {
             long sequence = 0;
@@ -322,6 +415,37 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
         await Rows("SELECT body::text FROM botgram_intake_v1.messages ORDER BY id", r => db.Messages.Add(JsonSerializer.Deserialize<Message>(r.GetString(0))!));
         await Rows("SELECT conversation_id,user_id,message_id FROM botgram_backend_v1.receipts", r => db.Receipts.Add(new(r.GetString(0), r.GetString(1), r.GetInt64(2))));
         await Rows("SELECT owner_id,user_id,first_name,last_name FROM botgram_backend_v1.contacts ORDER BY ordinal", r => db.Contacts.Add(new(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3))));
+        var devices = new Dictionary<string, E2eeDevice>(StringComparer.Ordinal);
+        await Rows($"""
+            SELECT user_id,device_id,registration_id,identity_key,signed_pre_key_id,signed_pre_key,
+                signed_pre_key_signature,kyber_pre_key_id,kyber_pre_key,kyber_pre_key_signature,generation,updated_at
+            FROM botgram_backend_v1.e2ee_devices ORDER BY user_id
+            """, r =>
+        {
+            var id = r.GetString(0);
+            devices[id] = new(id, (uint)r.GetInt32(1), r.GetInt32(2), r.GetFieldValue<byte[]>(3),
+                r.GetInt32(4), r.GetFieldValue<byte[]>(5), r.GetFieldValue<byte[]>(6),
+                r.GetInt32(7), r.GetFieldValue<byte[]>(8), r.GetFieldValue<byte[]>(9),
+                r.GetInt64(10), r.GetFieldValue<DateTimeOffset>(11), []);
+        });
+        await Rows("""
+            SELECT user_id,key_id,public_key,consumed FROM botgram_backend_v1.e2ee_one_time_pre_keys
+            ORDER BY user_id,key_id
+            """, r =>
+        {
+            var id = r.GetString(0);
+            if (!devices.TryGetValue(id, out var device)) throw new InvalidDataException("Orphan E2EE pre-key");
+            devices[id] = device with { OneTimePreKeys = [.. device.OneTimePreKeys,
+                new E2eeOneTimePreKey(r.GetInt32(1), r.GetFieldValue<byte[]>(2), r.GetBoolean(3))] };
+        });
+        db.E2eeDevices.AddRange(devices.Values);
+        await Rows("""
+            SELECT conversation_id,state,protocol_version,epoch,initiator_id,boundary_message_id,
+                close_boundary_message_id,close_requested_by,identity_confirmed_by,identity_generation,updated_at
+            FROM botgram_backend_v1.e2ee_conversations ORDER BY conversation_id
+            """, r => db.E2eeConversations.Add(new(r.GetString(0), r.GetString(1), (uint)r.GetInt32(2),
+            r.GetInt64(3), r.GetString(4), r.GetInt64(5), r.GetInt64(6), r.IsDBNull(7) ? null : r.GetString(7),
+            r.GetFieldValue<string[]>(8), r.GetFieldValue<DateTimeOffset>(10), r.GetInt64(9))));
         await Rows(PostgresBackend.CallRows + " ORDER BY ordinal",
             r => db.Calls.Add(PostgresBackend.CallRow(r)));
         await Rows("SELECT key,value FROM botgram_backend_v1.identities ORDER BY key", r => db.TelegramIds.Add(r.GetString(0), r.GetInt64(1)));

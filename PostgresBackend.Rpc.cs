@@ -50,6 +50,10 @@ public sealed partial class PostgresBackend
                 var input = request.SendMessage;
                 var command = ProtobufRpcMapper.RelationalSendCommand(input);
                 var conversation = await ResolveConversation(work, uid, input.Peer, domain, true);
+                // Direction, envelope and epoch validation happen inside this same
+                // transaction before the message/pts/event/outbox commit.
+                var canonical = await ValidateSend(work, session, conversation, command, domain);
+                if (canonical is not null) command = command with { E2eeEnvelope = canonical, Text = "" };
                 var accepted = await new PostgresMessageAcceptance(source, maximumBacklog).AcceptInTransactionAsync(
                     new(session.TokenHash, uid, conversation.Id, command, MessageWriteContract.Telegram),
                     work.Connection, work.NativeTransaction, work.RetainThroughCommit, work.Token);
@@ -373,6 +377,45 @@ public sealed partial class PostgresBackend
             case P.RpcRequest.OperationOneofCase.GetDhConfig:
                 response.GetDhConfig = PhoneDhConfig(request.GetDhConfig);
                 break;
+            case P.RpcRequest.OperationOneofCase.E2EePublishDevice:
+                response.E2EePublishDevice = await PublishDevice(work, session, request.E2EePublishDevice);
+                break;
+            case P.RpcRequest.OperationOneofCase.E2EeAction:
+            {
+                var input = request.E2EeAction;
+                var conversation = await ResolveConversation(work, uid, input.Peer, domain, true);
+                response.E2EeAction = await E2eeAction(work, session, conversation, input, domain);
+                break;
+            }
+            case P.RpcRequest.OperationOneofCase.E2EeGetStatus:
+            {
+                var input = request.E2EeGetStatus;
+                ProtobufRpcMapper.ValidateCount(input.Peers.Count);
+                var owned = await Owned(work, uid);
+                var selected = new List<string>();
+                foreach (var peer in input.Peers)
+                {
+                    var id = peer?.PeerCase switch
+                    {
+                        P.PeerRef.PeerOneofCase.User => ProtobufRpcMapper.UserReferenceId(peer.User, domain),
+                        P.PeerRef.PeerOneofCase.Self when peer.Self => uid,
+                        _ => throw new ApiException(400, "BOTGRAM_RPC_INVALID_ARGUMENT")
+                    };
+                    var found = owned.FirstOrDefault(c => c.Kind == "direct" && c.Members.Contains(id) && c.Members.Contains(uid));
+                    if (found is not null) selected.Add(found.Id);
+                }
+                response.E2EeGetStatus = await E2eeStatusList(work, uid, domain, true, selected);
+                break;
+            }
+            case P.RpcRequest.OperationOneofCase.E2EeList:
+                response.E2EeList = await E2eeStatusList(work, uid, domain, request.E2EeList.IncludePending, null);
+                break;
+            case P.RpcRequest.OperationOneofCase.E2EeGetPeerBundle:
+            {
+                var conversation = await ResolveConversation(work, uid, request.E2EeGetPeerBundle.Peer, domain);
+                response.E2EeGetPeerBundle = await PeerBundle(work, conversation, uid);
+                break;
+            }
             default:
                 throw new ApiException(501, "BOTGRAM_RPC_UNSUPPORTED:" + request.OperationCase);
         }

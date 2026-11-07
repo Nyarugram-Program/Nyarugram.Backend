@@ -28,36 +28,40 @@ internal static class SchemaUpgradeTests
         var settings = new NpgsqlConnectionStringBuilder(connectionString) { Pooling = false };
         await using var source = NpgsqlDataSource.Create(settings.ConnectionString);
         await PostgresBackendSchema.ApplyAsync(source);
+        // Simulate an existing v8 production-shaped database: v9 E2EE tables and
+        // its version marker are absent, all earlier versions and rows are present.
         await WriteMany(source,
-            "DELETE FROM botgram_backend_v1.schema_versions WHERE version=8",
-            "ALTER TABLE botgram_backend_v1.calls DROP COLUMN request_protocol, DROP COLUMN accept_protocol");
+            "DELETE FROM botgram_backend_v1.schema_versions WHERE version=9",
+            "DROP TABLE IF EXISTS botgram_backend_v1.e2ee_conversations",
+            "DROP TABLE IF EXISTS botgram_backend_v1.e2ee_one_time_pre_keys",
+            "DROP TABLE IF EXISTS botgram_backend_v1.e2ee_devices");
         await Seed(source);
         var before = await Digest(source);
-        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 7)), "fixture starts at schema v7");
+        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 8)), "fixture starts at schema v8");
         Check((await Scalar(source, "SELECT current_database()")) is string current && current == settings.Database,
             "fixture database identity");
 
-        // Precheck reports the supported v7 -> v8 path without changing anything.
+        // Precheck reports the supported v8 -> v9 path without changing anything.
         var inspection = await PostgresSchemaUpgrade.InspectAsync(source);
-        Check(inspection.MigrationRequired && inspection.VersionsBefore.SequenceEqual(Enumerable.Range(1, 7))
-            && inspection.VersionsAfter.SequenceEqual(Enumerable.Range(1, 7)) && !inspection.Applied,
-            "precheck reports a required, supported v7->v8 upgrade");
+        Check(inspection.MigrationRequired && inspection.VersionsBefore.SequenceEqual(Enumerable.Range(1, 8))
+            && inspection.VersionsAfter.SequenceEqual(Enumerable.Range(1, 8)) && !inspection.Applied,
+            "precheck reports a required, supported v8->v9 upgrade");
         Check((await Digest(source)) == before, "precheck does not change business state");
 
         await ExpectReject(() => PostgresSchemaUpgrade.InspectAsync(NpgsqlDataSource.Create(
                 new NpgsqlConnectionStringBuilder(settings.ConnectionString) { Database = "botgram_production" }.ConnectionString)),
             "non-botgram_test database is rejected");
-        await Write(source, "DELETE FROM botgram_backend_v1.schema_versions WHERE version=7");
-        await ExpectReject(() => PostgresSchemaUpgrade.InspectAsync(source), "v1..v6 is not a supported start version");
-        await Write(source, "INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(7)");
-        await Write(source, "INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(9)");
+        await Write(source, "DELETE FROM botgram_backend_v1.schema_versions WHERE version=8");
+        await ExpectReject(() => PostgresSchemaUpgrade.InspectAsync(source), "v1..v7 is not a supported start version");
+        await Write(source, "INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(8)");
+        await Write(source, "INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(10)");
         await ExpectReject(() => PostgresSchemaUpgrade.InspectAsync(source), "unknown schema versions are rejected");
-        await Write(source, "DELETE FROM botgram_backend_v1.schema_versions WHERE version=9");
+        await Write(source, "DELETE FROM botgram_backend_v1.schema_versions WHERE version=10");
 
         // A live backend connection blocks the offline operation even before it writes.
         await using (var writer = await source.OpenConnectionAsync())
             await ExpectReject(() => PostgresSchemaUpgrade.ApplyAsync(source), "an active client blocks the upgrade");
-        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 7)) && (await Digest(source)) == before,
+        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 8)) && (await Digest(source)) == before,
             "a rejected upgrade leaves the schema and data unchanged");
 
         // The four-component runtime lease is also honored when the competing session looks like
@@ -79,15 +83,15 @@ internal static class SchemaUpgradeTests
             BEGIN RAISE EXCEPTION 'isolated schema upgrade failure'; END $$;
             """,
             """
-            CREATE TRIGGER botgram_test_reject_schema_upgrade BEFORE UPDATE ON botgram_backend_v1.calls
+            CREATE TRIGGER botgram_test_reject_schema_upgrade BEFORE INSERT ON botgram_backend_v1.schema_versions
             FOR EACH ROW EXECUTE FUNCTION botgram_test_reject_schema_upgrade();
             """);
         await ExpectReject(() => PostgresSchemaUpgrade.ApplyAsync(source), "migration failure rolls back");
-        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 7)) && (await Digest(source)) == before
-            && await ColumnCount(source, "request_protocol") == 0 && await ColumnCount(source, "accept_protocol") == 0,
-            "a failed migration keeps v7, the original rows and no half-added columns");
+        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 8)) && (await Digest(source)) == before
+            && await Scalar(source, "SELECT to_regclass('botgram_backend_v1.e2ee_devices')::text") is not string,
+            "a failed migration keeps v8, the original rows and no half-added E2EE tables");
         await WriteMany(source,
-            "DROP TRIGGER botgram_test_reject_schema_upgrade ON botgram_backend_v1.calls",
+            "DROP TRIGGER botgram_test_reject_schema_upgrade ON botgram_backend_v1.schema_versions",
             "DROP FUNCTION botgram_test_reject_schema_upgrade()");
 
         // Two maintenance processes race; exactly one applies, the other is rejected without data loss.
@@ -109,21 +113,17 @@ internal static class SchemaUpgradeTests
         Check(outcomes.Count(result => result.Applied) == 1,
             "concurrent upgrades have exactly one applying writer: "
             + string.Join(" | ", outcomes.Select(result => result.Error ?? (result.Applied ? "APPLIED" : "NO-OP"))));
-        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 8)), "the winner reaches v8");
+        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 9)), "the winner reaches v9");
         Check((await Digest(source)) == before, "the in-place upgrade preserves every seeded business row");
-        var requestJson = (string)(await Scalar(source,
-            "SELECT request_protocol::text FROM botgram_backend_v1.calls WHERE id=$1", CallId))!;
-        var acceptJson = (string)(await Scalar(source,
-            "SELECT accept_protocol::text FROM botgram_backend_v1.calls WHERE id=$1", CallId))!;
-        var negotiatedJson = (string)(await Scalar(source,
-            "SELECT protocol::text FROM botgram_backend_v1.calls WHERE id=$1", CallId))!;
-        Check(requestJson == acceptJson && requestJson == negotiatedJson,
-            "legacy call proposals are backfilled from the negotiated protocol");
+        Check(await Scalar(source, "SELECT to_regclass('botgram_backend_v1.e2ee_devices')::text") is string
+            && await Scalar(source, "SELECT to_regclass('botgram_backend_v1.e2ee_one_time_pre_keys')::text") is string
+            && await Scalar(source, "SELECT to_regclass('botgram_backend_v1.e2ee_conversations')::text") is string,
+            "v9 E2EE directory, pre-key and conversation tables are created in place");
 
         // Repeating on the target schema is a safe no-op.
         var repeat = await PostgresSchemaUpgrade.ApplyAsync(source);
-        Check(!repeat.Applied && !repeat.MigrationRequired && repeat.VersionsBefore.SequenceEqual(Enumerable.Range(1, 8)),
-            "repeated upgrade on v8 is a no-op");
+        Check(!repeat.Applied && !repeat.MigrationRequired && repeat.VersionsBefore.SequenceEqual(Enumerable.Range(1, 9)),
+            "repeated upgrade on v9 is a no-op");
         Check((await Digest(source)) == before, "a no-op does not touch business rows");
 
         // The current backend startup check, login, session, privacy, validator and call reads work.
@@ -153,10 +153,10 @@ internal static class SchemaUpgradeTests
         Check((await Scalar(source, "SELECT to_regclass('botgram_backend_v1.wallpaper_accounts')::text")) is string,
             "current startup schema check finds the wallpaper tables");
 
-        Console.WriteLine($"PASS: {assertions} schema-upgrade assertions; the same isolated database was upgraded in place from v7 to v8");
+        Console.WriteLine($"PASS: {assertions} schema-upgrade assertions; the same isolated database was upgraded in place from v8 to v9 with E2EE tables");
     }
 
-    // Prepares a named, disposable v7 database so the actual Storage.Admin CLI can be run
+    // Prepares a named, disposable v8 database so the actual Storage.Admin CLI can be run
     // against one explicit target outside the automated assertions.
     public static async Task PrepareFixtureAsync(string adminConnectionString, string database)
     {
@@ -173,11 +173,13 @@ internal static class SchemaUpgradeTests
         await using var source = NpgsqlDataSource.Create(fixture.ConnectionString);
         await PostgresBackendSchema.ApplyAsync(source);
         await WriteMany(source,
-            "DELETE FROM botgram_backend_v1.schema_versions WHERE version=8",
-            "ALTER TABLE botgram_backend_v1.calls DROP COLUMN request_protocol, DROP COLUMN accept_protocol");
+            "DELETE FROM botgram_backend_v1.schema_versions WHERE version=9",
+            "DROP TABLE IF EXISTS botgram_backend_v1.e2ee_conversations",
+            "DROP TABLE IF EXISTS botgram_backend_v1.e2ee_one_time_pre_keys",
+            "DROP TABLE IF EXISTS botgram_backend_v1.e2ee_devices");
         await Seed(source);
-        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 7)), "the CLI fixture starts at schema v7");
-        Console.WriteLine($"PASS: prepared v7 fixture database {database}");
+        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 8)), "the CLI fixture starts at schema v8");
+        Console.WriteLine($"PASS: prepared v8 fixture database {database}");
     }
 
     // Runs the same application reads on an already upgraded CLI target.
@@ -190,12 +192,9 @@ internal static class SchemaUpgradeTests
         await using var source = NpgsqlDataSource.Create(settings.ConnectionString);
         var backend = new PostgresBackend(source);
         await backend.VerifySchemaAsync();
-        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 8)), "the CLI target is at schema v8");
-        var requestJson = (string)(await Scalar(source,
-            "SELECT request_protocol::text FROM botgram_backend_v1.calls WHERE id=$1", CallId))!;
-        var acceptJson = (string)(await Scalar(source,
-            "SELECT accept_protocol::text FROM botgram_backend_v1.calls WHERE id=$1", CallId))!;
-        Check(requestJson == acceptJson, "the CLI target backfills both original call proposals");
+        Check((await Versions(source)).SequenceEqual(Enumerable.Range(1, 9)), "the CLI target is at schema v9");
+        Check(await Scalar(source, "SELECT to_regclass('botgram_backend_v1.e2ee_devices')::text") is string,
+            "the CLI target has the v9 E2EE tables");
         var session = await backend.RequireAsync(Auth.HashToken(SessionToken));
         Check(session.UserId == AliceId && (await backend.MeAsync(session)).Username == "seed_alice",
             "the CLI target keeps valid sessions and account reads");

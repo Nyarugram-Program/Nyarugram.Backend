@@ -170,7 +170,7 @@ internal static class Program
     {
         Check(samples["request-golden"].ToByteArray().SequenceEqual(Convert.FromHexString(SendHex)), "manual golden");
         Check("A😀Z".Length == 4 && "A😀Z".Substring(1, 2) == "😀", "UTF16 span");
-        var unknown = Convert.FromHexString("ca0c03010203");
+        var unknown = Convert.FromHexString("e20d03010203");
         var request = RpcRequest.Parser.ParseFrom(unknown);
         var response = RpcResponse.Parser.ParseFrom(unknown);
         Check(request.OperationCase == RpcRequest.OperationOneofCase.None && request.ToByteArray().SequenceEqual(unknown), "unknown operation retained, NOT_SET");
@@ -283,7 +283,7 @@ internal static class Program
         {
             var data = File.ReadAllBytes(Path.Combine(args[0], name + ".bin"));
             IMessage parsed = name.StartsWith("request", StringComparison.Ordinal) ? RpcRequest.Parser.ParseFrom(data) : RpcResponse.Parser.ParseFrom(data);
-            Check(parsed.ToByteArray().SequenceEqual(Convert.FromHexString("0801ca0c03010203")), "cross-runtime unknown retained");
+            Check(parsed.ToByteArray().SequenceEqual(Convert.FromHexString("0801e20d03010203")), "cross-runtime unknown retained");
             File.WriteAllBytes(Path.Combine(args[1], name + ".bin"), parsed.ToByteArray());
         }
         var throughOld = OldEnvelope.Parser.ParseFrom(File.ReadAllBytes(Path.Combine(args[0], "compat-new.bin")));

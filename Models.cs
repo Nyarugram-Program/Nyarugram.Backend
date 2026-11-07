@@ -17,7 +17,10 @@ public sealed record E2eeDevice(string UserId, uint DeviceId, int RegistrationId
 // state: pending, active, closing, suspended, closed. Absence means disabled.
 public sealed record E2eeConversation(string ConversationId, string State, uint ProtocolVersion, long Epoch,
     string InitiatorId, long BoundaryMessageId, long CloseBoundaryMessageId, string? CloseRequestedBy,
-    string[] IdentityConfirmedBy, DateTimeOffset UpdatedAt);
+    string[] IdentityConfirmedBy, DateTimeOffset UpdatedAt,
+    // Relational only: device generation observed when an identity change suspended
+    // the chat. Legacy snapshots omit it and default to zero.
+    long IdentityGeneration = 0);
 public sealed record Receipt(string ConversationId, string UserId, long MessageId) : IEventPayload;
 public sealed record Contact(string OwnerId, string UserId, string FirstName, string LastName);
 public sealed record Call(string Id, string ConversationId, string CallerId, string CalleeId, string State, DateTimeOffset UpdatedAt,

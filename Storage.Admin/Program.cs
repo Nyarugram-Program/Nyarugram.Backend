@@ -5,30 +5,43 @@ using Microsoft.Extensions.Hosting;
 using Npgsql;
 using System.Text.Json;
 
-var commands = new[] { "prepare", "import", "export", "inspect", "upgrade" };
+var commands = new[] { "prepare", "init", "import", "export", "inspect", "upgrade" };
 if (args.Length is < 2 or > 3 || !commands.Contains(args[0], StringComparer.Ordinal))
-    throw new ArgumentException("Expected prepare|inspect|upgrade <private-config.json>, or import|export <private-config.json> <snapshot.json>");
-if (args[0] is "prepare" or "inspect" or "upgrade")
+    throw new ArgumentException("Expected prepare|init|inspect|upgrade <private-config.json>, or import|export <private-config.json> <snapshot.json>");
+if (args[0] is "prepare" or "init" or "inspect" or "upgrade")
 {
     if (args.Length != 2)
-        throw new ArgumentException("Expected prepare|inspect|upgrade <private-config.json>, or import|export <private-config.json> <snapshot.json>");
+        throw new ArgumentException("Expected prepare|init|inspect|upgrade <private-config.json>, or import|export <private-config.json> <snapshot.json>");
 }
 else if (args.Length != 3)
     throw new ArgumentException("Expected prepare|inspect|upgrade <private-config.json>, or import|export <private-config.json> <snapshot.json>");
 var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { EnvironmentName = Environments.Development });
 builder.Configuration.AddJsonFile(Path.GetFullPath(args[1]), optional: false);
+var primary = string.Equals(builder.Configuration["Storage:Mode"], nameof(StorageMode.NewStoragePrimary), StringComparison.Ordinal);
+if (primary)
+{
+    if (!string.Equals(builder.Configuration["Storage:PrimaryAcknowledged"], "true", StringComparison.OrdinalIgnoreCase))
+        throw new InvalidOperationException("Production offline maintenance requires Storage:PrimaryAcknowledged=true");
+    // A production database is never disguised as a Development validation target.
+    builder.Environment.EnvironmentName = Environments.Production;
+    Environment.SetEnvironmentVariable("BOTGRAM_PRIMARY_MAINTENANCE", "1");
+}
+var connectionString = (primary
+    ? builder.Configuration[StoragePolicy.PrimaryConnectionKey]
+    : builder.Configuration["Storage:ValidationConnectionString"])
+    ?? throw new InvalidOperationException("An explicit PostgreSQL connection string is required");
+var backendName = builder.Configuration["Storage:ValidationBackend"];
 if (args[0] is "inspect" or "upgrade")
 {
     // Offline schema maintenance only audits the declared isolated target. It deliberately does not
     // load the runtime transport switches or start the service.
-    if (!string.Equals(builder.Configuration["Storage:Mode"], nameof(StorageMode.NewStorageValidation), StringComparison.Ordinal))
-        throw new InvalidOperationException("Schema maintenance requires Storage:Mode=NewStorageValidation");
-    if (!string.Equals(builder.Configuration["Storage:ValidationAcknowledged"], "true", StringComparison.OrdinalIgnoreCase))
+    if (!primary && !string.Equals(builder.Configuration["Storage:Mode"], nameof(StorageMode.NewStorageValidation), StringComparison.Ordinal))
+        throw new InvalidOperationException("Schema maintenance requires Storage:Mode=NewStorageValidation or NewStoragePrimary");
+    if (!primary && !string.Equals(builder.Configuration["Storage:ValidationAcknowledged"], "true", StringComparison.OrdinalIgnoreCase))
         throw new InvalidOperationException("Schema maintenance requires Storage:ValidationAcknowledged=true");
-    if (builder.Configuration["Storage:ValidationBackend"] is not ("RelationalBackend" or "FourComponent"))
+    if (backendName is not ("RelationalBackend" or "FourComponent"))
         throw new InvalidOperationException("Schema maintenance requires Storage:ValidationBackend=RelationalBackend or FourComponent");
-    var settings = new NpgsqlConnectionStringBuilder(builder.Configuration["Storage:ValidationConnectionString"]
-        ?? throw new InvalidOperationException("Storage:ValidationConnectionString is required"));
+    var settings = new NpgsqlConnectionStringBuilder(connectionString);
     settings.Pooling = false;
     settings.ApplicationName = PostgresSchemaUpgrade.ApplicationName;
     await using var source = NpgsqlDataSource.Create(settings.ConnectionString);
@@ -48,15 +61,30 @@ if (args[0] is "inspect" or "upgrade")
             : "PASS: no migration required; the backend startup check accepted the current schema");
     return;
 }
-var policy = StoragePolicy.Load(builder.Configuration, builder.Environment);
-if (policy.Mode != StorageMode.NewStorageValidation || builder.Configuration["Storage:ValidationBackend"] != "FourComponent")
-    throw new InvalidOperationException("Storage.Admin prepare/import/export require the explicit isolated FourComponent configuration");
-await using var stack = NpgsqlDataSource.Create(builder.Configuration["Storage:ValidationConnectionString"]!);
+if (args[0] == "init")
+{
+    // New-database initialization without Kafka/Scylla/Redis. Re-running is a
+    // no-op: every version block is guarded by schema_versions.
+    if (backendName is not ("RelationalBackend" or "FourComponent"))
+        throw new InvalidOperationException("init requires ValidationBackend=RelationalBackend or FourComponent");
+    await using (var source = NpgsqlDataSource.Create(connectionString))
+        await PostgresBackendSchema.ApplyAsync(source);
+    Console.WriteLine($"PASS: PostgreSQL schema v{PostgresBackendSchema.CurrentVersion} applied (new database or idempotent re-run)");
+    return;
+}
+if (!primary && (!string.Equals(builder.Configuration["Storage:Mode"], nameof(StorageMode.NewStorageValidation), StringComparison.Ordinal) ||
+    !string.Equals(builder.Configuration["Storage:ValidationAcknowledged"], "true", StringComparison.OrdinalIgnoreCase)))
+    throw new InvalidOperationException("Isolated prepare/import/export require NewStorageValidation and ValidationAcknowledged=true");
+if (backendName != "FourComponent")
+    throw new InvalidOperationException("Storage.Admin prepare/import/export require ValidationBackend=FourComponent");
+await using var stack = NpgsqlDataSource.Create(connectionString);
 switch (args[0])
 {
     case "prepare":
-        await FourComponentSetup.PrepareAsync(stack, FourComponentOptions.Load(builder.Configuration));
-        Console.WriteLine("PASS: isolated PostgreSQL schema, worker contract, Kafka topic/offset and Scylla projection prepared");
+        await FourComponentSetup.PrepareAsync(stack, FourComponentOptions.Load(builder.Configuration, primary));
+        Console.WriteLine(primary
+            ? "PASS: production PostgreSQL schema, worker contract, Kafka topic/offset and Scylla projection prepared"
+            : "PASS: isolated PostgreSQL schema, worker contract, Kafka topic/offset and Scylla projection prepared");
         break;
     case "import":
         var file = new FileInfo(args[2]);

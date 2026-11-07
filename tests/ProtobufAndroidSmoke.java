@@ -682,52 +682,74 @@ public final class ProtobufAndroidSmoke {
     }
 
     private static void negotiationChecks() throws Exception {
-        AtomicInteger calls = new AtomicInteger();
-        AtomicInteger retired = new AtomicInteger();
-        AtomicInteger legacyCalls = new AtomicInteger();
-        AtomicInteger unexpectedPbCalls = new AtomicInteger();
+        // The client now negotiates over the Protobuf auth plane. Every legacy
+        // JSON ingress must fail with the same explicit 410 code.
+        AtomicInteger authCalls = new AtomicInteger();
+        AtomicInteger retiredCalls = new AtomicInteger();
+        AtomicInteger unexpectedRpcCalls = new AtomicInteger();
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/api/protocol/capabilities", exchange -> {
-            calls.incrementAndGet();
+        server.createContext("/api/v1/auth", exchange -> {
+            authCalls.incrementAndGet();
+            byte[] requestBytes = exchange.getRequestBody().readAllBytes();
+            BotgramRpc.RpcRequest request = BotgramRpc.RpcRequest.parseFrom(requestBytes);
             String bearer = exchange.getRequestHeaders().getFirst("Authorization");
-            String selected = retired.get() == 0 && "Bearer json-session".equals(bearer) ? "tl-json-v1" : "protobuf-v1";
-            String protocols = retired.get() == 0 ? "[\"protobuf-v1\",\"tl-json-v1\"]" : "[\"protobuf-v1\"]";
-            byte[] bytes = ("{\"negotiationVersion\":1,\"protocols\":" + protocols + ","
-                    + "\"selectedProtocol\":\"" + selected + "\",\"capabilities\":[\"send-random-id-idempotency-v1\"]}").getBytes(StandardCharsets.UTF_8);
-            if ("Bearer invalid-session".equals(bearer)) bytes = "{}".getBytes(StandardCharsets.UTF_8);
+            boolean invalid = "Bearer invalid-session".equals(bearer);
+            BotgramRpc.AuthCapabilities caps = BotgramRpc.AuthCapabilities.newBuilder()
+                    .setNegotiationVersion(1)
+                    .addProtocols("protobuf-v1")
+                    .setSelectedProtocol(invalid ? "tl-json-v1" : "protobuf-v1")
+                    .addCapabilities("send-random-id-idempotency-v1")
+                    .addEventSubprotocols("botgram.event-hint.v1.protobuf")
+                    .setJsonApiStatus("BOTGRAM_JSON_API_RETIRED")
+                    .build();
+            byte[] bytes = BotgramRpc.RpcResponse.newBuilder().setProtocolMajor(1)
+                    .setRequestId(request.getRequestId()).setAuthCapabilities(caps).build().toByteArray();
+            exchange.getResponseHeaders().set("Content-Type", "application/x-protobuf");
             exchange.sendResponseHeaders(200, bytes.length);
             exchange.getResponseBody().write(bytes);
             exchange.close();
         });
+        server.createContext("/api/protocol/capabilities", exchange -> {
+            retiredCalls.incrementAndGet();
+            byte[] bytes = "BOTGRAM_JSON_API_RETIRED\nstatus=410\n".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
+            exchange.getResponseHeaders().set("X-Botgram-Json-Api-Retired", "BOTGRAM_JSON_API_RETIRED");
+            exchange.sendResponseHeaders(410, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.close();
+        });
         server.createContext("/api/telegram/rpc", exchange -> {
-            legacyCalls.incrementAndGet();
-            byte[] bytes = (retired.get() == 0 ? "{}" : "{\"error\":\"BOTGRAM_JSON_RPC_DISABLED\"}").getBytes(StandardCharsets.UTF_8);
-            exchange.sendResponseHeaders(retired.get() == 0 ? 200 : 410, bytes.length);
-            exchange.getResponseBody().write(bytes); exchange.close();
+            retiredCalls.incrementAndGet();
+            byte[] bytes = "BOTGRAM_JSON_API_RETIRED\nstatus=410\n".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
+            exchange.getResponseHeaders().set("X-Botgram-Json-Api-Retired", "BOTGRAM_JSON_API_RETIRED");
+            exchange.sendResponseHeaders(410, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.close();
         });
         server.createContext("/api/v1/rpc", exchange -> {
-            unexpectedPbCalls.incrementAndGet(); exchange.sendResponseHeaders(500, -1); exchange.close();
+            unexpectedRpcCalls.incrementAndGet();
+            exchange.sendResponseHeaders(500, -1);
+            exchange.close();
         });
         server.start();
         try {
             String url = "http://127.0.0.1:" + server.getAddress().getPort();
             BotgramApi proto = new BotgramApi(url, "proto-session");
-            BotgramApi json = new BotgramApi(url, "json-session");
-            check("protobuf-v1".equals(proto.negotiate()), "protobuf session negotiated");
-            check("tl-json-v1".equals(json.negotiate()), "JSON session negotiated independently");
-            check("protobuf-v1".equals(proto.negotiate()) && calls.get() == 2, "session protocol pinned without refetch");
-            rejects("invalid negotiation fails closed", 502, () -> new BotgramApi(url, "invalid-session").negotiate());
-            check("protobuf-v1".equals(proto.negotiate()) && calls.get() == 3, "other session failure does not invalidate pin");
-            retired.set(1);
-            int beforeRetirement = calls.get();
-            check("tl-json-v1".equals(json.negotiate()) && calls.get() == beforeRetirement, "existing JSON API remains pinned after retirement advertisement");
-            rejects("pinned JSON request explicitly rejected", 410, () -> json.object("POST", "/api/telegram/rpc", new org.json.JSONObject()));
-            check(legacyCalls.get() == 1 && unexpectedPbCalls.get() == 0 && calls.get() == beforeRetirement, "410 does not retry or implicitly renegotiate/switch a write");
-            check("tl-json-v1".equals(json.negotiate()), "410 preserves old session pin");
-            check("protobuf-v1".equals(new BotgramApi(url, "json-session").negotiate()), "fresh API negotiates PB after JSON is disabled");
-            retired.set(0);
-            json.object("POST", "/api/telegram/rpc", new org.json.JSONObject());
-            check(legacyCalls.get() == 2 && unexpectedPbCalls.get() == 0, "restoring compatibility allows same JSON API without identity migration");
+            check("protobuf-v1".equals(proto.negotiate()), "protobuf session negotiated over /api/v1/auth");
+            check("protobuf-v1".equals(proto.negotiate()) && authCalls.get() == 1, "session protocol pinned without refetch");
+            rejects("non-protobuf capability advertisement fails closed", 502,
+                    () -> new BotgramApi(url, "invalid-session").negotiate());
+            check("protobuf-v1".equals(proto.negotiate()) && authCalls.get() == 2,
+                    "another session's failure does not invalidate this pin");
+            rejects("retired capability discovery is rejected", 410,
+                    () -> new BotgramApi(url, "proto-session").object("GET", "/api/protocol/capabilities", null));
+            rejects("retired JSON TL-RPC is rejected without JSON fallback", 410,
+                    () -> new BotgramApi(url, "proto-session").object("POST", "/api/telegram/rpc", new org.json.JSONObject()));
+            check(retiredCalls.get() == 2 && unexpectedRpcCalls.get() == 0,
+                    "410 does not retry on the Protobuf business endpoint");
+            check("protobuf-v1".equals(proto.negotiate()) && authCalls.get() == 2,
+                    "410 preserves the pinned Protobuf protocol");
         } finally { server.stop(0); }
     }
 

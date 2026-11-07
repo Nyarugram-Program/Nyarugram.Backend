@@ -56,6 +56,20 @@ message RpcRequest {
     E2eeGetStatusRequest e2ee_get_status = 141;
     E2eeListRequest e2ee_list = 142;
     E2eeGetPeerBundleRequest e2ee_get_peer_bundle = 143;
+    // Authentication-plane replacements for the retired JSON REST API. Tags are
+    // permanently allocated: never reuse or renumber them.
+    // 200..204 are accepted on the unauthenticated /api/v1/auth endpoint;
+    // 205..209 require a valid Bearer session on /api/v1/rpc.
+    AuthCapabilitiesRequest auth_capabilities = 200;
+    AuthRegisterRequest auth_register = 201;
+    AuthLoginRequest auth_login = 202;
+    AuthPasswordRequest auth_password = 203;
+    AuthRecoverRequest auth_recover = 204;
+    AuthLogoutRequest auth_logout = 205;
+    AccountMeRequest account_me = 206;
+    PremiumRequest premium = 207;
+    ChangeGidRequest change_gid = 208;
+    TotpRequest totp = 209;
   }
 }
 message RpcResponse {
@@ -107,6 +121,16 @@ message RpcResponse {
     E2eeChatStatusList e2ee_get_status = 141;
     E2eeChatStatusList e2ee_list = 142;
     E2eePeerBundle e2ee_get_peer_bundle = 143;
+    AuthCapabilities auth_capabilities = 200;
+    AuthSession auth_register = 201;
+    AuthSession auth_login = 202;
+    AuthPasswordInfo auth_password = 203;
+    AuthSession auth_recover = 204;
+    BoolValue auth_logout = 205;
+    AccountProfile account_me = 206;
+    PremiumStatus premium = 207;
+    AccountProfile change_gid = 208;
+    TotpResult totp = 209;
   }
 }
 message RpcError {
@@ -706,4 +730,75 @@ message DhConfig {
   bytes p = 3;
   bytes random = 4;
   bool not_modified = 5;
+}
+
+// --- Authentication plane (Protobuf-only replacement for retired JSON REST) ---
+// These messages never carry a JSON body. All credentials travel as typed
+// fields inside an application/x-protobuf envelope.
+message AuthCapabilitiesRequest {}
+message AuthCapabilities {
+  uint32 negotiation_version = 1;
+  repeated string protocols = 2;
+  string selected_protocol = 3;
+  repeated string event_subprotocols = 4;
+  repeated string capabilities = 5;
+  // Always "BOTGRAM_JSON_API_RETIRED" on a current server.
+  string json_api_status = 6;
+}
+message AuthRegisterRequest {
+  string username = 1;
+  string password = 2;
+  string display_name = 3;
+  optional string location_country = 4;
+}
+message AuthLoginRequest {
+  string username = 1;
+  string password = 2;
+  optional string totp_code = 3;
+  optional string password_proof = 4;
+}
+message AuthPasswordRequest { string username = 1; string password = 2; }
+// Account recovery: the one-time recovery code is verified by the same TOTP
+// state machine used at login; a successful call issues a fresh session.
+message AuthRecoverRequest {
+  string username = 1;
+  string password = 2;
+  string recovery_code = 3;
+}
+message AuthLogoutRequest {}
+message AccountMeRequest {}
+message PremiumRequest { bool activate = 1; }
+message ChangeGidRequest { string region_code = 1; string number = 2; }
+// operation: status | setup | confirm | recovery | disable
+message TotpRequest { string operation = 1; string code = 2; }
+message AccountProfile {
+  string user_id = 1;
+  string username = 2;
+  string display_name = 3;
+  string gid = 4;
+  int64 tl_user_id = 5;
+  string first_name = 6;
+  string last_name = 7;
+  optional bool nyarugram_premium = 8;
+  bool is_self = 9;
+  bool is_contact = 10;
+  bool is_mutual_contact = 11;
+  bool online = 12;
+  int64 last_seen_ms = 13;
+}
+message AuthSession {
+  string token = 1;
+  int64 expires_at_ms = 2;
+  AccountProfile user = 3;
+}
+// Serialized PasswordInfo, identical to the previously returned base64 value.
+message AuthPasswordInfo { bytes password_info = 1; }
+message PremiumStatus { bool active = 1; }
+message TotpResult {
+  bool enabled = 1;
+  int32 recovery_codes_remaining = 2;
+  string secret = 3;
+  string uri = 4;
+  int64 expires_at_ms = 5;
+  repeated string recovery_codes = 6;
 }

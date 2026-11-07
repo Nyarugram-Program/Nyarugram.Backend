@@ -17,17 +17,9 @@ public static class RelationalHttpRoutes
 
     public static void Map(WebApplication app, IConfiguration configuration, ProtocolPolicy policy)
     {
-        app.MapGet("/health", async (HttpContext context) =>
-        {
-            var runtime = context.RequestServices.GetService<FourComponentRuntime>();
-            if (runtime is null) return Results.Json(new { status = "ok", protocol = "botgram-v1",
-                storage = "isolated-postgresql-validation", fullStackReady = false });
-            var health = await runtime.HealthAsync(context.RequestAborted);
-            return Results.Json(new { status = health.FullStackReady ? "ok" : "degraded", protocol = "botgram-v1",
-                storage = "isolated-four-component-validation", fullStackReady = health.FullStackReady, components = health,
-                reads = context.RequestServices.GetRequiredService<FourComponentReads>().Metrics },
-                statusCode: health.FullStackReady ? 200 : 503);
-        });
+        // /health and both Protobuf authentication planes are registered once in
+        // Program.cs before this map. All remaining JSON REST routes below are
+        // unreachable: JsonApiRetirement.Guard rejects every retired path first.
         app.MapPost("/api/auth/register", (RegisterInput input, PostgresBackend backend, HttpContext c) =>
             backend.RegisterAsync(input, c.RequestAborted)).RequireRateLimiting("auth");
         app.MapPost("/api/auth/login", (LoginInput input, PostgresBackend backend, HttpContext c) =>
@@ -109,9 +101,11 @@ public static class RelationalHttpRoutes
             var legacy = offered.Count == 0 || offered.Contains("botgram.events.v1.json");
             c.Items["protocol_usage_selected"] = legacy ? "json" : "unknown";
             c.Items[legacy ? "protocol_usage_disabled" : "protocol_usage_unsupported"] = true;
-            throw new ApiException(legacy ? 410 : 400, legacy ? "BOTGRAM_JSON_WSS_DISABLED" : "unsupported_event_subprotocol");
+            throw new ApiException(legacy ? 410 : 400,
+                legacy ? JsonApiRetirement.Code : "unsupported_event_subprotocol");
         }
-        if (policy.LegacyJsonWssEnabled) throw new InvalidOperationException("Relational validation requires protobuf WSS");
+        // The unified retirement gate runs before this handler; legacy switches
+        // can neither re-enable JSON WSS nor break the Protobuf event channel.
         var session = Session(c);
         // Reauthorize before upgrading, then again on each bounded query.
         Botgram.Protocol.V1.EventHint? first = await backend.EventHintAsync(session, after ?? 0, c.RequestAborted);

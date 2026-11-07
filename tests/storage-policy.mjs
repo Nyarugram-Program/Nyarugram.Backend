@@ -47,7 +47,7 @@ for (const [index, {mode, extra}] of cases.entries()) {
     child.once('exit', code => { clearTimeout(timer); resolve(code); });
   });
   assert.notEqual(code, 0, `reject ${mode}`); assertions++;
-  assert.match(output, /Storage:Mode|Storage:Validation|Storage:FullStack|FourComponent|RelationalThreeRpc is restricted|RelationalBackend|cutover is not authorized|no verified implementation/); assertions++;
+  assert.match(output, /Storage:Mode|Storage:Validation|Storage:FullStack|FourComponent|RelationalThreeRpc is restricted|RelationalBackend|Relational backends|NewStoragePrimary|PrimaryAcknowledged|Privacy:KeyDirectory|cutover is not authorized|no verified implementation/); assertions++;
   await assert.rejects(access(path.dirname(data)), { code: 'ENOENT' }); assertions++;
 }
 console.log(`PASS: ${assertions} storage startup boundary assertions; no legacy data directories created; ${temp}`);

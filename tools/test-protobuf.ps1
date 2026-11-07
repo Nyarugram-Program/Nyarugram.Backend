@@ -34,6 +34,10 @@ foreach ($artifact in $lock.artifacts) {
     if ($actual -ne $artifact.sha256) { throw "SHA256 mismatch for $($artifact.name)." }
 }
 $testSources = Join-Path $repository 'Protocol.Tests'
+# global.json in the repository root pins SDK 8.0.204. Run every dotnet command
+# from there so an unrelated caller's working directory cannot select SDK 9.
+Push-Location $repository
+try {
 & $compiler "--proto_path=$testSources" "--java_out=lite:$(Join-Path $compat 'java')" "--csharp_out=$(Join-Path $compat 'csharp')" (Join-Path $testSources 'compat_v1.proto') (Join-Path $testSources 'compat_v2.proto') (Join-Path $testSources 'compat_backend_v1.proto')
 if ($LASTEXITCODE -ne 0) { throw "Compatibility generation failed ($LASTEXITCODE)." }
 
@@ -60,3 +64,4 @@ if ($LASTEXITCODE -ne 0) { throw "C# interop tests failed ($LASTEXITCODE)." }
 & $java -cp "$classes;$javaRuntime" ProtoGolden verify $csharpFixtures
 if ($LASTEXITCODE -ne 0) { throw "Java verification failed ($LASTEXITCODE)." }
 Write-Host "Binary Java lite ↔ C# interop passed. Fixtures: $run"
+} finally { Pop-Location }

@@ -16,12 +16,23 @@ public static class PostgresSchemaUpgrade
     public const string ApplicationName = "botgram-schema-upgrade";
     private static readonly int[] RequiredVersions = Enumerable.Range(1, TargetVersion).ToArray();
 
+    // Validation databases keep their loopback/botgram_test_* isolation. An
+    // explicitly authorized production target is allowed only when the offline
+    // operator sets BOTGRAM_PRIMARY_MAINTENANCE=1 and the database is not a test
+    // namespace. A production database is never silently treated as validation.
+    internal static bool PrimaryAuthorized(string? database) =>
+        string.Equals(Environment.GetEnvironmentVariable("BOTGRAM_PRIMARY_MAINTENANCE"), "1", StringComparison.Ordinal) &&
+        !string.IsNullOrWhiteSpace(database) && !database.StartsWith("botgram_test_", StringComparison.OrdinalIgnoreCase);
+
     private static void ValidateTarget(NpgsqlDataSource source)
     {
         var settings = new NpgsqlConnectionStringBuilder(source.ConnectionString);
-        if (!FourComponentOptions.Loopback(settings.Host) || settings.Database is not { } database ||
-            !Regex.IsMatch(database, "\\Abotgram_test_[a-z0-9_]+\\z", RegexOptions.CultureInvariant))
-            throw new InvalidOperationException("Schema maintenance requires a loopback botgram_test_* database");
+        var database = settings.Database;
+        var isolated = FourComponentOptions.Loopback(settings.Host) && database is not null &&
+            Regex.IsMatch(database, "\\Abotgram_test_[a-z0-9_]+\\z", RegexOptions.CultureInvariant);
+        if (!isolated && !PrimaryAuthorized(database))
+            throw new InvalidOperationException(
+                "Schema maintenance requires a loopback botgram_test_* database or BOTGRAM_PRIMARY_MAINTENANCE=1 with a dedicated production database");
     }
 
     public static async Task<SchemaUpgradeReport> InspectAsync(NpgsqlDataSource source, CancellationToken token = default)
@@ -36,7 +47,7 @@ public static class PostgresSchemaUpgrade
         var supported = Supported(versions) || versions.SequenceEqual(RequiredVersions);
         if (!supported)
             throw new InvalidOperationException("Unsupported schema version set: " + string.Join(',', versions)
-                + "; supported start versions are 1..7 and the target is " + TargetVersion);
+                + "; supported start versions are 1..8 and the target is " + TargetVersion);
         return identity with
         {
             VersionsBefore = versions, VersionsAfter = versions,
@@ -83,7 +94,7 @@ public static class PostgresSchemaUpgrade
         }
         if (!Supported(before))
             throw new InvalidOperationException("Unsupported schema version set: " + string.Join(',', before)
-                + "; supported start versions are 1..7 and the target is " + TargetVersion);
+                + "; supported start versions are 1..8 and the target is " + TargetVersion);
         await PostgresBackendSchema.ApplyInTransactionAsync(connection, transaction, token);
         var after = await Versions(connection, transaction, token);
         if (!after.SequenceEqual(RequiredVersions))
@@ -96,7 +107,7 @@ public static class PostgresSchemaUpgrade
         };
     }
 
-    private static bool Supported(int[] versions) => versions.SequenceEqual(Enumerable.Range(1, 7).ToArray());
+    private static bool Supported(int[] versions) => versions.SequenceEqual(Enumerable.Range(1, TargetVersion - 1).ToArray());
 
     private static async Task SetApplicationName(NpgsqlConnection connection, CancellationToken token)
     {

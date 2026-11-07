@@ -121,11 +121,14 @@ public static class ProtobufRpcMapper
 
     public static SendMessageCommand RelationalSendCommand(P.SendMessageRequest input)
     {
-        if (input.E2Ee is not null) throw new ApiException(501, "BOTGRAM_E2EE_BACKEND_UNSUPPORTED");
         MessageEntityService.ValidateCount(input.Entities.Count);
-        return new("tl:" + input.RandomId.ToString(CultureInfo.InvariantCulture), input.Text,
-            input.Entities.Count == 0 ? null : input.Entities.Select(e => Adapter.Entity(e, input.Text)).ToArray(),
-            input.HasReplyToMessageId ? Adapter.MessageId(input.ReplyToMessageId, true) : null, input.Silent);
+        var encrypted = input.E2Ee is not null;
+        if (encrypted && (input.Text.Length != 0 || input.Entities.Count != 0))
+            throw new ApiException(409, "E2EE_PLAINTEXT_FORBIDDEN");
+        return new("tl:" + input.RandomId.ToString(CultureInfo.InvariantCulture), encrypted ? "" : input.Text,
+            input.Entities.Count == 0 || encrypted ? null : input.Entities.Select(e => Adapter.Entity(e, input.Text)).ToArray(),
+            input.HasReplyToMessageId ? Adapter.MessageId(input.ReplyToMessageId, true) : null, input.Silent,
+            encrypted ? input.E2Ee.ToByteArray() : null);
     }
 
     public static P.RpcResponse MapRelationalHistory(Database view, string uid, P.RpcRequest request, string domain, Conversation conversation)

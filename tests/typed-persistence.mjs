@@ -44,8 +44,26 @@ const legacy = {
 };
 await writeFile(database, JSON.stringify(legacy));
 const expected = structuredClone(legacy);
+// Defaults added by later models when a legacy JSON snapshot is loaded. Keep
+// them explicit so the fixture keeps proving that no original field changes.
+const messageDefaults = { e2eeEnvelope: null, serviceKind: null };
+const callDefaults = { telegramId: 0, accessHash: 0, randomId: 0, video: false, protocol: null,
+  gaHash: null, gb: null, ga: null, keyFingerprint: 0, date: 0, receiveDate: 0, startDate: 0,
+  reason: 'Hangup', duration: 0, connections: null, p2pAllowed: false, requestProtocol: null, acceptProtocol: null };
+const userDefaults = { premium: false, lastSeen: null, online: false, presenceNotifiedAt: null };
 Object.assign(expected.messages[3], { serviceTitle: null, serviceMembers: null, telegramEntities: null, replyToMessageId: null, silent: false });
-for (const event of expected.events) event.expiresAt ??= null;
+expected.messages = expected.messages.map(message => ({ ...messageDefaults, ...message }));
+expected.calls = expected.calls.map(value => ({ ...callDefaults, ...value }));
+expected.users = expected.users.map(value => ({ ...userDefaults, ...value }));
+expected.sessions = expected.sessions.map(value => ({ foregroundAt: null, ...value }));
+expected.e2eeDevices = [];
+expected.e2eeConversations = [];
+expected.nextCallId = 0;
+for (const event of expected.events) {
+  event.expiresAt ??= null;
+  if (event.type === 'message.created') event.payload = { ...messageDefaults, ...event.payload };
+  if (event.type === 'call.updated') event.payload = { ...callDefaults, ...event.payload };
+}
 
 const xml = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 await writeFile(path.join(temp, 'TypedPersistence.csproj'), `<Project Sdk="Microsoft.NET.Sdk">

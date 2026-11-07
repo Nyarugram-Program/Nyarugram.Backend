@@ -17,6 +17,12 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
                 WHERE t.outbox_id=o.id AND t.state='Complete'))
         """;
 
+    private static bool EnvelopeEqual(byte[]? left, byte[]? right)
+    {
+        if (left is null || right is null) return left is null && right is null;
+        return left.AsSpan().SequenceEqual(right);
+    }
+
     // Explicit opt-in only: constructing this adapter never changes the database.
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
@@ -101,9 +107,21 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
             new("service:" + conversation.Id, ""), MessageWriteContract.Telegram),
             connection, transaction, accepted => accepted, retainThroughCommit, token, conversation);
 
+    /// <summary>
+    /// Native centred E2EE service message. It shares the message/pts/event/outbox
+    /// chain with ordinary messages and carries no plaintext.
+    /// </summary>
+    internal Task<AcceptedMessage> AddE2eeServiceInTransactionAsync(Session session, string conversationId,
+        string clientKey, string code, NpgsqlConnection connection, NpgsqlTransaction transaction,
+        Action<IDisposable> retainThroughCommit, CancellationToken token) =>
+        AcceptCore(new(session.TokenHash, session.UserId, conversationId,
+            new(clientKey, ""), MessageWriteContract.Telegram),
+            connection, transaction, accepted => accepted, retainThroughCommit, token,
+            e2eeServiceCode: code);
+
     private async Task<T> AcceptCore<T>(MessageAcceptance input, NpgsqlConnection connection, NpgsqlTransaction transaction,
         Func<AcceptedMessage, T> prepareResponse, Action<IDisposable> retainThroughCommit, CancellationToken cancellationToken,
-        Conversation? service = null)
+        Conversation? service = null, string? e2eeServiceCode = null)
     {
         if (transaction.Connection != connection || transaction.IsolationLevel != IsolationLevel.ReadCommitted)
             throw new InvalidOperationException("Message acceptance requires its caller's READ COMMITTED transaction");
@@ -164,10 +182,16 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
         if (service is not null && (service.Id != input.ConversationId || service.Kind != "group" ||
             !service.Members.Order(StringComparer.Ordinal).SequenceEqual(recipients)))
             throw new InvalidDataException("Group service does not match the authorized conversation");
-        if (service is null && (string.IsNullOrWhiteSpace(command.Text) || command.Text.Length > 16000))
+        // Encrypted messages and service messages legitimately have empty text.
+        if (service is null && e2eeServiceCode is null && command.E2eeEnvelope is null &&
+            (string.IsNullOrWhiteSpace(command.Text) || command.Text.Length > 16000))
             throw new ApiException(400, input.Contract == MessageWriteContract.Telegram ? "MESSAGE_EMPTY" : "invalid_text");
+        if (e2eeServiceCode is not null && command.E2eeEnvelope is not null)
+            throw new ApiException(400, "E2EE_ENVELOPE_INVALID");
         if (input.Contract == MessageWriteContract.Rest && command.Key.Length is < 1 or > 80)
             throw new ApiException(400, "invalid_client_message_id");
+        if (command.E2eeEnvelope is not null && command.Entities is { Length: > 0 })
+            throw new ApiException(409, "E2EE_ENTITIES_FORBIDDEN");
         if (command.Entities is { } entities)
         {
             MessageEntityService.ValidateCount(entities.Length);
@@ -185,7 +209,8 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
         if (stored is string json)
         {
             var existing = JsonSerializer.Deserialize<Message>(json) ?? throw new InvalidDataException("Missing stored message");
-            if (existing.Text != command.Text || (input.Contract == MessageWriteContract.Telegram &&
+            if (existing.Text != command.Text || !EnvelopeEqual(existing.E2eeEnvelope, command.E2eeEnvelope) ||
+                (input.Contract == MessageWriteContract.Telegram &&
                 (existing.ReplyToMessageId != command.ReplyId || existing.Silent != command.Silent ||
                  !MessageEntityService.Equal(existing.TelegramEntities, command.Entities))))
                 throw new ApiException(409, input.Contract == MessageWriteContract.Telegram ? "RANDOM_ID_DUPLICATE" : "idempotency_conflict");
@@ -194,7 +219,7 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
             return duplicateResponse;
         }
 
-        if (service is null)
+        if (service is null && e2eeServiceCode is null)
         {
             var privacy = await PostgresPrivacyPolicy.Load(connection, transaction, recipients.ToArray(), input.UserId, cancellationToken);
             if (privacy.AccountPrivacy is not null)
@@ -222,9 +247,11 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
         var sequence = (long)(await Scalar("""
             UPDATE botgram_intake_v1.conversations SET sequence = sequence + 1 WHERE id = $1 RETURNING sequence
             """, input.ConversationId))!;
-        var message = new Message(0, input.ConversationId, input.UserId, command.Key, command.Text,
-            DateTimeOffset.UtcNow, service?.Title, service?.Members,
-            TelegramEntities: command.Entities, ReplyToMessageId: command.ReplyId, Silent: command.Silent);
+        var message = new Message(0, input.ConversationId, input.UserId, command.Key,
+            command.E2eeEnvelope is null ? command.Text : "",
+            DateTimeOffset.UtcNow, service?.Title ?? e2eeServiceCode, service?.Members,
+            TelegramEntities: command.Entities, ReplyToMessageId: command.ReplyId, Silent: command.Silent,
+            E2eeEnvelope: command.E2eeEnvelope, ServiceKind: e2eeServiceCode is null ? null : "e2ee");
         var messageId = (long)(await Scalar("""
             INSERT INTO botgram_intake_v1.messages(conversation_id, conversation_sequence, sender_id, client_key, body)
             VALUES ($1, $2, $3, $4, $5::jsonb) RETURNING id

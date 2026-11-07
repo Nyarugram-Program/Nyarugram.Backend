@@ -4,7 +4,7 @@ namespace Botgram.Backend.Storage;
 
 public static class PostgresBackendSchema
 {
-    public const int CurrentVersion = 8;
+    public const int CurrentVersion = 9;
 
     // Explicit offline operation, never run by constructing a repository or handling a request.
     public static async Task ApplyAsync(NpgsqlDataSource source, CancellationToken token = default)
@@ -200,6 +200,49 @@ public static class PostgresBackendSchema
                     SET request_protocol=COALESCE(request_protocol,protocol),
                         accept_protocol=COALESCE(accept_protocol,protocol);
                 INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(8);
+            END IF;
+            END $migration$;
+            DO $migration$ BEGIN
+            IF NOT EXISTS(SELECT 1 FROM botgram_backend_v1.schema_versions WHERE version=9) THEN
+                -- Server-side E2EE directory and per-chat state. Only public key
+                -- material, protocol state and ciphertext references are stored;
+                -- plaintext, PINs and private keys never reach these tables.
+                CREATE TABLE IF NOT EXISTS botgram_backend_v1.e2ee_devices (
+                    user_id text PRIMARY KEY REFERENCES botgram_intake_v1.users(id),
+                    device_id integer NOT NULL CHECK (device_id = 1),
+                    registration_id integer NOT NULL CHECK (registration_id BETWEEN 1 AND 16383),
+                    identity_key bytea NOT NULL,
+                    signed_pre_key_id integer NOT NULL,
+                    signed_pre_key bytea NOT NULL,
+                    signed_pre_key_signature bytea NOT NULL,
+                    kyber_pre_key_id integer NOT NULL,
+                    kyber_pre_key bytea NOT NULL,
+                    kyber_pre_key_signature bytea NOT NULL,
+                    generation bigint NOT NULL CHECK (generation >= 1),
+                    updated_at timestamptz NOT NULL);
+                CREATE TABLE IF NOT EXISTS botgram_backend_v1.e2ee_one_time_pre_keys (
+                    user_id text NOT NULL REFERENCES botgram_backend_v1.e2ee_devices(user_id) ON DELETE CASCADE,
+                    key_id integer NOT NULL CHECK (key_id >= 1),
+                    public_key bytea NOT NULL,
+                    consumed boolean NOT NULL DEFAULT false,
+                    PRIMARY KEY (user_id, key_id));
+                CREATE TABLE IF NOT EXISTS botgram_backend_v1.e2ee_conversations (
+                    conversation_id text PRIMARY KEY REFERENCES botgram_intake_v1.conversations(id),
+                    state text NOT NULL CHECK (state IN ('pending','active','closing','suspended','closed')),
+                    protocol_version integer NOT NULL,
+                    epoch bigint NOT NULL,
+                    initiator_id text NOT NULL,
+                    boundary_message_id bigint NOT NULL,
+                    close_boundary_message_id bigint NOT NULL DEFAULT 0,
+                    close_requested_by text NULL,
+                    identity_confirmed_by text[] NOT NULL DEFAULT '{}',
+                    -- Generation observed when the identity change suspended the chat.
+                    -- A late confirmation cannot confirm a later replacement.
+                    identity_generation bigint NOT NULL DEFAULT 0,
+                    updated_at timestamptz NOT NULL);
+                CREATE INDEX IF NOT EXISTS e2ee_conversations_state_idx
+                    ON botgram_backend_v1.e2ee_conversations(state);
+                INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(9);
             END IF;
             END $migration$;
             """, connection, transaction);

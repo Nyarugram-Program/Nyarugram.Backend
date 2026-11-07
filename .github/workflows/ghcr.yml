@@ -19,10 +19,26 @@ jobs:
   test:
     name: Build and integration tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: botgram_test
+          POSTGRES_DB: botgram_test_ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U botgram_test -d botgram_test_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       BOTGRAM_TEST_DLL: ${{ github.workspace }}/bin/Release/net8.0/Botgram.Backend.dll
+      BOTGRAM_E2EE_PG: 'Host=127.0.0.1;Port=5432;Database=botgram_test_ci;Username=botgram_test'
+      BOTGRAM_PSQL: psql
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -32,17 +48,50 @@ jobs:
         with:
           node-version: '22'
       - name: Build Release
-        run: dotnet build -c Release --nologo
+        run: |
+          dotnet build -c Release --nologo
+          dotnet build Storage.Admin/Storage.Admin.csproj -c Release --nologo
+      - name: Initialize isolated PostgreSQL schema v9
+        run: |
+          cat > "$RUNNER_TEMP/pg-ci.json" <<'JSON'
+          {
+            "Storage": {
+              "Mode": "NewStorageValidation",
+              "ValidationAcknowledged": true,
+              "ValidationBackend": "RelationalBackend",
+              "ValidationConnectionString": "Host=127.0.0.1;Port=5432;Database=botgram_test_ci;Username=botgram_test"
+            }
+          }
+          JSON
+          dotnet Storage.Admin/bin/Release/net8.0/Storage.Admin.dll init "$RUNNER_TEMP/pg-ci.json"
       - name: Validate pinned M49 data
         run: node tests/m49.mjs
-      - name: Test GID allocation and persistence
+      - name: Verify every retired JSON route and JSON WSS negotiation
+        run: node tests/json-retirement.mjs
+      - name: Legacy GID suite verifies retirement and offline M49 data
         run: node tests/gid.mjs
-      - name: Test HTTP and WebSocket integration
+      - name: Legacy smoke suite verifies retirement without side effects
         run: node tests/smoke.mjs
-      - name: Test directional encrypted chats and persistence
-        run: node tests/e2ee.mjs
-      - name: Test RPC boundaries and replay
+      - name: Legacy TL-JSON RPC boundaries verify retirement
         run: node tests/rpc-boundaries.mjs
+      - name: Protobuf authentication, account security and ordinary chat
+        run: node tests/protobuf-business.mjs
+      - name: Protobuf authentication and chat against PostgreSQL authority
+        env:
+          BOTGRAM_BUSINESS_POSTGRES: '1'
+        run: node tests/protobuf-business.mjs
+      - name: Directional E2EE regression (legacy file authority)
+        run: node tests/e2ee.mjs
+      - name: Directional E2EE regression (real PostgreSQL authority)
+        env:
+          BOTGRAM_E2EE_POSTGRES: '1'
+        run: node tests/e2ee.mjs
+      - name: PostgreSQL E2EE concurrency, rollback and replay regression
+        run: node tests/postgres-e2ee-concurrency.mjs
+      - name: Protobuf schema fingerprint and frozen fixtures
+        run: |
+          node tests/proto-fingerprint.cjs
+          node tests/frozen-kafka-source.cjs
 
   image:
     name: Build and publish image
