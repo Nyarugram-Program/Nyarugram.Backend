@@ -123,7 +123,9 @@ static async Task Run(string connectionString)
         var replay = await Accept(Input("lost-response"));
         Check(replay.Duplicate && replay.Pts == 4 && stable == await Snapshot(source), "lost response retry");
         await Accept(Input("later"));
-        Check((await Accept(Input("lost-response"))).Pts == 5, "duplicate must return current pts");
+        var replayed = await Accept(Input("lost-response"));
+        Check(replayed.Duplicate && replayed.Pts == 4 && replayed.PtsCount == 1,
+            "duplicate must return the original event pts, not the current cursor");
 
         var rest = await Accept(Input("rest", contract: MessageWriteContract.Rest));
         var restReplay = await Accept(Input("rest", contract: MessageWriteContract.Rest) with

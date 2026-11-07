@@ -166,7 +166,8 @@ try {
     console.log(`  [ok] retry ${label}: id=${info.messageId} pts=${info.pts} pts_count=${info.ptsCount}, counters unchanged`);
   }
 
-  const second = sentInfo(await rpc(a.token, 107, send(bId, 7100000000002n, 'second message')));
+  const secondPayload = send(bId, 7100000000002n, 'second message');
+  const second = sentInfo(await rpc(a.token, 107, secondPayload));
   assert.ok(second.pts > firstInfo.pts);
   checks++;
   await retry('after another plaintext message');
@@ -233,6 +234,13 @@ try {
   assert.ok(messageIds.includes(encryptedInfo.messageId), 'difference lost the intervening encrypted message');
   checks++;
   console.log(`  [ok] difference from original pts=${firstInfo.pts} returned ${messageIds.length} messages, state.pts=${statePts}`);
+
+  // Remove the original event_recipients row and prove the retry fails explicitly
+  // instead of silently falling back to the current sync cursor.
+  sql(`DELETE FROM botgram_intake_v1.event_recipients WHERE user_id='${aId.replaceAll("'", "''")}' AND event_id=(SELECT id FROM botgram_intake_v1.events WHERE message_id=${second.messageId})`);
+  code(await rpc(a.token, 107, secondPayload), 500, 'BOTGRAM_MESSAGE_EVENT_PTS_MISSING');
+  checks++;
+  console.log('  [ok] missing original event recipient fails explicitly, no cursor fallback');
 
   console.log(`PASS: idempotent retry returns the original persistent pts (${checks} checkpoints)`);
 } catch (error) {
