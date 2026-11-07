@@ -60,8 +60,22 @@ if (relationalValidation || relationalBackend)
     if (relationalValidation) builder.Services.AddSingleton<PostgresRelationalValidation>();
     else
     {
-        builder.Services.AddSingleton<Botgram.Backend.Storage.PostgresBackend>();
+        // Backlog capacity is a semantic limit, not a tuning knob: keep the explicit
+        // Storage:MaximumBacklog override so isolated capacity regressions can use a
+        // small threshold without ever changing production semantics.
+        var maximumBacklog = builder.Configuration.GetValue<int?>("Storage:MaximumBacklog") ?? 100_000;
+        if (maximumBacklog < 1) throw new InvalidOperationException("Storage:MaximumBacklog must be positive");
+        builder.Services.AddSingleton(services =>
+            ActivatorUtilities.CreateInstance<Botgram.Backend.Storage.PostgresBackend>(services, maximumBacklog));
         builder.Services.AddHostedService<Botgram.Backend.Storage.RelationalMaintenanceService>();
+        if (!fourComponent)
+        {
+            // PostgreSQL single-authority mode has no Kafka/Scylla/Redis workers, so
+            // the same host owns the outbox completion lifecycle inside PostgreSQL.
+            builder.Services.AddSingleton(Botgram.Backend.Storage.RelationalOutboxOptions.Load(builder.Configuration));
+            builder.Services.AddSingleton<Botgram.Backend.Storage.RelationalOutboxMetrics>();
+            builder.Services.AddHostedService<Botgram.Backend.Storage.RelationalOutboxCompletionService>();
+        }
     }
 }
 builder.Services.AddSingleton<ProtocolUsage>();
@@ -234,6 +248,20 @@ app.MapGet("/health", async (HttpContext context) =>
         new("storage", relationalBackend ? "postgresql" : "legacy-file")
     };
     var status = 200;
+    if (relationalBackend && !fourComponent)
+    {
+        // PostgreSQL single-authority completion metrics. Pending is the number of
+        // outbox rows that still count against Storage:MaximumBacklog.
+        var metrics = context.RequestServices.GetService<Botgram.Backend.Storage.RelationalOutboxMetrics>();
+        if (metrics is not null)
+        {
+            var snapshot = metrics.Snapshot();
+            fields.Add(new("outbox_pending", snapshot.Pending.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            fields.Add(new("outbox_completed", snapshot.Completed.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            fields.Add(new("outbox_failures", snapshot.Failures.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            fields.Add(new("outbox_worker", snapshot.State));
+        }
+    }
     if (fourComponent)
     {
         var runtime = context.RequestServices.GetService<Botgram.Backend.Storage.FourComponentRuntime>();

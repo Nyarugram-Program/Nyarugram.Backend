@@ -152,7 +152,25 @@ function publishBody(identityKey, options = {}) {
     vfield(7, 11), bfield(8, Buffer.alloc(800, 4)), bfield(9, Buffer.alloc(32, 5)), oneTime
   );
 }
-function actionBody(peer, action) { return concat(bfield(1, peerRef(peer)), vfield(2, action), vfield(3, 2)); }
+function actionBody(peer, action, confirmation) {
+  const fields = [bfield(1, peerRef(peer)), vfield(2, action), vfield(3, 2)];
+  if (confirmation) {
+    fields.push(bfield(4, concat(
+      bfield(1, confirmation.identityKey),
+      vfield(2, confirmation.generation),
+      vfield(3, confirmation.epoch),
+      sfield(4, confirmation.version))));
+  }
+  return concat(...fields);
+}
+function confirmationFrom(status) {
+  return {
+    identityKey: bytes(status, 17),
+    generation: num(status, 18),
+    epoch: num(status, 4),
+    version: text(status, 22)
+  };
+}
 function statusList(response, operationField) {
   const payload = one(response.fields, operationField);
   assert.ok(payload, 'status payload');
@@ -323,6 +341,39 @@ try {
   assert.equal(statusState(reActive), 2);
   const epoch2 = num(reActive, 4);
   assert.ok(epoch2 > epoch);
+  const previousVersion = text(reActive, 22);
+  assert.equal(previousVersion.length, 64);
+
+  // random_id is a full signed 64-bit value: negative and extreme ids are legal,
+  // survive the idempotency key, and keep exact precision end to end.
+  for (const randomId of [-7100000000001n, -9223372036854775808n, 9223372036854775807n]) {
+    const payload = sendBody(bobId, randomId, null,
+      envelope(conversation, aliceId, bobId, epoch2, randomId));
+    const first = await protoRpc(alice.token, 107, payload);
+    rpcCode(first, 200);
+    const messageId = num(messageBody(first), 1);
+    assert.ok(messageId > 0);
+    const retried = await protoRpc(alice.token, 107, payload);
+    rpcCode(retried, 200);
+    assert.equal(num(messageBody(retried), 1), messageId, `negative random id ${randomId} lost idempotency`);
+  }
+  rpcCode(await protoRpc(alice.token, 107,
+    sendBody(bobId, 0, null, envelope(conversation, aliceId, bobId, epoch2, 0))), 400, 'E2EE_RANDOM_ID_INVALID');
+  rpcCode(await protoRpc(alice.token, 107,
+    sendBody(bobId, 123, null, envelope(conversation, aliceId, bobId, epoch2, 456))), 400, 'E2EE_RANDOM_ID_INVALID');
+
+  // A plaintext message committed before encryption was enabled must stay
+  // retryable after activation; only a new plaintext message is rejected.
+  rpcCode(await protoRpc(bob.token, 107, sendBody(aliceId, 8002, 'ordinary reverse direction')), 200);
+
+  // A sent message keeps its idempotent retry across close/reopen and identity
+  // changes: losing the commit response must not turn into a conflict.
+  const retryRandom = -9007199254740993n;
+  const retryPayload = sendBody(bobId, retryRandom, null,
+    envelope(conversation, aliceId, bobId, epoch2, retryRandom));
+  const retryFirst = await protoRpc(alice.token, 107, retryPayload);
+  rpcCode(retryFirst, 200);
+  const retryMessageId = num(messageBody(retryFirst), 1);
 
   // A new identity key suspends the conversation until both peers confirm.
   const replaced = await protoRpc(bob.token, 139, publishBody(Buffer.alloc(33, 0x33)));
@@ -332,18 +383,67 @@ try {
   const suspended = statusFor(suspendedResponse, 141, bobId);
   assert.equal(statusState(suspended), 4);
   assert.equal(num(suspended, 9), 1);
+  const staleVersion = text(suspended, 22);
+  assert.equal(staleVersion.length, 64, 'two-sided identity version is published');
+  const aliceSnapshot = confirmationFrom(suspended);
+  assert.equal(aliceSnapshot.generation, 2);
+  assert.equal(aliceSnapshot.identityKey.length, 33);
   rpcCode(await protoRpc(alice.token, 107,
     sendBody(bobId, 1006, null, envelope(conversation, aliceId, bobId, epoch2, 1006))), 409, 'E2EE_NOT_ACTIVE');
-  const aliceConfirm = await protoRpc(alice.token, 140, actionBody(bobId, 7));
+
+  // Missing or incomplete confirmation snapshots fail explicitly; the server
+  // never defaults to the identity that happens to be current.
+  rpcCode(await protoRpc(alice.token, 140, actionBody(bobId, 7)), 400, 'E2EE_IDENTITY_CONFIRMATION_REQUIRED');
+  rpcCode(await protoRpc(alice.token, 140,
+    actionBody(bobId, 7, { ...aliceSnapshot, version: '' })), 400, 'E2EE_IDENTITY_CONFIRMATION_REQUIRED');
+  rpcCode(await protoRpc(alice.token, 140,
+    actionBody(bobId, 7, { ...aliceSnapshot, epoch: epoch2 - 1 })), 409, 'E2EE_IDENTITY_CHANGED');
+  rpcCode(await protoRpc(alice.token, 140,
+    actionBody(bobId, 7, { ...aliceSnapshot, identityKey: Buffer.alloc(33, 0x99) })), 409, 'E2EE_IDENTITY_CHANGED');
+
+  // The user confirms the exact key, generation, epoch and version shown to them.
+  const aliceConfirm = await protoRpc(alice.token, 140, actionBody(bobId, 7, aliceSnapshot));
   rpcCode(aliceConfirm, 200);
-  assert.equal(statusState(statusFor(aliceConfirm, 140, bobId)), 4);
-  const bobConfirm = await protoRpc(bob.token, 140, actionBody(aliceId, 7));
+  const aliceConfirmed = statusFor(aliceConfirm, 140, bobId);
+  assert.equal(statusState(aliceConfirmed), 4);
+  assert.equal(num(aliceConfirmed, 13) ?? 0, 1);
+  assert.equal(num(aliceConfirmed, 14) ?? 0, 0);
+
+  // A confirmation captured before another replacement must fail, and must not
+  // create a peer confirmation or advance the state.
+  const bobOldSnapshot = {
+    identityKey: Buffer.alloc(33, 0x11), generation: 1, epoch: epoch2, version: previousVersion
+  };
+  rpcCode(await protoRpc(bob.token, 140, actionBody(aliceId, 7, bobOldSnapshot)), 409, 'E2EE_IDENTITY_CHANGED');
+  const afterStale = statusFor(await protoRpc(alice.token, 141, concat(bfield(1, peerRef(bobId)))), 141, bobId);
+  assert.equal(statusState(afterStale), 4);
+  assert.equal(num(afterStale, 14) ?? 0, 0);
+
+  // A second replacement while suspended invalidates the first side's
+  // confirmation instead of letting it confirm the newer identity.
+  rpcCode(await protoRpc(bob.token, 139, publishBody(Buffer.alloc(33, 0x44))), 200);
+  const bobFresh = statusFor(await protoRpc(bob.token, 141, concat(bfield(1, peerRef(aliceId)))), 141, aliceId);
+  assert.notEqual(text(bobFresh, 22), staleVersion);
+  rpcCode(await protoRpc(bob.token, 140, actionBody(aliceId, 7, confirmationFrom(bobFresh))), 200);
+  const aliceFresh = statusFor(await protoRpc(alice.token, 141, concat(bfield(1, peerRef(bobId)))), 141, bobId);
+  assert.equal(statusState(aliceFresh), 4);
+  assert.equal(num(aliceFresh, 13) ?? 0, 0, 'old confirmation must not survive a later identity');
+  assert.equal(num(aliceFresh, 14) ?? 0, 1);
+  const bobConfirm = await protoRpc(alice.token, 140, actionBody(bobId, 7, confirmationFrom(aliceFresh)));
   rpcCode(bobConfirm, 200);
-  const reactivated = statusFor(bobConfirm, 140, aliceId);
+  const reactivated = statusFor(bobConfirm, 140, bobId);
   assert.equal(statusState(reactivated), 2);
+  assert.equal(num(reactivated, 13) ?? 0, 1);
+  assert.equal(num(reactivated, 14) ?? 0, 1);
   const epoch3 = num(reactivated, 4);
   const afterIdentity = envelope(conversation, aliceId, bobId, epoch3, 1007);
   rpcCode(await protoRpc(alice.token, 107, sendBody(bobId, 1007, null, afterIdentity)), 200);
+
+  // The original retry still resolves to the original message after the whole
+  // close/reopen and identity-change sequence.
+  const retryAfterIdentity = await protoRpc(alice.token, 107, retryPayload);
+  rpcCode(retryAfterIdentity, 200);
+  assert.equal(num(messageBody(retryAfterIdentity), 1), retryMessageId);
 
   // History/difference exposes only the envelope, never plaintext, and service markers.
   const history = await protoRpc(alice.token, 105, concat(bfield(1, peerRef(bobId)), vfield(7, 50)));

@@ -88,6 +88,28 @@ jobs:
         run: node tests/e2ee.mjs
       - name: PostgreSQL E2EE concurrency, rollback and replay regression
         run: node tests/postgres-e2ee-concurrency.mjs
+      - name: PostgreSQL storage contracts, delivery fencing and capacity
+        env:
+          BOTGRAM_PG_TEST_CONNECTION_STRING: 'Host=127.0.0.1;Port=5432;Database=botgram_test_ci;Username=botgram_test'
+        run: dotnet run --no-build -c Release --project Storage.Tests
+      - name: Initialize dedicated outbox-completion database
+        run: |
+          psql -h 127.0.0.1 -U botgram_test -d postgres -c 'CREATE DATABASE botgram_test_outbox'
+          cat > "$RUNNER_TEMP/pg-outbox.json" <<'JSON'
+          {
+            "Storage": {
+              "Mode": "NewStorageValidation",
+              "ValidationAcknowledged": true,
+              "ValidationBackend": "RelationalBackend",
+              "ValidationConnectionString": "Host=127.0.0.1;Port=5432;Database=botgram_test_outbox;Username=botgram_test"
+            }
+          }
+          JSON
+          dotnet Storage.Admin/bin/Release/net8.0/Storage.Admin.dll init "$RUNNER_TEMP/pg-outbox.json"
+      - name: PostgreSQL single-authority outbox completion lifecycle
+        env:
+          BOTGRAM_E2EE_PG: 'Host=127.0.0.1;Port=5432;Database=botgram_test_outbox;Username=botgram_test'
+        run: node tests/relational-outbox.mjs
       - name: Protobuf schema fingerprint and frozen fixtures
         run: |
           node tests/proto-fingerprint.cjs

@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using Google.Protobuf;
 using P = Botgram.Protocol.V1;
 
@@ -172,20 +175,45 @@ public static class E2eeService
             case P.E2eeActionKind.E2EeConfirmIdentity:
             {
                 if (record is null) return Disabled(db, conversation, uid, domain);
+                // A stale repeat after activation is idempotent and changes nothing.
                 if (record.State != StateSuspended) return MapStatus(db, conversation, uid, domain, record);
-                if (!record.IdentityConfirmedBy.Contains(uid))
+                // The legacy file store follows the same binding contract as the
+                // relational path: the request must carry the exact identity the
+                // user saw, otherwise it is rejected without touching the record.
+                var confirmation = input.IdentityConfirmation;
+                if (confirmation is null || confirmation.PeerIdentityKey.Length is < 32 or > 4096 ||
+                    string.IsNullOrEmpty(confirmation.IdentityVersion) || confirmation.Epoch <= 0)
+                    throw new ApiException(400, "E2EE_IDENTITY_CONFIRMATION_REQUIRED");
+                var self = Device(db, uid);
+                var peerDevice = Device(db, peer);
+                var currentVersion = IdentityVersion(self, peerDevice);
+                var versionMatches = currentVersion.Length != 0 && confirmation.IdentityVersion.Length == currentVersion.Length &&
+                    CryptographicOperations.FixedTimeEquals(
+                        Encoding.UTF8.GetBytes(confirmation.IdentityVersion), Encoding.UTF8.GetBytes(currentVersion));
+                if (!versionMatches || confirmation.Epoch != record.Epoch || peerDevice is null ||
+                    confirmation.PeerGeneration != peerDevice.Generation ||
+                    !confirmation.PeerIdentityKey.Span.SequenceEqual(peerDevice.IdentityKey))
+                    throw new ApiException(409, "E2EE_IDENTITY_CHANGED");
+                var confirmed = record.IdentityConfirmedBy
+                    .Where(entry => entry.EndsWith("|" + currentVersion, StringComparison.Ordinal)).ToList();
+                if (!confirmed.Contains(uid + "|" + currentVersion, StringComparer.Ordinal))
+                    confirmed.Add(uid + "|" + currentVersion);
+                if (!confirmed.SequenceEqual(record.IdentityConfirmedBy, StringComparer.Ordinal))
                     record = record with
                     {
-                        IdentityConfirmedBy = [.. record.IdentityConfirmedBy, uid],
+                        IdentityConfirmedBy = confirmed.ToArray(),
+                        IdentityGeneration = record.IdentityGeneration + 1,
                         UpdatedAt = DateTimeOffset.UtcNow
                     };
-                if (record.IdentityConfirmedBy.Distinct().Count() >= conversation.Members.Distinct().Count())
+                if (AllConfirmedVersion(confirmed.ToArray(), conversation.Members, currentVersion))
                 {
                     record = record with
                     {
                         State = StateActive, Epoch = record.Epoch + 1,
                         BoundaryMessageId = LastMessageId(db, conversation.Id),
-                        IdentityConfirmedBy = conversation.Members, UpdatedAt = DateTimeOffset.UtcNow
+                        IdentityConfirmedBy = conversation.Members
+                            .Select(member => member + "|" + currentVersion).ToArray(),
+                        UpdatedAt = DateTimeOffset.UtcNow
                     };
                     ConversationMessageService.AddE2eeServiceMessage(db, conversation, uid, "e2ee:reactivated");
                 }
@@ -246,8 +274,10 @@ public static class E2eeService
         }
         if (envelope.KeyEpoch != record.Epoch)
             throw new ApiException(409, "E2EE_EPOCH_INVALID");
-        if (!command.Key.StartsWith("tl:", StringComparison.Ordinal) ||
-            !long.TryParse(command.Key.AsSpan(3), out var random) || random != envelope.RandomId)
+        // Full signed 64-bit random ids are legal; compare the canonical decimal form
+        // so '+', leading zeros, whitespace, overflow and zero cannot slip through.
+        if (envelope.RandomId == 0 ||
+            !command.Key.Equals("tl:" + envelope.RandomId.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal))
             throw new ApiException(400, "E2EE_RANDOM_ID_INVALID");
         if (envelope.Ciphertext.Length is < 1 or > MaxCiphertext)
             throw new ApiException(400, "E2EE_CIPHERTEXT_INVALID");
@@ -277,6 +307,8 @@ public static class E2eeService
         var peer = Other(conversation, uid);
         var peerDevice = Device(db, peer);
         var selfDevice = Device(db, uid);
+        var currentVersion = IdentityVersion(selfDevice, peerDevice);
+        var versioned = record?.State == StateSuspended;
         var result = new P.E2eeChatStatus
         {
             Peer = new() { User = new() { ServerDomain = domain, UserId = peer } },
@@ -291,24 +323,56 @@ public static class E2eeService
             {
                 { State: StatePending } => record.InitiatorId != uid,
                 { State: StateClosing } => record.CloseRequestedBy != uid,
-                { State: StateSuspended } => !record.IdentityConfirmedBy.Contains(uid),
+                { State: StateSuspended } => currentVersion.Length == 0 ||
+                    !IsConfirmedVersion(record.IdentityConfirmedBy, uid, currentVersion),
                 _ => false
             },
             PeerSupported = peerDevice is not null,
             IdentityChanged = record?.State == StateSuspended,
             InitiatorUserId = record?.InitiatorId ?? "",
             ClosedByUserId = record?.CloseRequestedBy ?? "",
-            SelfConfirmedIdentity = record is not null && record.IdentityConfirmedBy.Contains(uid),
-            PeerConfirmedIdentity = record is not null && record.IdentityConfirmedBy.Contains(peer),
+            SelfConfirmedIdentity = record is not null && (versioned
+                ? IsConfirmedVersion(record.IdentityConfirmedBy, uid, currentVersion)
+                : IsConfirmedBy(record.IdentityConfirmedBy, uid)),
+            PeerConfirmedIdentity = record is not null && (versioned
+                ? IsConfirmedVersion(record.IdentityConfirmedBy, peer, currentVersion)
+                : IsConfirmedBy(record.IdentityConfirmedBy, peer)),
             SelfDeviceId = selfDevice?.DeviceId ?? 0,
             PeerDeviceId = peerDevice?.DeviceId ?? 0,
             PeerIdentityKey = peerDevice is null ? ByteString.Empty : ByteString.CopyFrom(peerDevice.IdentityKey),
             PeerGeneration = peerDevice?.Generation ?? 0,
             UpdatedAtMs = (record?.UpdatedAt ?? DateTimeOffset.UtcNow).ToUnixTimeMilliseconds(),
-            TlUserId = IdentityService.UserId(db, peer)
+            TlUserId = IdentityService.UserId(db, peer),
+            IdentityVersion = IdentityVersion(selfDevice, peerDevice)
         };
         return result;
     }
+
+    /// <summary>
+    /// Canonical version of both devices' identities, ordered by user id so both
+    /// participants observe the same value. Never derives binding from a sum of
+    /// generations; the hash covers the actual keys and generations.
+    /// </summary>
+    private static string IdentityVersion(E2eeDevice? self, E2eeDevice? peer)
+    {
+        if (self is null || peer is null) return "";
+        var (first, second) = string.CompareOrdinal(self.UserId, peer.UserId) <= 0 ? (self, peer) : (peer, self);
+        var material = string.Join('\n',
+            first.UserId, first.Generation.ToString(CultureInfo.InvariantCulture),
+            Convert.ToBase64String(first.IdentityKey),
+            second.UserId, second.Generation.ToString(CultureInfo.InvariantCulture),
+            Convert.ToBase64String(second.IdentityKey));
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(material))).ToLowerInvariant();
+    }
+
+    private static bool IsConfirmedBy(string[] entries, string uid) =>
+        entries.Any(entry => entry == uid || entry.StartsWith(uid + "|", StringComparison.Ordinal));
+
+    private static bool IsConfirmedVersion(string[] entries, string uid, string version) =>
+        entries.Contains(uid + "|" + version, StringComparer.Ordinal);
+
+    private static bool AllConfirmedVersion(string[] entries, string[] members, string version) =>
+        members.All(member => IsConfirmedVersion(entries, member, version));
 
     private static P.E2eeChatStatus Disabled(Database db, Conversation conversation, string uid, string domain) =>
         MapStatus(db, conversation, uid, domain, null);
@@ -322,6 +386,9 @@ public static class E2eeService
             Replace(db, record with
             {
                 State = StateSuspended, IdentityConfirmedBy = [], CloseRequestedBy = null,
+                // Versioned confirmations make every old binding stale; the counter is
+                // now a monotonic suspension revision for diagnostics, not a key.
+                IdentityGeneration = record.IdentityGeneration + 1,
                 UpdatedAt = DateTimeOffset.UtcNow
             });
             ConversationMessageService.AddE2eeServiceMessage(db, conversation, uid, "e2ee:identity_changed");

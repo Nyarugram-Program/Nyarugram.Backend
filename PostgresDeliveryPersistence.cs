@@ -162,6 +162,16 @@ public sealed class PostgresDeliveryPersistence(NpgsqlDataSource dataSource,
             cancellationToken, acknowledgement.Position.Topic, acknowledgement.Position.Partition, acknowledgement.Position.Offset);
     }
 
+    /// <summary>
+    /// PostgreSQL-only publication: no external broker exists. Called only AFTER the
+    /// event was durably staged in delivery_inbox and, for messages, its projection
+    /// task was verified Complete. Broker coordinates stay NULL on purpose.
+    /// </summary>
+    public Task<bool> ConfirmRelationalPublishedAsync(Guid outboxId, Guid leaseToken, CancellationToken cancellationToken) =>
+        OutboxMutation(outboxId, leaseToken,
+            "state='Published',broker_topic=NULL,broker_partition=NULL,broker_offset=NULL,lease_token=NULL,lease_until=NULL",
+            cancellationToken);
+
     public Task<bool> FailAsync(Guid outboxId, Guid leaseToken, DateTimeOffset retryAt, bool blocked, CancellationToken cancellationToken) =>
         OutboxMutation(outboxId, leaseToken, "state=$3,retry_at=$4,lease_token=NULL,lease_until=NULL",
             cancellationToken, blocked ? "Blocked" : "Pending", retryAt);

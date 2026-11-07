@@ -85,6 +85,7 @@ function envelopeBytes(conversation, sender, recipient, epoch, randomId, message
     sfield(5, recipient), vfield(6, recipientDevice), vfield(7, epoch), fixed64(8, randomId),
     bfield(9, Buffer.alloc(48, 9)), vfield(10, messageType));
 }
+function chatFields(list) { return fields(first(list, 1).bytes); }
 function send(peer, randomId, e2ee) {
   return concat(bfield(1, peerRef(peer)), fixed64(2, randomId), bfield(7, e2ee));
 }
@@ -165,10 +166,27 @@ try {
   const firstMessageId = Number(first(fields(first(firstSend, 1).bytes), 1).value);
   const replay = outcome(await rpc(a.token, 107, send(bId, random, valid)), 107);
   assert.equal(Number(first(fields(first(replay, 1).bytes), 1).value), firstMessageId);
-  // A well-formed protobuf payload with invalid envelope semantics is rejected
-  // by E2EE validation (a malformed wire payload is rejected even earlier).
+  // A conflicting retry with the same id but different content is a conflict,
+  // not a fresh admission: the durable idempotency lookup wins.
   code(await rpc(a.token, 107, send(bId, random, concat(vfield(1, 1)))),
+    409, 'RANDOM_ID_DUPLICATE');
+  // A new random id with invalid envelope semantics is still rejected by admission.
+  code(await rpc(a.token, 107, send(bId, random + 1n, concat(vfield(1, 1)))),
     400, 'E2EE_MESSAGE_TYPE_INVALID');
+  checks++;
+
+  // sfixed64 random_id covers the full signed range; the idempotency key keeps
+  // exact precision for negative and extreme values.
+  for (const value of [-7100000000001n, -9223372036854775808n, 9223372036854775807n]) {
+    const bytes = envelopeBytes(conversationId, aId, bId, Number(first(accept, 4).value), value, 3, 1);
+    const sent = outcome(await rpc(a.token, 107, send(bId, value, bytes)), 107);
+    const messageId = Number(first(fields(first(sent, 1).bytes), 1).value);
+    const again = outcome(await rpc(a.token, 107, send(bId, value, bytes)), 107);
+    assert.equal(Number(first(fields(first(again, 1).bytes), 1).value), messageId);
+  }
+  code(await rpc(a.token, 107, send(bId, 0n,
+    envelopeBytes(conversationId, aId, bId, Number(first(accept, 4).value), 0n, 3, 1))),
+    400, 'E2EE_RANDOM_ID_INVALID');
   checks++;
 
   // Paged history preserves ordering and the encrypted body.
@@ -177,6 +195,44 @@ try {
       concat(bfield(1, peerRef(bId)), vfield(7, limit))), 105);
     assert.ok(all(page, 1).length <= limit);
   }
+  // A committed message stays retryable after an identity replacement suspends
+  // the chat, and a confirmation captured before the replacement is rejected.
+  const statusBefore = chatFields(outcome(await rpc(a.token, 141, concat(bfield(1, peerRef(bId)))), 141));
+  const oldVersion = stringOf(first(statusBefore, 22));
+  const oldPeerKey = first(statusBefore, 17).bytes;
+  const oldPeerGeneration = Number(first(statusBefore, 18).value);
+  const oldEpoch = Number(first(statusBefore, 4).value);
+  outcome(await rpc(b.token, 139, publishBody(Buffer.alloc(33, 0x44), [950])), 139);
+  const suspendedStatus = chatFields(outcome(await rpc(a.token, 141, concat(bfield(1, peerRef(bId)))), 141));
+  assert.equal(Number(first(suspendedStatus, 2).value), 4);
+  const confirm = (key, generation, epoch, version) => concat(
+    bfield(1, peerRef(bId)), vfield(2, 7), vfield(3, 2),
+    bfield(4, concat(bfield(1, key), vfield(2, generation), vfield(3, epoch), sfield(4, version))));
+  code(await rpc(a.token, 140, confirm(oldPeerKey, oldPeerGeneration, oldEpoch, oldVersion)),
+    409, 'E2EE_IDENTITY_CHANGED');
+  const retrySuspended = outcome(await rpc(a.token, 107, send(bId, random, valid)), 107);
+  assert.equal(Number(first(fields(first(retrySuspended, 1).bytes), 1).value), firstMessageId);
+  checks++;
+
+  // Both sides confirm the current version, then the same retry still resolves.
+  const freshA = chatFields(outcome(await rpc(a.token, 141, concat(bfield(1, peerRef(bId)))), 141));
+  const freshB = chatFields(outcome(await rpc(b.token, 141, concat(bfield(1, peerRef(aId)))), 141));
+  const confirmFor = (status, peer) => concat(bfield(1, peerRef(peer)), vfield(2, 7), vfield(3, 2),
+    bfield(4, concat(bfield(1, first(status, 17).bytes), vfield(2, Number(first(status, 18).value)),
+      vfield(3, Number(first(status, 4).value)), sfield(4, stringOf(first(status, 22))))));
+  outcome(await rpc(a.token, 140, confirmFor(freshA, bId)), 140);
+  const reactivated = outcome(await rpc(b.token, 140, confirmFor(freshB, aId)), 140);
+  assert.equal(Number(first(reactivated, 2).value), 2);
+  const retryActive = outcome(await rpc(a.token, 107, send(bId, random, valid)), 107);
+  assert.equal(Number(first(fields(first(retryActive, 1).bytes), 1).value), firstMessageId);
+  checks++;
+
+  // Restart must not break the same idempotent retry.
+  await stop(); await start();
+  const retryRestart = outcome(await rpc(a.token, 107, send(bId, random, valid)), 107);
+  assert.equal(Number(first(fields(first(retryRestart, 1).bytes), 1).value), firstMessageId);
+  checks++;
+
   // Only a base64 ciphertext envelope is persisted; the JSON field name alone
   // is present (as null) on plaintext messages, so test the JSON value.
   const plaintextLeaks = Number(sql(

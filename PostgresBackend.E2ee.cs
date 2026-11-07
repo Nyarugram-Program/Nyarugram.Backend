@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using Google.Protobuf;
 using P = Botgram.Protocol.V1;
 
@@ -101,6 +103,32 @@ public sealed partial class PostgresBackend
 
     private static string Other(Conversation conversation, string uid) => conversation.Members.Single(m => m != uid);
 
+    /// <summary>
+    /// Canonical version of both devices' identities, ordered by user id so both
+    /// participants observe the same value. Generation sums are never used as an
+    /// identity binding: a hash covers the actual public keys and generations.
+    /// </summary>
+    private static string IdentityVersion(E2eeDeviceRow? self, E2eeDeviceRow? peer)
+    {
+        if (self is null || peer is null) return "";
+        var (first, second) = string.CompareOrdinal(self.UserId, peer.UserId) <= 0 ? (self, peer) : (peer, self);
+        var material = string.Join('\n',
+            first.UserId, first.Generation.ToString(CultureInfo.InvariantCulture),
+            Convert.ToBase64String(first.IdentityKey),
+            second.UserId, second.Generation.ToString(CultureInfo.InvariantCulture),
+            Convert.ToBase64String(second.IdentityKey));
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(material))).ToLowerInvariant();
+    }
+
+    private static bool IsConfirmedBy(string[] entries, string uid) =>
+        entries.Any(entry => entry == uid || entry.StartsWith(uid + "|", StringComparison.Ordinal));
+
+    private static bool IsConfirmedVersion(string[] entries, string uid, string version) =>
+        entries.Contains(uid + "|" + version, StringComparer.Ordinal);
+
+    private static bool AllConfirmedVersion(string[] entries, string[] members, string version) =>
+        members.All(member => IsConfirmedVersion(entries, member, version));
+
     private static void ValidateKey(ByteString key, string code)
     {
         if (key.Length is < 32 or > 4096) throw new ApiException(400, code);
@@ -182,7 +210,7 @@ public sealed partial class PostgresBackend
                                  WHERE user_id=$1 AND NOT consumed ORDER BY key_id LIMIT 100)
             """, uid);
 
-        if (replaced) await SuspendForIdentityChange(work, session, uid, generation);
+        if (replaced) await SuspendForIdentityChange(work, session, uid);
         var remaining = (int)(long)(await work.Scalar("""
             SELECT count(*) FROM botgram_backend_v1.e2ee_one_time_pre_keys WHERE user_id=$1 AND NOT consumed
             """, uid))!;
@@ -265,22 +293,42 @@ public sealed partial class PostgresBackend
             case P.E2eeActionKind.E2EeConfirmIdentity:
             {
                 if (record is null) return await MapStatus(work, conversation, uid, domain, null);
+                // A stale repeat after activation is idempotent and changes nothing.
                 if (record.State != StateSuspended) return await MapStatus(work, conversation, uid, domain, record);
-                // A confirmation for an older replacement must not confirm a newer identity.
+                // The confirmation must carry the exact snapshot the user saw. An old
+                // request without it is rejected instead of inheriting the current identity.
+                var confirmation = input.IdentityConfirmation;
+                if (confirmation is null || confirmation.PeerIdentityKey.Length is < 32 or > 4096 ||
+                    string.IsNullOrEmpty(confirmation.IdentityVersion) || confirmation.Epoch <= 0)
+                    throw new ApiException(400, "E2EE_IDENTITY_CONFIRMATION_REQUIRED");
                 var self = await Device(work, uid);
                 var peerDevice = await Device(work, peer);
-                var current = (self?.Generation ?? 0) + (peerDevice?.Generation ?? 0);
-                if (current != record.IdentityGeneration)
+                var currentVersion = IdentityVersion(self, peerDevice);
+                var versionMatches = currentVersion.Length != 0 && confirmation.IdentityVersion.Length == currentVersion.Length &&
+                    CryptographicOperations.FixedTimeEquals(
+                        Encoding.UTF8.GetBytes(confirmation.IdentityVersion), Encoding.UTF8.GetBytes(currentVersion));
+                if (!versionMatches || confirmation.Epoch != record.Epoch || peerDevice is null ||
+                    confirmation.PeerGeneration != peerDevice.Generation ||
+                    !confirmation.PeerIdentityKey.Span.SequenceEqual(peerDevice.IdentityKey))
                 {
-                    record = record with { IdentityConfirmedBy = [], IdentityGeneration = current, UpdatedAt = now };
-                    break;
+                    // Never mutate the record: the user confirmed an identity that is no
+                    // longer current, so this request must not confirm the replacement.
+                    throw new ApiException(409, "E2EE_IDENTITY_CHANGED");
                 }
-                if (!record.IdentityConfirmedBy.Contains(uid))
-                    record = record with { IdentityConfirmedBy = [.. record.IdentityConfirmedBy, uid], UpdatedAt = now };
-                if (record.IdentityConfirmedBy.Distinct().Count() >= conversation.Members.Distinct().Count())
+                // Drop confirmations bound to any older identity version. Only versioned
+                // entries count while suspended, so a plain user id cannot inherit this one.
+                var confirmed = record.IdentityConfirmedBy
+                    .Where(entry => entry.EndsWith("|" + currentVersion, StringComparison.Ordinal)).ToList();
+                if (!confirmed.Contains(uid + "|" + currentVersion, StringComparer.Ordinal))
+                    confirmed.Add(uid + "|" + currentVersion);
+                if (!confirmed.SequenceEqual(record.IdentityConfirmedBy, StringComparer.Ordinal))
+                    record = record with { IdentityConfirmedBy = confirmed.ToArray(),
+                        IdentityGeneration = record.IdentityGeneration + 1, UpdatedAt = now };
+                if (AllConfirmedVersion(confirmed.ToArray(), conversation.Members, currentVersion))
                 {
                     record = record with { State = StateActive, Epoch = record.Epoch + 1, BoundaryMessageId = boundary,
-                        IdentityConfirmedBy = conversation.Members, UpdatedAt = now };
+                        IdentityConfirmedBy = conversation.Members
+                            .Select(member => member + "|" + currentVersion).ToArray(), UpdatedAt = now };
                     service = "e2ee:reactivated";
                 }
                 break;
@@ -320,6 +368,10 @@ public sealed partial class PostgresBackend
         var peerDevice = await Device(work, peer);
         var selfDevice = await Device(work, uid);
         var tlUserId = (await UserIdentities(work, [peer]))[peer];
+        // While suspended, a confirmation only counts for the current two-sided
+        // version. An entry bound to an older version must not look confirmed.
+        var currentVersion = IdentityVersion(selfDevice, peerDevice);
+        var versioned = record?.State == StateSuspended;
         return new P.E2eeChatStatus
         {
             Peer = new() { User = new() { ServerDomain = domain, UserId = peer } },
@@ -334,21 +386,27 @@ public sealed partial class PostgresBackend
             {
                 { State: StatePending } => record.InitiatorId != uid,
                 { State: StateClosing } => record.CloseRequestedBy != uid,
-                { State: StateSuspended } => !record.IdentityConfirmedBy.Contains(uid),
+                { State: StateSuspended } => currentVersion.Length == 0 ||
+                    !IsConfirmedVersion(record.IdentityConfirmedBy, uid, currentVersion),
                 _ => false
             },
             PeerSupported = peerDevice is not null,
             IdentityChanged = record?.State == StateSuspended,
             InitiatorUserId = record?.InitiatorId ?? "",
             ClosedByUserId = record?.CloseRequestedBy ?? "",
-            SelfConfirmedIdentity = record is not null && record.IdentityConfirmedBy.Contains(uid),
-            PeerConfirmedIdentity = record is not null && record.IdentityConfirmedBy.Contains(peer),
+            SelfConfirmedIdentity = record is not null && (versioned
+                ? IsConfirmedVersion(record.IdentityConfirmedBy, uid, currentVersion)
+                : IsConfirmedBy(record.IdentityConfirmedBy, uid)),
+            PeerConfirmedIdentity = record is not null && (versioned
+                ? IsConfirmedVersion(record.IdentityConfirmedBy, peer, currentVersion)
+                : IsConfirmedBy(record.IdentityConfirmedBy, peer)),
             SelfDeviceId = selfDevice?.DeviceId ?? 0,
             PeerDeviceId = peerDevice?.DeviceId ?? 0,
             PeerIdentityKey = peerDevice is null ? ByteString.Empty : ByteString.CopyFrom(peerDevice.IdentityKey),
             PeerGeneration = peerDevice?.Generation ?? 0,
             UpdatedAtMs = (record?.UpdatedAt ?? DateTimeOffset.UtcNow).ToUnixTimeMilliseconds(),
-            TlUserId = tlUserId
+            TlUserId = tlUserId,
+            IdentityVersion = IdentityVersion(selfDevice, peerDevice)
         };
     }
 
@@ -430,14 +488,19 @@ public sealed partial class PostgresBackend
             if (envelope.RecipientDeviceId != peerDevice.DeviceId) throw new ApiException(409, "E2EE_ENVELOPE_DEVICE_INVALID");
         }
         if (envelope.KeyEpoch != record.Epoch) throw new ApiException(409, "E2EE_EPOCH_INVALID");
-        if (!command.Key.StartsWith("tl:", StringComparison.Ordinal) ||
-            !long.TryParse(command.Key.AsSpan(3), NumberStyles.None, CultureInfo.InvariantCulture, out var random) ||
-            random != envelope.RandomId) throw new ApiException(400, "E2EE_RANDOM_ID_INVALID");
+        // Compare against the canonical decimal form instead of parsing with a
+        // restricted NumberStyles: sfixed64 is a full signed 64-bit value and
+        // clients legitimately generate negative random ids. This rejects zero,
+        // leading '+', leading zeros, whitespace and any overflow without ever
+        // converting through a narrower or floating-point representation.
+        if (envelope.RandomId == 0 ||
+            !command.Key.Equals("tl:" + envelope.RandomId.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal))
+            throw new ApiException(400, "E2EE_RANDOM_ID_INVALID");
         if (envelope.Ciphertext.Length is < 1 or > MaxCiphertext) throw new ApiException(400, "E2EE_CIPHERTEXT_INVALID");
         return envelope.ToByteArray();
     }
 
-    private async Task SuspendForIdentityChange(Transaction work, Session session, string uid, long generation)
+    private async Task SuspendForIdentityChange(Transaction work, Session session, string uid)
     {
         var owned = await Owned(work, uid);
         foreach (var conversation in owned.Where(c => c.Kind == "direct" && c.Members.Distinct().Count() == 2 &&
@@ -445,10 +508,12 @@ public sealed partial class PostgresBackend
         {
             var record = await Chat(work, conversation.Id, true);
             if (record is null || record.State is not (StateActive or StateClosing)) continue;
-            var peerDevice = await Device(work, Other(conversation, uid));
-            var observed = generation + (peerDevice?.Generation ?? 0);
+            // Confirmation bindings are versioned snapshots, so every old confirmation
+            // must be discarded. identity_generation is now a monotonic revision of
+            // suspensions, never a sum of device generations.
             await SaveChat(work, record with { State = StateSuspended, IdentityConfirmedBy = [],
-                CloseRequestedBy = null, IdentityGeneration = observed, UpdatedAt = DateTimeOffset.UtcNow });
+                CloseRequestedBy = null, IdentityGeneration = record.IdentityGeneration + 1,
+                UpdatedAt = DateTimeOffset.UtcNow });
             await AddE2eeServiceMessage(work, session, conversation.Id, "e2ee:identity_changed", record.Epoch);
         }
     }

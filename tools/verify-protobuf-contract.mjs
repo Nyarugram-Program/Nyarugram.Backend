@@ -58,7 +58,19 @@ const binaryFields = new Set(['PasswordKdf.salt1', 'PasswordKdf.salt2', 'Passwor
   'PasswordInfo.secure_random', 'PasswordUpdate.new_password_hash',
   'PhoneRequestCallRequest.g_a_hash', 'PhoneAcceptCallRequest.g_b', 'PhoneConfirmCallRequest.g_a',
   'PhoneSendSignalingDataRequest.data', 'PhoneCall.g_a_hash', 'PhoneCall.g_b', 'PhoneCall.g_a_or_b',
-  'PhoneCallSignalingData.data', 'DhConfig.p', 'DhConfig.random']);
+  'PhoneCallSignalingData.data', 'DhConfig.p', 'DhConfig.random',
+  'AuthPasswordInfo.password_info',
+  'E2eeEnvelope.ciphertext', 'E2eeOneTimePreKey.public_key',
+  'E2eePublishDeviceRequest.identity_key', 'E2eePublishDeviceRequest.signed_pre_key',
+  'E2eePublishDeviceRequest.signed_pre_key_signature', 'E2eePublishDeviceRequest.kyber_pre_key',
+  'E2eePublishDeviceRequest.kyber_pre_key_signature',
+  'E2eeDeviceInfo.identity_key', 'E2eeDeviceInfo.signed_pre_key',
+  'E2eeDeviceInfo.signed_pre_key_signature', 'E2eeDeviceInfo.kyber_pre_key',
+  'E2eeDeviceInfo.kyber_pre_key_signature',
+  'E2eePeerBundle.pre_key', 'E2eePeerBundle.signed_pre_key',
+  'E2eePeerBundle.signed_pre_key_signature', 'E2eePeerBundle.identity_key',
+  'E2eePeerBundle.kyber_pre_key', 'E2eePeerBundle.kyber_pre_key_signature',
+  'E2eeChatStatus.peer_identity_key', 'E2eeIdentityConfirmation.peer_identity_key']);
 for (const [name, fields] of messages) {
   for (const field of fields) {
     assert(scalarTypes.has(field.type) || messages.has(field.type) || enumTypes.has(field.type), `Unknown type ${name}.${field.name}: ${field.type}`);
@@ -121,17 +133,38 @@ for (const feature of policy.featureOperations) {
     assert.deepEqual([...feature[key]].sort(), messages.get(message).map(f => `${message}.${f.name}`).sort(), `Complete feature ${feature.operation}.${key}`);
   }
 }
-const registeredOperations = [...policy.requests, ...policy.transportOperations, ...policy.featureOperations, ...policy.phoneOperations];
+assert.equal(policy.e2eeOperations.length, 5);
+for (const operation of policy.e2eeOperations) {
+  assert(operation.purpose && operation.validation, `Missing E2EE semantics: ${operation.operation}`);
+  for (const [key, message] of [['requestFields', operation.message], ['responseFields', operation.response]]) {
+    operation[key].forEach(schemaField);
+    assert.deepEqual([...operation[key]].sort(), messages.get(message).map(f => `${message}.${f.name}`).sort(), `Complete E2EE ${operation.operation}.${key}`);
+  }
+}
+assert.equal(policy.authOperations.length, 10);
+for (const operation of policy.authOperations) {
+  assert(operation.purpose && operation.validation, `Missing auth semantics: ${operation.operation}`);
+  for (const [key, message] of [['requestFields', operation.message], ['responseFields', operation.response]]) {
+    operation[key].forEach(schemaField);
+    assert.deepEqual([...operation[key]].sort(), messages.get(message).map(f => `${message}.${f.name}`).sort(), `Complete auth ${operation.operation}.${key}`);
+  }
+}
+const registeredOperations = [...policy.requests, ...policy.transportOperations, ...policy.featureOperations,
+  ...policy.e2eeOperations, ...policy.phoneOperations];
 const orderedOperations = [...registeredOperations].sort((a, b) => a.tag - b.tag);
-assert.equal(new Set(registeredOperations.map(r => r.operation)).size, 39);
-assert.equal(new Set(registeredOperations.map(r => r.tag)).size, 39);
+assert.equal(new Set(registeredOperations.map(r => r.operation)).size, 44);
+assert.equal(new Set(registeredOperations.map(r => r.tag)).size, 44);
 for (const [i, request] of orderedOperations.entries()) {
   assert.equal(request.tag, 100 + i, `Tag gap before ${request.tl ?? request.operation}`);
 }
+const orderedAuth = [...policy.authOperations].sort((a, b) => a.tag - b.tag);
+for (const [i, request] of orderedAuth.entries()) {
+  assert.equal(request.tag, 200 + i, `Auth tag gap before ${request.operation}`);
+}
 for (const envelope of ['RpcRequest.operation', 'RpcResponse.outcome']) {
   const operations = oneofs.get(envelope).filter(f => f.tag >= 100);
-  assert.equal(operations.length, 39, `${envelope} requires 21 original operations + bootstrap + 8 feature operations + 9 phone/DH operations`);
-  for (const request of registeredOperations) {
+  assert.equal(operations.length, 54, `${envelope} requires 21 original operations + bootstrap + 8 feature operations + 5 E2EE operations + 9 phone/DH operations + 10 auth operations`);
+  for (const request of [...registeredOperations, ...policy.authOperations]) {
     const operation = operations.find(f => f.tag === request.tag);
     assert.equal(operation?.name, request.operation, `Tag drift: ${request.tl ?? request.operation}`);
     if (envelope.startsWith('RpcRequest')) assert.equal(operation.type, request.message);

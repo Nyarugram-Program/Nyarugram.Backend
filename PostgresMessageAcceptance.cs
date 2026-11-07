@@ -97,9 +97,18 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
         finally { held?.Dispose(); }
     }
 
+    /// <summary>
+    /// <paramref name="admitNewSend"/> runs only for a NEW send: authentication,
+    /// membership, isolation and the durable idempotency lookup have already passed,
+    /// but no E2EE/epoch admission has been applied yet. A committed retry therefore
+    /// returns its original message even after the chat state changed, while a new
+    /// message still faces the current encryption requirements.
+    /// </summary>
     internal Task<AcceptedMessage> AcceptInTransactionAsync(MessageAcceptance input, NpgsqlConnection connection,
-        NpgsqlTransaction transaction, Action<IDisposable> retainThroughCommit, CancellationToken token) =>
-        AcceptCore(input, connection, transaction, accepted => accepted, retainThroughCommit, token);
+        NpgsqlTransaction transaction, Action<IDisposable> retainThroughCommit, CancellationToken token,
+        Func<Task<byte[]?>>? admitNewSend = null) =>
+        AcceptCore(input, connection, transaction, accepted => accepted, retainThroughCommit, token,
+            admitNewSend: admitNewSend);
 
     internal Task<AcceptedMessage> AddGroupServiceAsync(Session session, Conversation conversation,
         NpgsqlConnection connection, NpgsqlTransaction transaction, Action<IDisposable> retainThroughCommit, CancellationToken token) =>
@@ -121,7 +130,7 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
 
     private async Task<T> AcceptCore<T>(MessageAcceptance input, NpgsqlConnection connection, NpgsqlTransaction transaction,
         Func<AcceptedMessage, T> prepareResponse, Action<IDisposable> retainThroughCommit, CancellationToken cancellationToken,
-        Conversation? service = null, string? e2eeServiceCode = null)
+        Conversation? service = null, string? e2eeServiceCode = null, Func<Task<byte[]?>>? admitNewSend = null)
     {
         if (transaction.Connection != connection || transaction.IsolationLevel != IsolationLevel.ReadCommitted)
             throw new InvalidOperationException("Message acceptance requires its caller's READ COMMITTED transaction");
@@ -217,6 +226,15 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
             var pts = (int?)await Scalar("SELECT pts FROM botgram_intake_v1.sync WHERE user_id = $1", input.UserId) ?? 1;
             var duplicateResponse = prepareResponse(new(existing, true, pts));
             return duplicateResponse;
+        }
+
+        // Durable idempotency is settled: this is a brand-new message. Only now does
+        // the caller's E2EE/direction/epoch admission run, so a committed retry whose
+        // response was lost is never rejected merely because the chat state moved on.
+        if (admitNewSend is not null)
+        {
+            var canonical = await admitNewSend();
+            if (canonical is not null) command = command with { E2eeEnvelope = canonical, Text = "" };
         }
 
         if (service is null && e2eeServiceCode is null)

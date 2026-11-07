@@ -303,5 +303,319 @@
         "TL_messageEntityMentionName_layer131":{"rejectStatus":501,"fields":{"user_id":"reject"}}
       }
     }
-  }
+  },
+  "authOperations":   [
+    {
+      "tag": 200,
+      "operation": "auth_capabilities",
+      "message": "AuthCapabilitiesRequest",
+      "response": "AuthCapabilities",
+      "purpose": "Unauthenticated protocol negotiation: protocols, event subprotocols, capabilities and the permanent JSON-retirement status.",
+      "validation": "No token required on /api/v1/auth. Never reveals account data or enables any retired JSON interface.",
+      "requestFields": [],
+      "responseFields": [
+        "AuthCapabilities.negotiation_version",
+        "AuthCapabilities.protocols",
+        "AuthCapabilities.selected_protocol",
+        "AuthCapabilities.event_subprotocols",
+        "AuthCapabilities.capabilities",
+        "AuthCapabilities.json_api_status"
+      ]
+    },
+    {
+      "tag": 201,
+      "operation": "auth_register",
+      "message": "AuthRegisterRequest",
+      "response": "AuthSession",
+      "purpose": "Create an account and return a bearer session plus the typed account profile.",
+      "validation": "Unauthenticated /api/v1/auth, rate limited, password hashed with salted PBKDF2, GID allocated server-side; no plaintext password persisted or logged.",
+      "requestFields": [
+        "AuthRegisterRequest.username",
+        "AuthRegisterRequest.password",
+        "AuthRegisterRequest.display_name",
+        "AuthRegisterRequest.location_country"
+      ],
+      "responseFields": [
+        "AuthSession.token",
+        "AuthSession.expires_at_ms",
+        "AuthSession.user"
+      ]
+    },
+    {
+      "tag": 202,
+      "operation": "auth_login",
+      "message": "AuthLoginRequest",
+      "response": "AuthSession",
+      "purpose": "Authenticate an existing account and issue a bearer session.",
+      "validation": "Unauthenticated /api/v1/auth, rate limited, constant-time verifier comparison; failures do not disclose account existence.",
+      "requestFields": [
+        "AuthLoginRequest.username",
+        "AuthLoginRequest.password",
+        "AuthLoginRequest.totp_code",
+        "AuthLoginRequest.password_proof"
+      ],
+      "responseFields": [
+        "AuthSession.token",
+        "AuthSession.expires_at_ms",
+        "AuthSession.user"
+      ]
+    },
+    {
+      "tag": 203,
+      "operation": "auth_password",
+      "message": "AuthPasswordRequest",
+      "response": "AuthPasswordInfo",
+      "purpose": "Return password verification parameters and optional password update material.",
+      "validation": "Pre-auth only for verification parameters; password changes require the current password and are rate limited. Never returns a stored hash.",
+      "requestFields": [
+        "AuthPasswordRequest.username",
+        "AuthPasswordRequest.password"
+      ],
+      "responseFields": [
+        "AuthPasswordInfo.password_info"
+      ]
+    },
+    {
+      "tag": 204,
+      "operation": "auth_recover",
+      "message": "AuthRecoverRequest",
+      "response": "AuthSession",
+      "purpose": "Recover an account with a one-time recovery code and issue a session.",
+      "validation": "Unauthenticated /api/v1/auth, rate limited; a used recovery code is consumed in the same transaction.",
+      "requestFields": [
+        "AuthRecoverRequest.username",
+        "AuthRecoverRequest.password",
+        "AuthRecoverRequest.recovery_code"
+      ],
+      "responseFields": [
+        "AuthSession.token",
+        "AuthSession.expires_at_ms",
+        "AuthSession.user"
+      ]
+    },
+    {
+      "tag": 205,
+      "operation": "auth_logout",
+      "message": "AuthLogoutRequest",
+      "response": "BoolValue",
+      "purpose": "Revoke the current bearer session.",
+      "validation": "Requires a valid Bearer on /api/v1/rpc; only the current token hash is removed.",
+      "requestFields": [],
+      "responseFields": [
+        "BoolValue.value"
+      ]
+    },
+    {
+      "tag": 206,
+      "operation": "account_me",
+      "message": "AccountMeRequest",
+      "response": "AccountProfile",
+      "purpose": "Read the authenticated account profile.",
+      "validation": "Authenticated owner only; returns the public profile, never salt/password hash or private keys.",
+      "requestFields": [],
+      "responseFields": [
+        "AccountProfile.user_id",
+        "AccountProfile.username",
+        "AccountProfile.display_name",
+        "AccountProfile.gid",
+        "AccountProfile.tl_user_id",
+        "AccountProfile.first_name",
+        "AccountProfile.last_name",
+        "AccountProfile.nyarugram_premium",
+        "AccountProfile.is_self",
+        "AccountProfile.is_contact",
+        "AccountProfile.is_mutual_contact",
+        "AccountProfile.online",
+        "AccountProfile.last_seen_ms"
+      ]
+    },
+    {
+      "tag": 207,
+      "operation": "premium",
+      "message": "PremiumRequest",
+      "response": "PremiumStatus",
+      "purpose": "Read or locally activate Nyarugram Premium.",
+      "validation": "Authenticated owner only; no Telegram payment path, activation persists on the account.",
+      "requestFields": [
+        "PremiumRequest.activate"
+      ],
+      "responseFields": [
+        "PremiumStatus.active"
+      ]
+    },
+    {
+      "tag": 208,
+      "operation": "change_gid",
+      "message": "ChangeGidRequest",
+      "response": "AccountProfile",
+      "purpose": "Change the account Gram ID with server-side allocation and collision checks.",
+      "validation": "Authenticated owner only; rejects World/country/unknown regions, non-eight-digit or all-zero suffixes; UUID and TL identity stay stable.",
+      "requestFields": [
+        "ChangeGidRequest.region_code",
+        "ChangeGidRequest.number"
+      ],
+      "responseFields": [
+        "AccountProfile.user_id",
+        "AccountProfile.username",
+        "AccountProfile.display_name",
+        "AccountProfile.gid",
+        "AccountProfile.tl_user_id",
+        "AccountProfile.first_name",
+        "AccountProfile.last_name",
+        "AccountProfile.nyarugram_premium",
+        "AccountProfile.is_self",
+        "AccountProfile.is_contact",
+        "AccountProfile.is_mutual_contact",
+        "AccountProfile.online",
+        "AccountProfile.last_seen_ms"
+      ]
+    },
+    {
+      "tag": 209,
+      "operation": "totp",
+      "message": "TotpRequest",
+      "response": "TotpResult",
+      "purpose": "Read, set up, confirm or disable the authenticator and recovery codes.",
+      "validation": "Authenticated owner only; secrets are encrypted in the account privacy state, recovery codes are versioned HMAC values and plaintext is returned once.",
+      "requestFields": [
+        "TotpRequest.operation",
+        "TotpRequest.code"
+      ],
+      "responseFields": [
+        "TotpResult.enabled",
+        "TotpResult.recovery_codes_remaining",
+        "TotpResult.secret",
+        "TotpResult.uri",
+        "TotpResult.expires_at_ms",
+        "TotpResult.recovery_codes"
+      ]
+    }
+  ],
+  "e2eeOperations":   [
+    {
+      "tag": 139,
+      "operation": "e2ee_publish_device",
+      "message": "E2eePublishDeviceRequest",
+      "response": "E2eeDeviceInfo",
+      "purpose": "Publish the device identity, signed/kyber pre-keys and one-time pre-key batch; a changed identity key bumps the generation and suspends active encrypted chats.",
+      "validation": "Authenticated owner only, device_id=1, bounded key/signature lengths and unique pre-key ids. Replacing an identity invalidates old pre-key material and versioned identity confirmations in one transaction.",
+      "requestFields": [
+        "E2eePublishDeviceRequest.device_id",
+        "E2eePublishDeviceRequest.registration_id",
+        "E2eePublishDeviceRequest.identity_key",
+        "E2eePublishDeviceRequest.signed_pre_key_id",
+        "E2eePublishDeviceRequest.signed_pre_key",
+        "E2eePublishDeviceRequest.signed_pre_key_signature",
+        "E2eePublishDeviceRequest.kyber_pre_key_id",
+        "E2eePublishDeviceRequest.kyber_pre_key",
+        "E2eePublishDeviceRequest.kyber_pre_key_signature",
+        "E2eePublishDeviceRequest.one_time_pre_keys"
+      ],
+      "responseFields": [
+        "E2eeDeviceInfo.device_id",
+        "E2eeDeviceInfo.registration_id",
+        "E2eeDeviceInfo.identity_key",
+        "E2eeDeviceInfo.signed_pre_key_id",
+        "E2eeDeviceInfo.signed_pre_key",
+        "E2eeDeviceInfo.signed_pre_key_signature",
+        "E2eeDeviceInfo.kyber_pre_key_id",
+        "E2eeDeviceInfo.kyber_pre_key",
+        "E2eeDeviceInfo.kyber_pre_key_signature",
+        "E2eeDeviceInfo.remaining_one_time_pre_keys",
+        "E2eeDeviceInfo.generation",
+        "E2eeDeviceInfo.identity_replaced"
+      ]
+    },
+    {
+      "tag": 140,
+      "operation": "e2ee_action",
+      "message": "E2eeActionRequest",
+      "response": "E2eeChatStatus",
+      "purpose": "Directional encrypted-chat state machine: invite, accept, decline, cancel, close and reactivation after an identity change.",
+      "validation": "Direct two-member conversation, protocol_version=2, per-chat advisory lock. E2EE_CONFIRM_IDENTITY requires the exact peer key, generation, epoch and two-sided identity version the user saw; any mismatch or missing snapshot fails without state, confirmation, epoch or service-message side effects.",
+      "requestFields": [
+        "E2eeActionRequest.peer",
+        "E2eeActionRequest.action",
+        "E2eeActionRequest.protocol_version",
+        "E2eeActionRequest.identity_confirmation"
+      ],
+      "responseFields": [
+        "E2eeChatStatus.peer",
+        "E2eeChatStatus.state",
+        "E2eeChatStatus.protocol_version",
+        "E2eeChatStatus.epoch",
+        "E2eeChatStatus.boundary_message_id",
+        "E2eeChatStatus.self_initiator",
+        "E2eeChatStatus.awaiting_self",
+        "E2eeChatStatus.peer_supported",
+        "E2eeChatStatus.identity_changed",
+        "E2eeChatStatus.close_boundary_message_id",
+        "E2eeChatStatus.initiator_user_id",
+        "E2eeChatStatus.closed_by_user_id",
+        "E2eeChatStatus.self_confirmed_identity",
+        "E2eeChatStatus.peer_confirmed_identity",
+        "E2eeChatStatus.self_device_id",
+        "E2eeChatStatus.peer_device_id",
+        "E2eeChatStatus.peer_identity_key",
+        "E2eeChatStatus.peer_generation",
+        "E2eeChatStatus.updated_at_ms",
+        "E2eeChatStatus.conversation_id",
+        "E2eeChatStatus.tl_user_id",
+        "E2eeChatStatus.identity_version"
+      ]
+    },
+    {
+      "tag": 141,
+      "operation": "e2ee_get_status",
+      "message": "E2eeGetStatusRequest",
+      "response": "E2eeChatStatusList",
+      "purpose": "Read the encrypted-chat status for selected peers, including the current two-sided identity_version echoed by confirmation requests.",
+      "validation": "Authenticated member only; each peer must be a direct-conversation participant. Never exposes plaintext or private keys.",
+      "requestFields": [
+        "E2eeGetStatusRequest.peers"
+      ],
+      "responseFields": [
+        "E2eeChatStatusList.chats"
+      ]
+    },
+    {
+      "tag": 142,
+      "operation": "e2ee_list",
+      "message": "E2eeListRequest",
+      "response": "E2eeChatStatusList",
+      "purpose": "List all encrypted direct chats for the authenticated account.",
+      "validation": "Authenticated owner only; pending chats are included only when requested. Never exposes plaintext or private keys.",
+      "requestFields": [
+        "E2eeListRequest.include_pending"
+      ],
+      "responseFields": [
+        "E2eeChatStatusList.chats"
+      ]
+    },
+    {
+      "tag": 143,
+      "operation": "e2ee_get_peer_bundle",
+      "message": "E2eeGetPeerBundleRequest",
+      "response": "E2eePeerBundle",
+      "purpose": "Fetch the peer device bundle and atomically consume one one-time pre-key for session establishment.",
+      "validation": "Authenticated member of a direct conversation with a published peer device; missing pre-keys fail with E2EE_PREKEYS_EXHAUSTED. Consumption is never replayed twice.",
+      "requestFields": [
+        "E2eeGetPeerBundleRequest.peer"
+      ],
+      "responseFields": [
+        "E2eePeerBundle.device_id",
+        "E2eePeerBundle.registration_id",
+        "E2eePeerBundle.pre_key_id",
+        "E2eePeerBundle.pre_key",
+        "E2eePeerBundle.signed_pre_key_id",
+        "E2eePeerBundle.signed_pre_key",
+        "E2eePeerBundle.signed_pre_key_signature",
+        "E2eePeerBundle.identity_key",
+        "E2eePeerBundle.kyber_pre_key_id",
+        "E2eePeerBundle.kyber_pre_key",
+        "E2eePeerBundle.kyber_pre_key_signature",
+        "E2eePeerBundle.generation"
+      ]
+    }
+  ]
 }

@@ -50,13 +50,15 @@ public sealed partial class PostgresBackend
                 var input = request.SendMessage;
                 var command = ProtobufRpcMapper.RelationalSendCommand(input);
                 var conversation = await ResolveConversation(work, uid, input.Peer, domain, true);
-                // Direction, envelope and epoch validation happen inside this same
-                // transaction before the message/pts/event/outbox commit.
-                var canonical = await ValidateSend(work, session, conversation, command, domain);
-                if (canonical is not null) command = command with { E2eeEnvelope = canonical, Text = "" };
+                // Authentication, membership, isolation and the durable idempotency
+                // lookup run first. ValidateSend is deferred to brand-new messages only,
+                // so a retry of a committed message keeps returning the original message
+                // after accept/close/reopen/identity changes, while a new message still
+                // faces the current direction, envelope and epoch requirements.
                 var accepted = await new PostgresMessageAcceptance(source, maximumBacklog).AcceptInTransactionAsync(
                     new(session.TokenHash, uid, conversation.Id, command, MessageWriteContract.Telegram),
-                    work.Connection, work.NativeTransaction, work.RetainThroughCommit, work.Token);
+                    work.Connection, work.NativeTransaction, work.RetainThroughCommit, work.Token,
+                    () => ValidateSend(work, session, conversation, command, domain));
                 var mapping = new P.MessageIdMapping { RandomId = input.RandomId,
                     MessageId = ProtobufRpcMapper.ValidateMessageId(accepted.Message.Id, true) };
                 var updates = await MessageUpdates(work, uid, domain, accepted);

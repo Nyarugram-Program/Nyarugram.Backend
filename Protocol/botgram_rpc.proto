@@ -545,7 +545,24 @@ enum E2eeActionKind {
   E2EE_CLOSE_CONFIRM = 6;
   E2EE_CONFIRM_IDENTITY = 7;
 }
-message E2eeActionRequest { PeerRef peer = 1; E2eeActionKind action = 2; uint32 protocol_version = 3; }
+// The exact identity the user saw when they pressed "confirm identity". The
+// server compares this snapshot with the current devices under the chat lock;
+// a late request must never confirm a replacement the user did not see.
+message E2eeIdentityConfirmation {
+  bytes peer_identity_key = 1;
+  int64 peer_generation = 2;
+  int64 epoch = 3;
+  // Opaque two-sided identity version echoed from E2eeChatStatus.identity_version.
+  string identity_version = 4;
+}
+message E2eeActionRequest {
+  PeerRef peer = 1;
+  E2eeActionKind action = 2;
+  uint32 protocol_version = 3;
+  // Required for E2EE_CONFIRM_IDENTITY; other actions ignore it. An old request
+  // without this snapshot must fail instead of inheriting the current identity.
+  E2eeIdentityConfirmation identity_confirmation = 4;
+}
 message E2eeGetStatusRequest { repeated PeerRef peers = 1; }
 message E2eeListRequest { bool include_pending = 1; }
 message E2eeChatStatus {
@@ -570,6 +587,9 @@ message E2eeChatStatus {
   int64 updated_at_ms = 19;
   string conversation_id = 20;
   int64 tl_user_id = 21;
+  // Canonical version derived from both devices' identity keys and generations.
+  // Empty when either device has not published its identity.
+  string identity_version = 22;
 }
 message E2eeChatStatusList { repeated E2eeChatStatus chats = 1; }
 message ReadHistoryRequest { PeerRef peer = 1; int64 max_message_id = 2; }

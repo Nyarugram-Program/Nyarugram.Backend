@@ -153,7 +153,8 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
                 chat.ProtocolVersion != 2 || chat.Epoch < 1 ||
                 !db.Users.Any(u => u.Id == chat.InitiatorId) ||
                 chat.CloseRequestedBy is { Length: > 0 } && !db.Users.Any(u => u.Id == chat.CloseRequestedBy) ||
-                chat.IdentityConfirmedBy.Any(id => !db.Users.Any(u => u.Id == id)))
+                chat.IdentityConfirmedBy.Any(entry => !db.Users.Any(u => u.Id == Owner(entry))) ||
+                chat.IdentityConfirmedBy.Any(entry => entry.Contains('|') && !IsIdentityVersion(entry.Split('|', 2)[1])))
                 throw new InvalidDataException("Invalid snapshot E2EE conversation state");
             if (db.E2eeConversations.Select(c => c.ConversationId).Distinct().Count() != db.E2eeConversations.Count)
                 throw new InvalidDataException("Duplicate snapshot E2EE conversation");
@@ -503,4 +504,15 @@ public sealed class PostgresSnapshotMigration(NpgsqlDataSource source)
             """, r => db.NextCallId = r.GetInt64(0));
         return Normalize(db);
     }
+
+    // Identity confirmations are stored as "<userId>|<identityVersion>". Older
+    // snapshots may still carry a bare user id, which is accepted as-is.
+    private static string Owner(string entry)
+    {
+        var index = entry.IndexOf('|', StringComparison.Ordinal);
+        return index < 0 ? entry : entry[..index];
+    }
+
+    private static bool IsIdentityVersion(string value) =>
+        value.Length == 64 && value.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f');
 }
