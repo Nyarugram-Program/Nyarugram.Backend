@@ -227,10 +227,11 @@ app.UseRateLimiter();
 // Protobuf-only planes are shared by both storage backends.
 app.MapGet("/health", async (HttpContext context) =>
 {
+    // JsonApiRetirement.Health already emits status/protocol/json_api; only add
+    // backend-specific fields here so the probe never contains duplicate keys.
     var fields = new List<KeyValuePair<string, string>>
     {
-        new("storage", relationalBackend ? "postgresql" : "legacy-file"),
-        new("json_api", JsonApiRetirement.Code)
+        new("storage", relationalBackend ? "postgresql" : "legacy-file")
     };
     var status = 200;
     if (fourComponent)

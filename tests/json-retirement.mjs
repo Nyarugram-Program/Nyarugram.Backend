@@ -116,6 +116,12 @@ try {
   assert.match(healthText, /status=ok/);
   assert.match(healthText, new RegExp(CODE));
   assert.ok(!healthText.trimStart().startsWith('{'));
+  // The probe is a key/value format consumed by monitors: every key must be
+  // unique, otherwise last-wins parsers silently drop a backend-specific field.
+  const healthKeys = healthText.trim().split('\n').map(line => line.split('=', 1)[0]);
+  assert.equal(new Set(healthKeys).size, healthKeys.length, `duplicate health keys: ${healthKeys.join(',')}`);
+  assert.equal(healthKeys.filter(key => key === 'json_api').length, 1);
+  assert.equal(healthKeys.filter(key => key === 'storage').length, 1);
 
   const before = await snapshotState();
 
