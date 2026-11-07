@@ -30,11 +30,26 @@ public static class ProtobufRpcMapper
             CreatedAtMs = message.CreatedAt.ToUnixTimeMilliseconds(), Outgoing = message.SenderId == uid,
             Unread = message.ServiceTitle is null && message.SenderId != uid && message.Id > read
         };
-        if (message.ServiceTitle is not null)
+        if (message.ServiceKind == "e2ee" && message.ServiceTitle is not null)
+        {
+            result.Service = new() { E2EeSystem = new() { Text = message.ServiceTitle } };
+        }
+        else if (message.ServiceTitle is not null)
         {
             var action = new P.GroupCreatedAction { Title = message.ServiceTitle };
             action.Members.Add((message.ServiceMembers ?? []).Select(Reference));
             result.Service = new() { GroupCreated = action };
+        }
+        else if (message.E2eeEnvelope is not null)
+        {
+            try
+            {
+                result.E2Ee = P.E2eeEnvelope.Parser.ParseFrom(message.E2eeEnvelope);
+            }
+            catch (InvalidProtocolBufferException)
+            {
+                throw new ApiException(500, "BOTGRAM_E2EE_STORAGE_CORRUPT");
+            }
         }
         else
         {
@@ -106,6 +121,7 @@ public static class ProtobufRpcMapper
 
     public static SendMessageCommand RelationalSendCommand(P.SendMessageRequest input)
     {
+        if (input.E2Ee is not null) throw new ApiException(501, "BOTGRAM_E2EE_BACKEND_UNSUPPORTED");
         MessageEntityService.ValidateCount(input.Entities.Count);
         return new("tl:" + input.RandomId.ToString(CultureInfo.InvariantCulture), input.Text,
             input.Entities.Count == 0 ? null : input.Entities.Select(e => Adapter.Entity(e, input.Text)).ToArray(),
@@ -596,11 +612,16 @@ public static class ProtobufRpcMapper
                 {
                     var input = request.SendMessage;
                     MessageEntityService.ValidateCount(input.Entities.Count);
-                    var entities = input.Entities.Count == 0 ? null : input.Entities.Select(e => Entity(e, input.Text)).ToArray();
+                    var encrypted = input.E2Ee is not null;
+                    if (encrypted && (input.Text.Length != 0 || input.Entities.Count != 0))
+                        throw new ApiException(409, "E2EE_PLAINTEXT_FORBIDDEN");
+                    var entities = input.Entities.Count == 0 || encrypted ? null : input.Entities.Select(e => Entity(e, input.Text)).ToArray();
                     long? reply = input.HasReplyToMessageId ? MessageId(input.ReplyToMessageId, true) : null;
                     var conversation = ConversationMessageService.FindByPeer(db, PeerId(input.Peer), uid, true);
                     var message = ConversationMessageService.Send(db, conversation, uid,
-                        new("tl:" + input.RandomId.ToString(CultureInfo.InvariantCulture), input.Text, entities, reply, input.Silent), MessageWriteContract.Telegram);
+                        new("tl:" + input.RandomId.ToString(CultureInfo.InvariantCulture), encrypted ? "" : input.Text,
+                            entities, reply, input.Silent, encrypted ? input.E2Ee.ToByteArray() : null),
+                        MessageWriteContract.Telegram);
                     var mapping = new P.MessageIdMapping { RandomId = input.RandomId, MessageId = MessageId(message.Id, true) };
                     // Both fields describe the same immutable result during this request's encoding.
                     var mapped = Message(message);
@@ -638,6 +659,40 @@ public static class ProtobufRpcMapper
                     Unique(ids);
                     response.GetUsers = new();
                     response.GetUsers.Users.Add(UserQueryService.ByIds(db, ids.Select(id => IdentityService.UserId(db, id)).ToArray(), uid).Select(User));
+                    break;
+                }
+                case P.RpcRequest.OperationOneofCase.E2EePublishDevice:
+                    response.E2EePublishDevice = E2eeService.Publish(db, uid, request.E2EePublishDevice);
+                    break;
+                case P.RpcRequest.OperationOneofCase.E2EeAction:
+                {
+                    var input = request.E2EeAction;
+                    var conversation = ConversationMessageService.FindByPeer(db, PeerId(input.Peer), uid, true);
+                    response.E2EeAction = E2eeService.Action(db, conversation, uid, input, serverDomain);
+                    break;
+                }
+                case P.RpcRequest.OperationOneofCase.E2EeGetStatus:
+                {
+                    var input = request.E2EeGetStatus;
+                    Count(input.Peers.Count);
+                    var peers = input.Peers.Select(PeerId).ToArray();
+                    Unique(peers);
+                    var ids = ConversationQueryService.Owned(db, uid)
+                        .Where(c => c.Kind == "direct" && c.Members.Contains(uid) &&
+                            peers.Contains(IdentityService.DialogId(db, c, uid)))
+                        .Select(c => c.Id).ToArray();
+                    response.E2EeGetStatus = E2eeService.StatusList(db, uid, serverDomain, true, ids);
+                    break;
+                }
+                case P.RpcRequest.OperationOneofCase.E2EeList:
+                    response.E2EeList = E2eeService.StatusList(db, uid, serverDomain,
+                        request.E2EeList.IncludePending, null);
+                    break;
+                case P.RpcRequest.OperationOneofCase.E2EeGetPeerBundle:
+                {
+                    var input = request.E2EeGetPeerBundle;
+                    var conversation = ConversationMessageService.FindByPeer(db, PeerId(input.Peer), uid);
+                    response.E2EeGetPeerBundle = E2eeService.PeerBundle(db, conversation, uid);
                     break;
                 }
                 case P.RpcRequest.OperationOneofCase.GetSpecialContacts:
@@ -900,3 +955,5 @@ public static class ProtobufRpcMapper
         }
     }
 }
+
+

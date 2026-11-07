@@ -1,7 +1,10 @@
+using Google.Protobuf;
+using P = Botgram.Protocol.V1;
+
 namespace Botgram.Backend;
 
 public sealed record SendMessageCommand(string Key, string Text, MessageEntity[]? Entities = null,
-    long? ReplyId = null, bool Silent = false);
+    long? ReplyId = null, bool Silent = false, byte[]? E2eeEnvelope = null);
 public sealed record HistoryQuery(long OffsetId = 0, long OffsetDate = 0, int AddOffset = 0,
     long MinId = 0, long MaxId = 0, int Limit = 50);
 public sealed record ReadResult(Receipt? Receipt, bool Changed);
@@ -14,28 +17,46 @@ public static class ConversationMessageService
         MessageWriteContract contract)
     {
         using var diagnostic = RpcDiagnosticStage.Start("send_service_ms");
-        if (string.IsNullOrWhiteSpace(command.Text) || command.Text.Length > 16000)
-            throw new ApiException(400, contract == MessageWriteContract.Telegram ? "MESSAGE_EMPTY" : "invalid_text");
-        if (contract == MessageWriteContract.Rest && command.Key.Length is < 1 or > 80)
-            throw new ApiException(400, "invalid_client_message_id");
-        if (command.Entities is { } entities)
+        byte[]? canonical = null;
+        if (command.E2eeEnvelope is { } rawEnvelope)
         {
-            MessageEntityService.ValidateCount(entities.Length);
-            foreach (var entity in entities) MessageEntityService.Validate(command.Text, entity);
+            try
+            {
+                canonical = P.E2eeEnvelope.Parser.ParseFrom(rawEnvelope).ToByteArray();
+            }
+            catch (InvalidProtocolBufferException)
+            {
+                throw new ApiException(400, "E2EE_ENVELOPE_INVALID");
+            }
         }
-        if (command.ReplyId is not null && !db.Messages.Any(m => m.ConversationId == conversation.Id && m.Id == command.ReplyId))
-            throw new ApiException(400, "REPLY_MESSAGE_ID_INVALID");
+        // Idempotent retries must return the original message even after the chat state changed.
         var existing = db.Messages.FirstOrDefault(m => m.ConversationId == conversation.Id && m.SenderId == uid && m.ClientMessageId == command.Key);
         if (existing is not null)
         {
-            bool conflict = existing.Text != command.Text || (contract == MessageWriteContract.Telegram &&
+            bool conflict = existing.Text != (canonical is null ? command.Text : "") ||
+                !EnvelopeEqual(existing.E2eeEnvelope, canonical) ||
+                (contract == MessageWriteContract.Telegram &&
                 (existing.ReplyToMessageId != command.ReplyId || existing.Silent != command.Silent ||
                  !MessageEntityService.Equal(existing.TelegramEntities, command.Entities)));
             if (conflict) throw new ApiException(409, contract == MessageWriteContract.Telegram ? "RANDOM_ID_DUPLICATE" : "idempotency_conflict");
             return existing;
         }
+        var e2ee = E2eeService.ValidateSend(db, conversation, uid, command);
+        if (e2ee is null && (string.IsNullOrWhiteSpace(command.Text) || command.Text.Length > 16000))
+            throw new ApiException(400, contract == MessageWriteContract.Telegram ? "MESSAGE_EMPTY" : "invalid_text");
+        if (contract == MessageWriteContract.Rest && command.Key.Length is < 1 or > 80)
+            throw new ApiException(400, "invalid_client_message_id");
+        if (command.Entities is { } entities)
+        {
+            if (e2ee is not null) throw new ApiException(409, "E2EE_ENTITIES_FORBIDDEN");
+            MessageEntityService.ValidateCount(entities.Length);
+            foreach (var entity in entities) MessageEntityService.Validate(command.Text, entity);
+        }
+        if (command.ReplyId is not null && !db.Messages.Any(m => m.ConversationId == conversation.Id && m.Id == command.ReplyId))
+            throw new ApiException(400, "REPLY_MESSAGE_ID_INVALID");
         AccountPrivacyService.CheckMessage(db, conversation, uid);
-        return AddMessage(db, conversation, uid, command.Key, command.Text, command.Entities, command.ReplyId, command.Silent);
+        return AddMessage(db, conversation, uid, command.Key, e2ee is null ? command.Text : "",
+            command.Entities, command.ReplyId, command.Silent, e2ee);
     }
 
     public static Message[] History(Database db, Conversation conversation, HistoryQuery query)
@@ -128,13 +149,29 @@ public static class ConversationMessageService
     }
 
     public static Message AddMessage(Database db, Conversation conversation, string uid, string key, string text,
-        MessageEntity[]? entities = null, long? replyId = null, bool silent = false)
+        MessageEntity[]? entities = null, long? replyId = null, bool silent = false, byte[]? e2eeEnvelope = null,
+        string? serviceTitle = null, string[]? serviceMembers = null, string? serviceKind = null)
     {
         var message = new Message(db.NextMessageId++, conversation.Id, uid, key, text, DateTimeOffset.UtcNow,
-            TelegramEntities: entities, ReplyToMessageId: replyId, Silent: silent);
+            serviceTitle, serviceMembers, entities, replyId, silent, e2eeEnvelope, serviceKind);
         db.Messages.Add(message);
         db.Emit(conversation.Members, "message.created", message);
         return message;
+    }
+
+    public static Message AddE2eeServiceMessage(Database db, Conversation conversation, string uid, string code)
+    {
+        var message = new Message(db.NextMessageId++, conversation.Id, uid, "e2ee:" + db.NextMessageId, "",
+            DateTimeOffset.UtcNow, code, conversation.Members, null, null, false, null, "e2ee");
+        db.Messages.Add(message);
+        db.Emit(conversation.Members, "message.created", message);
+        return message;
+    }
+
+    private static bool EnvelopeEqual(byte[]? left, byte[]? right)
+    {
+        if (left is null || right is null) return left is null && right is null;
+        return left.AsSpan().SequenceEqual(right);
     }
 
     public static Receipt AdvanceRead(Database db, Conversation conversation, string uid, long messageId)

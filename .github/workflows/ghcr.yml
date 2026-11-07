@@ -39,6 +39,10 @@ jobs:
         run: node tests/gid.mjs
       - name: Test HTTP and WebSocket integration
         run: node tests/smoke.mjs
+      - name: Test directional encrypted chats and persistence
+        run: node tests/e2ee.mjs
+      - name: Test RPC boundaries and replay
+        run: node tests/rpc-boundaries.mjs
 
   image:
     name: Build and publish image

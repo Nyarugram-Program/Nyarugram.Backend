@@ -6,7 +6,18 @@ public sealed record Session(string TokenHash, string UserId, DateTimeOffset Exp
 public sealed record Conversation(string Id, string Kind, string Title, string[] Members, DateTimeOffset CreatedAt) : IEventPayload;
 public sealed record Message(long Id, string ConversationId, string SenderId, string ClientMessageId, string Text, DateTimeOffset CreatedAt,
     string? ServiceTitle = null, string[]? ServiceMembers = null, MessageEntity[]? TelegramEntities = null,
-    long? ReplyToMessageId = null, bool Silent = false) : IEventPayload;
+    long? ReplyToMessageId = null, bool Silent = false, byte[]? E2eeEnvelope = null,
+    string? ServiceKind = null) : IEventPayload;
+// Public pre-key material only. Private keys, PINs and plaintext never enter the database.
+public sealed record E2eeOneTimePreKey(int KeyId, byte[] PublicKey, bool Consumed);
+public sealed record E2eeDevice(string UserId, uint DeviceId, int RegistrationId, byte[] IdentityKey,
+    int SignedPreKeyId, byte[] SignedPreKey, byte[] SignedPreKeySignature,
+    int KyberPreKeyId, byte[] KyberPreKey, byte[] KyberPreKeySignature,
+    long Generation, DateTimeOffset UpdatedAt, E2eeOneTimePreKey[] OneTimePreKeys);
+// state: pending, active, closing, suspended, closed. Absence means disabled.
+public sealed record E2eeConversation(string ConversationId, string State, uint ProtocolVersion, long Epoch,
+    string InitiatorId, long BoundaryMessageId, long CloseBoundaryMessageId, string? CloseRequestedBy,
+    string[] IdentityConfirmedBy, DateTimeOffset UpdatedAt);
 public sealed record Receipt(string ConversationId, string UserId, long MessageId) : IEventPayload;
 public sealed record Contact(string OwnerId, string UserId, string FirstName, string LastName);
 public sealed record Call(string Id, string ConversationId, string CallerId, string CalleeId, string State, DateTimeOffset UpdatedAt,
@@ -30,6 +41,8 @@ public sealed class Database
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, AccountPrivacyState>? AccountPrivacy { get; set; }
     public List<Call> Calls { get; set; } = [];
+    public List<E2eeDevice> E2eeDevices { get; set; } = [];
+    public List<E2eeConversation> E2eeConversations { get; set; } = [];
     public List<ChatEvent> Events { get; set; } = [];
     public long NextMessageId { get; set; } = 1;
     public long NextEventId { get; set; } = 1;
