@@ -3,8 +3,13 @@ namespace Botgram.Backend;
 public enum DialogSelection { All, Pinned, Peers }
 public sealed record DialogQuery(DialogSelection Selection, int FolderId = 0, long OffsetId = 0,
     long OffsetPeer = 0, int Limit = 100, long[]? Peers = null);
+// DraftView is the server-side draft snapshot returned with a dialog.
+public sealed record DraftView(string Text, MessageEntity[]? Entities, long? ReplyTo, DateTimeOffset UpdatedAt);
 public sealed record DialogView(Conversation Conversation, long PeerId, Message? LastMessage,
-    long Inbox, long Outbox, int UnreadCount, Receipt[] Receipts);
+    long Inbox, long Outbox, int UnreadCount, Receipt[] Receipts,
+    // Batch A per-account dialog state; defaults keep legacy in-memory results unchanged.
+    bool Pinned = false, bool UnreadMark = false, bool SettingsBarHidden = false,
+    long HiddenThrough = 0, long PinOrder = 0, DraftView? Draft = null);
 public sealed record DialogPage(DialogView[] Dialogs, int TotalCount, bool IsSlice);
 public sealed record MessageView(Message Message, long SenderId, long PeerId, bool Out, bool Unread, long[] ServiceMembers);
 public sealed record PeerDetails(UserProfile[] Users, Conversation[] Chats);

@@ -58,8 +58,33 @@ public static class ProtobufRpcMapper
             if (message.ReplyToMessageId is { } reply)
                 result.Text.Reply = new() { MessageId = ValidateMessageId(reply, true) };
         }
+        if (message.ForwardFromUserId is { } forwardFrom)
+        {
+            result.ForwardFrom = Reference(forwardFrom);
+            if (message.ForwardFromAt is { } forwardedAt)
+                result.ForwardFromDateMs = forwardedAt.ToUnixTimeMilliseconds();
+        }
+        if (message.Media is { } media)
+        {
+            result.Media = new()
+            {
+                Media = new()
+                {
+                    MediaId = media.MediaId,
+                    Kind = media.Kind == "photo" ? P.MediaKind.Photo : P.MediaKind.Document,
+                    Mime = media.Mime, ByteSize = media.ByteSize, Width = media.Width,
+                    Height = media.Height, Duration = media.Duration, FileName = media.FileName,
+                    TotalParts = media.TotalParts
+                }
+            };
+            if (message.GroupedId is { } grouped) result.GroupedId = grouped;
+        }
         return result;
     }
+
+    /// <summary>Proto entity to stored entity, with the same UTF-16 bounds and URL rules as sending.</summary>
+    public static MessageEntity ParseEntity(P.MessageEntity entity, string text) => Adapter.Entity(entity, text);
+    public static P.MessageEntity MapEntity(MessageEntity entity) => Adapter.Entity(entity);
 
     public static string UserReferenceId(P.UserRef? reference, string domain)
     {

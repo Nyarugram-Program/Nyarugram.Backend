@@ -15,12 +15,21 @@ public sealed partial class PostgresBackend(NpgsqlDataSource source, int maximum
                 to_regclass('botgram_backend_v1.privacy_accounts')::text,
                 to_regclass('botgram_backend_v1.e2ee_devices')::text,
                 to_regclass('botgram_backend_v1.e2ee_one_time_pre_keys')::text,
-                to_regclass('botgram_backend_v1.e2ee_conversations')::text
+                to_regclass('botgram_backend_v1.e2ee_conversations')::text,
+                to_regclass('botgram_backend_v1.dialogs')::text,
+                to_regclass('botgram_backend_v1.pinned_messages')::text,
+                to_regclass('botgram_backend_v1.content_reads')::text,
+                to_regclass('botgram_backend_v1.media_files')::text,
+                to_regclass('botgram_backend_v1.media_parts')::text,
+                to_regclass('botgram_backend_v1.media_shares')::text,
+                to_regclass('botgram_backend_v1.media_messages')::text
             """, connection);
         await using var reader = await command.ExecuteReaderAsync(token);
-        if (!await reader.ReadAsync(token) || !reader.GetFieldValue<int[]>(0).SequenceEqual(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }) ||
-            reader.IsDBNull(1) || reader.IsDBNull(2) || reader.IsDBNull(3) || reader.IsDBNull(4) || reader.IsDBNull(5))
-            throw new InvalidDataException("Relational backend requires the explicit offline schema migration through version 9");
+        if (!await reader.ReadAsync(token) || !reader.GetFieldValue<int[]>(0).SequenceEqual(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }) ||
+            reader.IsDBNull(1) || reader.IsDBNull(2) || reader.IsDBNull(3) || reader.IsDBNull(4) || reader.IsDBNull(5) ||
+            reader.IsDBNull(6) || reader.IsDBNull(7) || reader.IsDBNull(8) ||
+            reader.IsDBNull(9) || reader.IsDBNull(10) || reader.IsDBNull(11) || reader.IsDBNull(12))
+            throw new InvalidDataException("Relational backend requires the explicit offline schema migration through version 12");
     }
 
     public Task<Botgram.Protocol.V1.EventHint> EventHintAsync(Session session, long after, CancellationToken token = default)

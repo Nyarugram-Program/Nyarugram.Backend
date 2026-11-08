@@ -17,7 +17,11 @@ public sealed partial class PostgresBackend
         recipients = recipients.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
         if (recipients.Length == 0) throw new InvalidDataException("Missing event recipients");
         var stream = type is "receipt.updated" or "user.gid_changed" or "user.presence_changed"
-            or "call.updated" or "call.tl_signal";
+            or "call.updated" or "call.tl_signal"
+            // Batch A message-lifecycle events all consume the recipient's pts so the
+            // difference stream remains the single authoritative delivery channel.
+            or "message.deleted" or "message.edited" or "message.pinned"
+            or "content.read" or "draft.changed" or "user.typing";
         int?[] positions;
         if (stream)
         {

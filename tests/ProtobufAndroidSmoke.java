@@ -130,7 +130,7 @@ public final class ProtobufAndroidSmoke {
         BotgramRpc.ReadReceipt read = BotgramRpc.ReadReceipt.newBuilder().setPeer(SELF).setMaxMessageId(17).setPts(7).setPtsCount(1).build();
         BotgramRpc.Updates updates = BotgramRpc.Updates.newBuilder().addUsers(SUMMARY).addGroups(GROUP_SUMMARY).setDateMs(NOW).setSeq(3)
                 .addUpdates(BotgramRpc.Update.newBuilder().setNewMessage(BotgramRpc.NewMessage.newBuilder().setMessage(text).setPts(7).setPtsCount(1)))
-                .addUpdates(BotgramRpc.Update.newBuilder().setMessageId(mapping))
+                .addUpdates(BotgramRpc.Update.newBuilder().setMessageId(mapping).build())
                 .addUpdates(BotgramRpc.Update.newBuilder().setReadInbox(read))
                 .addUpdates(BotgramRpc.Update.newBuilder().setReadOutbox(read))
                 .addUpdates(BotgramRpc.Update.newBuilder().setGidChanged(BotgramRpc.GidChanged.newBuilder().setUser(USER).setGid("03087654321"))).build();
@@ -779,6 +779,292 @@ public final class ProtobufAndroidSmoke {
         roundTrip(envelope().setAccountPrivacy(BotgramRpc.AccountPrivacyResponse.newBuilder().setContactsDeleted(EMPTY).addUsers(SUMMARY)), new TLRPC.TL_contacts_deleteContacts(), TLRPC.TL_updates.class);
     }
 
+    private void expectOperation(TLObject request, BotgramRpc.RpcRequest.OperationCase expected) throws Exception {
+        check(requests.map(request, "batch-a").getOperationCase() == expected, expected + " request mapping");
+    }
+
+    /** Batch A: every messages.* request maps to its own operation and every response
+     *  round-trips through the original Android TL classes with stable bytes. */
+    private void batchAChecks() throws Exception {
+        TLRPC.TL_inputPeerSelf selfPeer = new TLRPC.TL_inputPeerSelf();
+        TLRPC.TL_inputDialogPeer selfDialog = new TLRPC.TL_inputDialogPeer();
+        selfDialog.peer = new TLRPC.TL_inputPeerSelf();
+
+        TLRPC.TL_messages_deleteMessages deleteMessages = new TLRPC.TL_messages_deleteMessages();
+        deleteMessages.revoke = true; deleteMessages.id.add(17); deleteMessages.id.add(18);
+        expectOperation(deleteMessages, BotgramRpc.RpcRequest.OperationCase.DELETE_MESSAGES);
+        BotgramRpc.DeleteMessagesRequest mappedDelete = requests.map(deleteMessages, "batch-a").getDeleteMessages();
+        check(mappedDelete.getRevoke() && mappedDelete.getMessageIdsCount() == 2
+                && mappedDelete.getMessageIds(1) == 18, "delete messages ids and revoke");
+
+        TLRPC.TL_messages_deleteHistory deleteHistory = new TLRPC.TL_messages_deleteHistory();
+        deleteHistory.peer = selfPeer; deleteHistory.just_clear = true; deleteHistory.revoke = true; deleteHistory.max_id = 17;
+        expectOperation(deleteHistory, BotgramRpc.RpcRequest.OperationCase.DELETE_HISTORY);
+        TLRPC.TL_messages_deleteSavedHistory deleteSaved = new TLRPC.TL_messages_deleteSavedHistory();
+        deleteSaved.peer = selfPeer; deleteSaved.max_id = 17;
+        expectOperation(deleteSaved, BotgramRpc.RpcRequest.OperationCase.DELETE_SAVED_HISTORY);
+        expectOperation(new TLRPC.TL_messages_deletePhoneCallHistory(), BotgramRpc.RpcRequest.OperationCase.DELETE_PHONE_CALL_HISTORY);
+        TLRPC.TL_messages_editMessage edit = new TLRPC.TL_messages_editMessage();
+        edit.peer = selfPeer; edit.id = 17; edit.message = "edited";
+        expectOperation(edit, BotgramRpc.RpcRequest.OperationCase.EDIT_MESSAGE);
+        TLRPC.TL_messages_getMessageEditData editData = new TLRPC.TL_messages_getMessageEditData();
+        editData.peer = selfPeer; editData.id = 17;
+        expectOperation(editData, BotgramRpc.RpcRequest.OperationCase.GET_MESSAGE_EDIT_DATA);
+        TLRPC.TL_messages_forwardMessages forward = new TLRPC.TL_messages_forwardMessages();
+        forward.from_peer = selfPeer; forward.to_peer = selfPeer; forward.id.add(17); forward.random_id.add(RANDOM_ID);
+        expectOperation(forward, BotgramRpc.RpcRequest.OperationCase.FORWARD_MESSAGES);
+        TLRPC.TL_messages_setTyping typing = new TLRPC.TL_messages_setTyping();
+        typing.peer = selfPeer; typing.action = new TLRPC.TL_sendMessageRecordAudioAction();
+        expectOperation(typing, BotgramRpc.RpcRequest.OperationCase.SET_TYPING);
+        check(requests.map(typing, "batch-a").getSetTyping().getAction() == BotgramRpc.TypingAction.RECORD_AUDIO,
+                "typing action carries the concrete kind");
+        TLRPC.TL_messages_saveDraft draft = new TLRPC.TL_messages_saveDraft();
+        draft.peer = selfPeer; draft.message = "draft text";
+        expectOperation(draft, BotgramRpc.RpcRequest.OperationCase.SAVE_DRAFT);
+        expectOperation(new TLRPC.TL_messages_clearAllDrafts(), BotgramRpc.RpcRequest.OperationCase.CLEAR_ALL_DRAFTS);
+        expectOperation(new TLRPC.TL_messages_getAllDrafts(), BotgramRpc.RpcRequest.OperationCase.GET_ALL_DRAFTS);
+        TLRPC.TL_messages_updatePinnedMessage pin = new TLRPC.TL_messages_updatePinnedMessage();
+        pin.peer = selfPeer; pin.id = 17;
+        expectOperation(pin, BotgramRpc.RpcRequest.OperationCase.UPDATE_PINNED_MESSAGE);
+        TLRPC.TL_messages_unpinAllMessages unpin = new TLRPC.TL_messages_unpinAllMessages();
+        unpin.peer = selfPeer;
+        expectOperation(unpin, BotgramRpc.RpcRequest.OperationCase.UNPIN_ALL_MESSAGES);
+        TLRPC.TL_messages_toggleDialogPin togglePin = new TLRPC.TL_messages_toggleDialogPin();
+        togglePin.peer = selfDialog; togglePin.pinned = true;
+        expectOperation(togglePin, BotgramRpc.RpcRequest.OperationCase.TOGGLE_DIALOG_PIN);
+        TLRPC.TL_messages_reorderPinnedDialogs reorder = new TLRPC.TL_messages_reorderPinnedDialogs();
+        reorder.order.add(selfDialog);
+        expectOperation(reorder, BotgramRpc.RpcRequest.OperationCase.REORDER_PINNED_DIALOGS);
+        TLRPC.TL_messages_markDialogUnread markUnread = new TLRPC.TL_messages_markDialogUnread();
+        markUnread.peer = selfDialog; markUnread.unread = true;
+        expectOperation(markUnread, BotgramRpc.RpcRequest.OperationCase.MARK_DIALOG_UNREAD);
+        expectOperation(new TLRPC.TL_messages_getDialogUnreadMarks(), BotgramRpc.RpcRequest.OperationCase.GET_DIALOG_UNREAD_MARKS);
+        TLRPC.TL_messages_readMessageContents contents = new TLRPC.TL_messages_readMessageContents();
+        contents.id.add(17);
+        expectOperation(contents, BotgramRpc.RpcRequest.OperationCase.READ_MESSAGE_CONTENTS);
+        TLRPC.TL_messages_getOnlines onlines = new TLRPC.TL_messages_getOnlines();
+        onlines.peer = selfPeer;
+        expectOperation(onlines, BotgramRpc.RpcRequest.OperationCase.GET_ONLINES);
+        TLRPC.TL_messages_getCommonChats common = new TLRPC.TL_messages_getCommonChats();
+        common.user_id = new TLRPC.TL_inputUserSelf(); common.max_id = 17; common.limit = 10;
+        expectOperation(common, BotgramRpc.RpcRequest.OperationCase.GET_COMMON_CHATS);
+        TLRPC.TL_messages_hidePeerSettingsBar hideBar = new TLRPC.TL_messages_hidePeerSettingsBar();
+        hideBar.peer = selfPeer;
+        expectOperation(hideBar, BotgramRpc.RpcRequest.OperationCase.HIDE_PEER_SETTINGS_BAR);
+        TLRPC.TL_messages_reportSpam report = new TLRPC.TL_messages_reportSpam();
+        report.peer = selfPeer;
+        expectOperation(report, BotgramRpc.RpcRequest.OperationCase.REPORT_SPAM);
+        TLRPC.TL_messages_getMessagesViews views = new TLRPC.TL_messages_getMessagesViews();
+        views.peer = selfPeer; views.id.add(17); views.increment = true;
+        expectOperation(views, BotgramRpc.RpcRequest.OperationCase.GET_MESSAGES_VIEWS);
+        TLRPC.TL_messages_getOutboxReadDate readDate = new TLRPC.TL_messages_getOutboxReadDate();
+        readDate.peer = selfPeer; readDate.msg_id = 17;
+        expectOperation(readDate, BotgramRpc.RpcRequest.OperationCase.GET_OUTBOX_READ_DATE);
+        TLRPC.TL_messages_search search = new TLRPC.TL_messages_search();
+        search.peer = selfPeer; search.q = "alpha"; search.filter = new TLRPC.TL_inputMessagesFilterEmpty();
+        search.limit = 21; search.min_date = 100; search.offset_id = 17;
+        expectOperation(search, BotgramRpc.RpcRequest.OperationCase.SEARCH);
+        BotgramRpc.SearchRequest mappedSearch = requests.map(search, "batch-a").getSearch();
+        check(mappedSearch.getFilter() == BotgramRpc.SearchFilter.EMPTY && mappedSearch.getMinDateMs() == 100000L
+                && mappedSearch.getLimit() == 21, "search query, filter and date conversion");
+        TLRPC.TL_messages_search pinnedSearch = new TLRPC.TL_messages_search();
+        pinnedSearch.peer = selfPeer; pinnedSearch.filter = new TLRPC.TL_inputMessagesFilterPinned();
+        check(requests.map(pinnedSearch, "batch-a").getSearch().getFilter() == BotgramRpc.SearchFilter.PINNED,
+                "pinned search filter");
+        TLRPC.TL_messages_getSearchCounters counters = new TLRPC.TL_messages_getSearchCounters();
+        counters.peer = selfPeer; counters.filters.add(new TLRPC.TL_inputMessagesFilterEmpty());
+        counters.filters.add(new TLRPC.TL_inputMessagesFilterPinned());
+        expectOperation(counters, BotgramRpc.RpcRequest.OperationCase.GET_SEARCH_COUNTERS);
+        check(requests.map(counters, "batch-a").getGetSearchCounters().getFiltersCount() == 2,
+                "search counters keep the requested filter order");
+
+        BotgramRpc.Message text = message().build();
+        BotgramRpc.MessageIdMapping mapping = BotgramRpc.MessageIdMapping.newBuilder().setRandomId(RANDOM_ID).setMessageId(17).build();
+        BotgramRpc.AffectedMessages affected = BotgramRpc.AffectedMessages.newBuilder().setPts(9).setPtsCount(1).build();
+        roundTrip(envelope().setDeleteMessages(affected), new TLRPC.TL_messages_deleteMessages(), TLRPC.TL_messages_affectedMessages.class);
+        BotgramRpc.AffectedHistory history = BotgramRpc.AffectedHistory.newBuilder().setPts(9).setPtsCount(1).build();
+        roundTrip(envelope().setDeleteHistory(history), new TLRPC.TL_messages_deleteHistory(), TLRPC.TL_messages_affectedHistory.class);
+        roundTrip(envelope().setDeleteSavedHistory(history), new TLRPC.TL_messages_deleteSavedHistory(), TLRPC.TL_messages_affectedHistory.class);
+        roundTrip(envelope().setUnpinAllMessages(history), new TLRPC.TL_messages_unpinAllMessages(), TLRPC.TL_messages_affectedHistory.class);
+        TLRPC.TL_messages_affectedHistory zeroOffset = (TLRPC.TL_messages_affectedHistory) roundTrip(
+                envelope().setDeleteHistory(history), new TLRPC.TL_messages_deleteHistory(), TLRPC.TL_messages_affectedHistory.class);
+        check(zeroOffset.offset == 0 && zeroOffset.pts == 9, "history deletion terminates the client retry loop");
+        BotgramRpc.AffectedFoundMessages found = BotgramRpc.AffectedFoundMessages.newBuilder()
+                .setPts(9).setPtsCount(0).addMessages(17).build();
+        roundTrip(envelope().setDeletePhoneCallHistory(found), new TLRPC.TL_messages_deletePhoneCallHistory(), TLRPC.TL_messages_affectedFoundMessages.class);
+        roundTrip(envelope().setGetMessageEditData(BotgramRpc.MessageEditData.newBuilder().setCaption(true)),
+                new TLRPC.TL_messages_getMessageEditData(), TLRPC.TL_messages_messageEditData.class);
+        for (int i = 0; i < 8; i++) {
+            BotgramRpc.BoolValue applied = BotgramRpc.BoolValue.newBuilder().setValue(true).build();
+            TLObject request = i == 0 ? new TLRPC.TL_messages_setTyping() : i == 1 ? new TLRPC.TL_messages_saveDraft()
+                    : i == 2 ? new TLRPC.TL_messages_clearAllDrafts() : i == 3 ? new TLRPC.TL_messages_toggleDialogPin()
+                    : i == 4 ? new TLRPC.TL_messages_reorderPinnedDialogs() : i == 5 ? new TLRPC.TL_messages_markDialogUnread()
+                    : i == 6 ? new TLRPC.TL_messages_hidePeerSettingsBar() : new TLRPC.TL_messages_reportSpam();
+            BotgramRpc.RpcResponse.Builder builder = i == 0 ? envelope().setSetTyping(applied)
+                    : i == 1 ? envelope().setSaveDraft(applied) : i == 2 ? envelope().setClearAllDrafts(applied)
+                    : i == 3 ? envelope().setToggleDialogPin(applied) : i == 4 ? envelope().setReorderPinnedDialogs(applied)
+                    : i == 5 ? envelope().setMarkDialogUnread(applied) : i == 6 ? envelope().setHidePeerSettingsBar(applied)
+                    : envelope().setReportSpam(applied);
+            roundTrip(builder, request, TLRPC.TL_boolTrue.class);
+        }
+        roundTrip(envelope().setGetOnlines(BotgramRpc.ChatOnlines.newBuilder().setOnlines(3)),
+                new TLRPC.TL_messages_getOnlines(), TLRPC.TL_chatOnlines.class);
+        roundTrip(envelope().setGetCommonChats(BotgramRpc.GroupList.newBuilder().addGroups(GROUP_SUMMARY)),
+                new TLRPC.TL_messages_getCommonChats(), TLRPC.TL_messages_chats.class);
+        roundTrip(envelope().setGetMessagesViews(BotgramRpc.MessageViewsList.newBuilder().addViews(5).addViews(0)),
+                new TLRPC.TL_messages_getMessagesViews(), TLRPC.TL_messages_messageViews.class);
+        roundTrip(envelope().setGetOutboxReadDate(BotgramRpc.OutboxReadDate.newBuilder().setDateMs(NOW)),
+                new TLRPC.TL_messages_getOutboxReadDate(), TLRPC.TL_outboxReadDate.class);
+        roundTrip(envelope().setGetDialogUnreadMarks(BotgramRpc.PeerList.newBuilder().addPeers(SELF)),
+                new TLRPC.TL_messages_getDialogUnreadMarks(), org.telegram.tgnet.Vector.class);
+        TLRPC.messages_Messages searched = (TLRPC.messages_Messages) roundTrip(envelope().setSearch(
+                BotgramRpc.SearchPage.newBuilder().setCount(1).addMessages(text).addUsers(SUMMARY).addGroups(GROUP_SUMMARY)),
+                new TLRPC.TL_messages_search(), TLRPC.TL_messages_messagesSlice.class);
+        check(searched.count == 1 && searched.messages.size() == 1, "search page carries count and messages");
+        roundTrip(envelope().setGetSearchCounters(BotgramRpc.SearchCounters.newBuilder()
+                        .addCounters(BotgramRpc.SearchCounter.newBuilder().setFilter(BotgramRpc.SearchFilter.EMPTY).setCount(1))
+                        .addCounters(BotgramRpc.SearchCounter.newBuilder().setFilter(BotgramRpc.SearchFilter.PINNED))),
+                new TLRPC.TL_messages_getSearchCounters(), org.telegram.tgnet.Vector.class);
+
+        BotgramRpc.Updates edits = BotgramRpc.Updates.newBuilder().addUsers(SUMMARY).addGroups(GROUP_SUMMARY).setDateMs(NOW)
+                .addUpdates(BotgramRpc.Update.newBuilder().setMessageEdited(BotgramRpc.MessageEdited.newBuilder()
+                        .setMessage(text).setPts(9).setPtsCount(1)).build()).build();
+        TLRPC.TL_updates editEnvelope = (TLRPC.TL_updates) roundTrip(envelope().setEditMessage(edits),
+                new TLRPC.TL_messages_editMessage(), TLRPC.TL_updates.class);
+        check(editEnvelope.updates.get(0) instanceof org.telegram.tgnet.tl.TL_update.TL_updateEditMessage,
+                "edit update kind");
+        BotgramRpc.Updates forwarded = BotgramRpc.Updates.newBuilder().addUsers(SUMMARY).addGroups(GROUP_SUMMARY).setDateMs(NOW)
+                .addUpdates(BotgramRpc.Update.newBuilder().setMessageId(mapping))
+                .addUpdates(BotgramRpc.Update.newBuilder().setNewMessage(BotgramRpc.NewMessage.newBuilder()
+                        .setMessage(text).setPts(9).setPtsCount(1)).build()).build();
+        TLRPC.TL_updates forwardEnvelope = (TLRPC.TL_updates) roundTrip(envelope().setForwardMessages(forwarded),
+                new TLRPC.TL_messages_forwardMessages(), TLRPC.TL_updates.class);
+        check(forwardEnvelope.updates.size() == 2
+                && forwardEnvelope.updates.get(0) instanceof org.telegram.tgnet.tl.TL_update.TL_updateMessageID,
+                "forward response keeps the random id mapping");
+
+        BotgramRpc.DifferencePage.Builder differencePage = BotgramRpc.DifferencePage.newBuilder().setState(STATE).addMessages(text)
+                .addUpdates(BotgramRpc.Update.newBuilder().setMessagesDeleted(BotgramRpc.MessagesDeleted.newBuilder()
+                        .addMessageIds(17).setPts(8).setPtsCount(1)).build())
+                .addUpdates(BotgramRpc.Update.newBuilder().setMessagesPinned(BotgramRpc.MessagesPinned.newBuilder()
+                        .setPeer(SELF).addMessageIds(17).setPinned(true).setPts(9).setPtsCount(1)).build())
+                .addUpdates(BotgramRpc.Update.newBuilder().setContentsRead(BotgramRpc.ContentsRead.newBuilder()
+                        .addMessageIds(17).setPts(10).setPtsCount(1)).build())
+                .addUpdates(BotgramRpc.Update.newBuilder().setDraftChanged(BotgramRpc.DraftChanged.newBuilder()
+                        .setPeer(SELF).setDraft(BotgramRpc.DraftState.newBuilder().setText("draft").setUpdatedAtMs(NOW))).build())
+                .addUpdates(BotgramRpc.Update.newBuilder().setUserTyping(BotgramRpc.UserTyping.newBuilder()
+                        .setPeer(SELF).setUser(USER).setAction(BotgramRpc.TypingAction.TYPING)).build());
+        TLRPC.TL_updates_difference difference = (TLRPC.TL_updates_difference) roundTrip(
+                envelope().setGetDifference(BotgramRpc.Difference.newBuilder().setComplete(differencePage.build())),
+                new TLRPC.TL_updates_getDifference(), TLRPC.TL_updates_difference.class);
+        check(difference.other_updates.get(0) instanceof org.telegram.tgnet.tl.TL_update.TL_updateDeleteMessages
+                && difference.other_updates.get(1) instanceof org.telegram.tgnet.tl.TL_update.TL_updatePinnedMessages
+                && difference.other_updates.get(2) instanceof org.telegram.tgnet.tl.TL_update.TL_updateReadMessagesContents
+                && difference.other_updates.get(3) instanceof org.telegram.tgnet.tl.TL_update.TL_updateDraftMessage
+                && difference.other_updates.get(4) instanceof org.telegram.tgnet.tl.TL_update.TL_updateUserTyping,
+                "difference replays all batch A update kinds");
+
+        BotgramRpc.Dialog stateDialog = BotgramRpc.Dialog.newBuilder().setPeer(SELF).setTopMessageId(17)
+                .setReadInboxMaxId(16).setReadOutboxMaxId(16).setNotifySettings(NOTIFY).setPinned(true).setUnreadMark(true)
+                .setDraft(BotgramRpc.DraftState.newBuilder().setText("draft").setUpdatedAtMs(NOW).setReplyToMessageId(16)).build();
+        TLRPC.TL_messages_peerDialogs pinnedDialogs = (TLRPC.TL_messages_peerDialogs) roundTrip(
+                envelope().setGetPinnedDialogs(BotgramRpc.PeerDialogs.newBuilder().addDialogs(stateDialog)
+                        .addMessages(text).addUsers(SUMMARY).addGroups(GROUP_SUMMARY).setState(STATE)),
+                new TLRPC.TL_messages_getPinnedDialogs(), TLRPC.TL_messages_peerDialogs.class);
+        TLRPC.TL_dialog state = (TLRPC.TL_dialog) pinnedDialogs.dialogs.get(0);
+        check(state.pinned && state.unread_mark && state.draft != null && "draft".equals(state.draft.message)
+                && state.draft.reply_to != null, "dialog carries pin, unread mark and draft");
+
+        BotgramRpc.Message forwardedMessage = message().setForwardFrom(USER).setForwardFromDateMs(NOW - 1000).build();
+        TLRPC.messages_Messages forwardedHistory = (TLRPC.messages_Messages) roundTrip(
+                envelope().setGetHistory(page(forwardedMessage.toBuilder())),
+                new TLRPC.TL_messages_getHistory(), TLRPC.TL_messages_messages.class);
+        TLRPC.Message withHeader = forwardedHistory.messages.get(0);
+        check(withHeader.fwd_from != null && withHeader.fwd_from.from_id != null
+                && withHeader.fwd_from.date == (int) ((NOW - 1000) / 1000), "forward attribution round-trip");
+    }
+
+    /** Batch I: media requests map to typed sources and media messages round-trip as TL. */
+    private void batchIChecks() throws Exception {
+        TLRPC.TL_inputMediaUploadedPhoto uploaded = new TLRPC.TL_inputMediaUploadedPhoto();
+        uploaded.file = new TLRPC.TL_inputFile();
+        uploaded.file.id = 4242;
+        uploaded.file.parts = 3;
+        uploaded.file.name = "photo.jpg";
+        TLRPC.TL_messages_sendMedia send = new TLRPC.TL_messages_sendMedia();
+        send.peer = new TLRPC.TL_inputPeerSelf();
+        send.media = uploaded;
+        send.message = "caption";
+        send.random_id = RANDOM_ID;
+        BotgramRpc.SendMediaRequest mapped = requests.map(send, "batch-i").getSendMedia();
+        check(mapped.getMedia().getClientFileId() == 4242
+                && mapped.getMedia().getKind() == BotgramRpc.MediaKind.PHOTO, "uploaded photo request");
+        check("caption".equals(mapped.getCaption()) && mapped.getRandomId() == RANDOM_ID,
+                "media caption and random id");
+
+        TLRPC.TL_inputMediaPhoto existing = new TLRPC.TL_inputMediaPhoto();
+        existing.id = new TLRPC.TL_inputPhoto();
+        existing.id.id = 77;
+        existing.id.access_hash = 1;
+        send.media = existing;
+        check(requests.map(send, "batch-i").getSendMedia().getMedia().getMediaId() == 77,
+                "existing media request");
+
+        BotgramRpc.MediaRef photo = BotgramRpc.MediaRef.newBuilder().setMediaId(901)
+                .setKind(BotgramRpc.MediaKind.PHOTO).setMime("image/jpeg").setByteSize(240)
+                .setWidth(640).setHeight(480).setTotalParts(3).build();
+        BotgramRpc.Message photoMessage = message()
+                .setMedia(BotgramRpc.MediaMessage.newBuilder().setMedia(photo)).build();
+        BotgramRpc.Updates photoUpdates = BotgramRpc.Updates.newBuilder().addUsers(SUMMARY)
+                .addGroups(GROUP_SUMMARY).setDateMs(NOW)
+                .addUpdates(BotgramRpc.Update.newBuilder().setNewMessage(
+                        BotgramRpc.NewMessage.newBuilder().setMessage(photoMessage).setPts(9).setPtsCount(1)))
+                .build();
+        TLRPC.TL_updates photoEnvelope = (TLRPC.TL_updates) roundTrip(
+                envelope().setSendMedia(photoUpdates), new TLRPC.TL_messages_sendMedia(), TLRPC.TL_updates.class);
+        TLRPC.Message photoResult = ((org.telegram.tgnet.tl.TL_update.TL_updateNewMessage)
+                photoEnvelope.updates.get(0)).message;
+        check(photoResult.media instanceof TLRPC.TL_messageMediaPhoto
+                && photoResult.media.photo != null && photoResult.media.photo.id == 901, "photo media round-trip");
+        // TL_photoSize carries type/w/h/size on the wire; the location is rebuilt from the
+        // photo id by the deserializer, which is also what the download interceptor reads.
+        check(photoResult.media.photo.sizes.size() == 1
+                && "y".equals(photoResult.media.photo.sizes.get(0).type)
+                && photoResult.media.photo.sizes.get(0).w == 640
+                && photoResult.media.photo.sizes.get(0).h == 480
+                && photoResult.media.photo.sizes.get(0).size == 240
+                && photoResult.media.photo.sizes.get(0).location != null,
+                "photo size round-trip");
+
+        BotgramRpc.MediaRef video = BotgramRpc.MediaRef.newBuilder().setMediaId(902)
+                .setKind(BotgramRpc.MediaKind.DOCUMENT).setMime("video/mp4").setByteSize(2048)
+                .setWidth(1280).setHeight(720).setDuration(12).setFileName("clip.mp4").setTotalParts(4).build();
+        BotgramRpc.Message videoMessage = message()
+                .setMedia(BotgramRpc.MediaMessage.newBuilder().setMedia(video)).setGroupedId(555).build();
+        BotgramRpc.Updates videoUpdates = BotgramRpc.Updates.newBuilder().addUsers(SUMMARY)
+                .addGroups(GROUP_SUMMARY).setDateMs(NOW)
+                .addUpdates(BotgramRpc.Update.newBuilder().setNewMessage(
+                        BotgramRpc.NewMessage.newBuilder().setMessage(videoMessage).setPts(9).setPtsCount(1)))
+                .build();
+        TLRPC.TL_updates videoEnvelope = (TLRPC.TL_updates) roundTrip(
+                envelope().setSendMultiMedia(videoUpdates), new TLRPC.TL_messages_sendMultiMedia(), TLRPC.TL_updates.class);
+        TLRPC.Message videoResult = ((org.telegram.tgnet.tl.TL_update.TL_updateNewMessage)
+                videoEnvelope.updates.get(0)).message;
+        check(videoResult.media instanceof TLRPC.TL_messageMediaDocument
+                && videoResult.media.document != null && videoResult.media.document.id == 902
+                && "video/mp4".equals(videoResult.media.document.mime_type), "document media round-trip");
+        check(videoResult.grouped_id == 555, "album id round-trip");
+        boolean hasVideo = false, hasName = false;
+        for (TLRPC.DocumentAttribute attribute : videoResult.media.document.attributes) {
+            if (attribute instanceof TLRPC.TL_documentAttributeVideo) hasVideo = true;
+            if (attribute instanceof TLRPC.TL_documentAttributeFilename) hasName = true;
+        }
+        check(hasVideo && hasName, "document attributes round-trip");
+
+        roundTrip(envelope().setUploadMedia(BotgramRpc.UploadMediaResult.newBuilder().setMedia(photo)),
+                new TLRPC.TL_messages_uploadMedia(), TLRPC.TL_messageMediaPhoto.class);
+    }
+
     public static void main(String[] args) throws Exception {
         negotiationChecks();
         rpcChecks();
@@ -806,6 +1092,8 @@ public final class ProtobufAndroidSmoke {
             ProtobufAndroidSmoke smoke = new ProtobufAndroidSmoke(identity);
             smoke.run();
             smoke.privacyChecks();
+            smoke.batchAChecks();
+            smoke.batchIChecks();
             identityChecks(api, identity, resolverCalls);
             System.out.println("PASS: 29 application response outcomes plus privacy/security, 15 entities, 4 differences, 5 updates; " + checks + " assertions against original Android TL classes (host only)");
         } finally { server.stop(0); }

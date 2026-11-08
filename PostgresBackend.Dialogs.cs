@@ -1,3 +1,4 @@
+using System.Text.Json;
 using P = Botgram.Protocol.V1;
 
 namespace Botgram.Backend.Storage;
@@ -33,25 +34,52 @@ public sealed partial class PostgresBackend
                 COALESCE((SELECT max(r.message_id) FROM botgram_backend_v1.receipts r
                     WHERE r.conversation_id=c.id AND r.user_id<>$1),0),
                 (SELECT count(*)::integer FROM botgram_intake_v1.messages m
-                    WHERE m.conversation_id=c.id AND m.sender_id<>$1 AND m.id>COALESCE(own.message_id,0))
+                    WHERE m.conversation_id=c.id AND m.sender_id<>$1 AND m.id>COALESCE(own.message_id,0)
+                      AND m.id>COALESCE(dlg.cleared_through,0)
+                      AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.message_deletions del WHERE del.message_id=m.id)
+                      AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.deleted_messages h
+                          WHERE h.message_id=m.id AND h.user_id=$1)),
+                COALESCE(dlg.pinned,false),COALESCE(dlg.unread_mark,false),COALESCE(dlg.settings_bar_hidden,false),
+                COALESCE(dlg.hidden_through,0),COALESCE(dlg.pin_order,0),dlg.draft,dlg.draft_updated_at
             FROM botgram_backend_v1.conversations c
             JOIN botgram_intake_v1.members member ON member.conversation_id=c.id AND member.user_id=$1
             LEFT JOIN botgram_backend_v1.receipts own ON own.conversation_id=c.id AND own.user_id=$1
+            LEFT JOIN botgram_backend_v1.dialogs dlg ON dlg.conversation_id=c.id AND dlg.user_id=$1
             LEFT JOIN LATERAL (SELECT body FROM botgram_intake_v1.messages m
-                WHERE m.conversation_id=c.id ORDER BY m.id DESC LIMIT 1) last ON true
+                WHERE m.conversation_id=c.id
+                  AND m.id>COALESCE(dlg.cleared_through,0)
+                  AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.message_deletions del WHERE del.message_id=m.id)
+                  AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.deleted_messages h
+                      WHERE h.message_id=m.id AND h.user_id=$1)
+                ORDER BY m.id DESC LIMIT 1) last ON true
             """, r => (Id: r.GetString(0), Last: r.IsDBNull(1) ? null : StoredMessage(r.GetString(1)),
-                Inbox: r.GetInt64(2), Outbox: r.GetInt64(3), Unread: r.GetInt32(4)), uid);
+                Inbox: r.GetInt64(2), Outbox: r.GetInt64(3), Unread: r.GetInt32(4),
+                Pinned: r.GetBoolean(5), UnreadMark: r.GetBoolean(6), SettingsBarHidden: r.GetBoolean(7),
+                HiddenThrough: r.GetInt64(8), PinOrder: r.GetInt64(9),
+                Draft: r.IsDBNull(10) ? null : JsonSerializer.Deserialize<StoredDraft>(r.GetString(10)),
+                DraftAt: r.IsDBNull(11) ? (DateTimeOffset?)null : r.GetFieldValue<DateTimeOffset>(11)), uid);
         var byId = rows.ToDictionary(r => r.Id);
         IEnumerable<DialogView> selected = owned.Select(c =>
         {
             var row = byId[c.Id];
             var peer = c.Kind == "group" ? -groupIds[c.Id] :
                 userIds[c.Kind == "saved" ? uid : c.Members.Single(id => id != uid)];
-            return new DialogView(c, peer, row.Last, row.Inbox, row.Outbox, row.Unread, []);
+            var draft = row.Draft is null ? null
+                : new DraftView(row.Draft.Text, row.Draft.Entities, row.Draft.ReplyTo,
+                    row.DraftAt ?? row.Draft.UpdatedAt);
+            return new DialogView(c, peer, row.Last, row.Inbox, row.Outbox, row.Unread, [],
+                row.Pinned, row.UnreadMark, row.SettingsBarHidden, row.HiddenThrough, row.PinOrder, draft);
         });
-        if (query.Selection == DialogSelection.Pinned || query.FolderId != 0) selected = [];
-        if (query.Selection == DialogSelection.Peers) selected = selected.Where(d => (query.Peers ?? []).Contains(d.PeerId));
-        selected = selected.OrderByDescending(d => d.LastMessage?.Id ?? 0).ThenBy(d => d.Conversation.Id);
+        // Cleared history keeps the dialog hidden until a newer message id appears;
+        // membership and message rows are never deleted to achieve this.
+        selected = selected.Where(d => d.HiddenThrough == 0 || (d.LastMessage?.Id ?? 0) > d.HiddenThrough);
+        if (query.Selection == DialogSelection.Pinned)
+            selected = selected.Where(d => d.Pinned)
+                .OrderBy(d => d.PinOrder).ThenByDescending(d => d.LastMessage?.Id ?? 0);
+        else if (query.FolderId != 0) selected = [];
+        else selected = selected.OrderByDescending(d => d.LastMessage?.Id ?? 0).ThenBy(d => d.Conversation.Id);
+        if (query.Selection == DialogSelection.Peers)
+            selected = selected.Where(d => (query.Peers ?? []).Contains(d.PeerId));
         if (query.Selection == DialogSelection.All)
         {
             if (query.OffsetPeer != 0 && selected.Any(d => d.PeerId == query.OffsetPeer))
@@ -71,13 +99,29 @@ public sealed partial class PostgresBackend
             DateMs = DateTimeOffset.UtcNow.ToUnixTimeSeconds() * 1000
         } };
         result.Groups.Add(await MappedGroups(work, uid));
-        result.Dialogs.Add(page.Dialogs.Select(d => new P.Dialog
+        result.Dialogs.Add(page.Dialogs.Select(d =>
         {
-            Peer = ConversationPeer(d.Conversation, uid, domain),
-            TopMessageId = ProtobufRpcMapper.ValidateMessageId(d.LastMessage?.Id ?? 0),
-            ReadInboxMaxId = ProtobufRpcMapper.ValidateMessageId(d.Inbox),
-            ReadOutboxMaxId = ProtobufRpcMapper.ValidateMessageId(d.Outbox),
-            UnreadCount = d.UnreadCount, NotifySettings = new()
+            var dialog = new P.Dialog
+            {
+                Peer = ConversationPeer(d.Conversation, uid, domain),
+                TopMessageId = ProtobufRpcMapper.ValidateMessageId(d.LastMessage?.Id ?? 0),
+                ReadInboxMaxId = ProtobufRpcMapper.ValidateMessageId(d.Inbox),
+                ReadOutboxMaxId = ProtobufRpcMapper.ValidateMessageId(d.Outbox),
+                UnreadCount = d.UnreadCount, NotifySettings = new(),
+                Pinned = d.Pinned, UnreadMark = d.UnreadMark
+            };
+            if (d.Draft is { } draft)
+            {
+                var state = new P.DraftState
+                {
+                    Text = draft.Text,
+                    UpdatedAtMs = draft.UpdatedAt.ToUnixTimeMilliseconds()
+                };
+                if (draft.ReplyTo is { } reply) state.ReplyToMessageId = reply;
+                state.Entities.Add((draft.Entities ?? []).Select(ProtobufRpcMapper.MapEntity));
+                dialog.Draft = state;
+            }
+            return dialog;
         }));
         result.Messages.Add(await MappedMessages(work, uid, domain,
             page.Dialogs.Where(d => d.LastMessage is not null).Select(d => d.LastMessage!).ToArray()));

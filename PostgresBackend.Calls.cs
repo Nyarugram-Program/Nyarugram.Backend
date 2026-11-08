@@ -204,6 +204,14 @@ public sealed partial class PostgresBackend
                     SELECT token_hash FROM botgram_intake_v1.sessions WHERE expires_at<=clock_timestamp()
                     FOR UPDATE SKIP LOCKED)
                 """);
+            // Abandoned or cancelled media uploads are invisible to every reader and are
+            // discarded after a day; completed media stays until its message is gone.
+            await work.Execute("""
+                DELETE FROM botgram_backend_v1.media_files WHERE id IN (
+                    SELECT id FROM botgram_backend_v1.media_files
+                    WHERE NOT completed AND created_at < clock_timestamp() - interval '24 hours'
+                    FOR UPDATE SKIP LOCKED)
+                """);
             return true;
         }, token);
 

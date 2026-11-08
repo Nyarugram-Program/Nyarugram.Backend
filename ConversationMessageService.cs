@@ -4,7 +4,14 @@ using P = Botgram.Protocol.V1;
 namespace Botgram.Backend;
 
 public sealed record SendMessageCommand(string Key, string Text, MessageEntity[]? Entities = null,
-    long? ReplyId = null, bool Silent = false, byte[]? E2eeEnvelope = null);
+    long? ReplyId = null, bool Silent = false, byte[]? E2eeEnvelope = null,
+    // Forward attribution carried through the same durable acceptance path (v10).
+    string? ForwardFromUserId = null, DateTimeOffset? ForwardFromAt = null,
+    // Durable forward request identity (schema v10 body extension); null for normal sends.
+    string? ForwardSourceConversationId = null, long? ForwardSourceMessageId = null,
+    bool? ForwardDropAuthor = null,
+    // Media body and album grouping (batch I); Text holds the caption for media messages.
+    MessageMedia? Media = null, long? GroupedId = null);
 public sealed record HistoryQuery(long OffsetId = 0, long OffsetDate = 0, int AddOffset = 0,
     long MinId = 0, long MaxId = 0, int Limit = 50);
 public sealed record ReadResult(Receipt? Receipt, bool Changed);

@@ -4,7 +4,7 @@ namespace Botgram.Backend.Storage;
 
 public static class PostgresBackendSchema
 {
-    public const int CurrentVersion = 9;
+    public const int CurrentVersion = 12;
 
     // Explicit offline operation, never run by constructing a repository or handling a request.
     public static async Task ApplyAsync(NpgsqlDataSource source, CancellationToken token = default)
@@ -257,6 +257,147 @@ public static class PostgresBackendSchema
                     OR (schema_version=4 AND type IN ('call.updated','call.tl_signal')
                         AND message_id IS NULL AND payload IS NOT NULL));
                 INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(9);
+            END IF;
+            END $migration$;
+            DO $migration$ BEGIN
+            IF NOT EXISTS(SELECT 1 FROM botgram_backend_v1.schema_versions WHERE version=10) THEN
+                -- Batch A message lifecycle and per-account dialog state. Business data stays
+                -- relational per table responsibility; message bodies remain the existing
+                -- two-phase JSON contract. No whole-database JSON snapshots are introduced.
+                CREATE TABLE botgram_backend_v1.dialogs (
+                    user_id text NOT NULL REFERENCES botgram_backend_v1.accounts(id),
+                    conversation_id text NOT NULL REFERENCES botgram_backend_v1.conversations(id),
+                    pinned boolean NOT NULL DEFAULT false,
+                    pin_order bigint NOT NULL DEFAULT 0,
+                    unread_mark boolean NOT NULL DEFAULT false,
+                    settings_bar_hidden boolean NOT NULL DEFAULT false,
+                    -- Messages with id <= cleared_through are hidden for this user only.
+                    cleared_through bigint NOT NULL DEFAULT 0 CHECK (cleared_through >= 0),
+                    -- Dialog stays hidden while no message id exceeds this boundary
+                    -- (deleteHistory without just_clear). Membership is never deleted.
+                    hidden_through bigint NOT NULL DEFAULT 0 CHECK (hidden_through >= 0),
+                    draft jsonb,
+                    draft_updated_at timestamptz,
+                    PRIMARY KEY (user_id, conversation_id));
+                CREATE INDEX backend_dialogs_conversations ON botgram_backend_v1.dialogs(conversation_id);
+                CREATE TABLE botgram_backend_v1.deleted_messages (
+                    user_id text NOT NULL REFERENCES botgram_backend_v1.accounts(id),
+                    message_id bigint NOT NULL REFERENCES botgram_intake_v1.messages(id),
+                    PRIMARY KEY (user_id, message_id));
+                CREATE INDEX backend_deleted_messages_message ON botgram_backend_v1.deleted_messages(message_id);
+                CREATE TABLE botgram_backend_v1.message_deletions (
+                    message_id bigint PRIMARY KEY REFERENCES botgram_intake_v1.messages(id),
+                    conversation_id text NOT NULL REFERENCES botgram_backend_v1.conversations(id));
+                CREATE INDEX backend_message_deletions_conversation
+                    ON botgram_backend_v1.message_deletions(conversation_id);
+                CREATE TABLE botgram_backend_v1.content_reads (
+                    user_id text NOT NULL REFERENCES botgram_backend_v1.accounts(id),
+                    conversation_id text NOT NULL REFERENCES botgram_backend_v1.conversations(id),
+                    message_id bigint NOT NULL REFERENCES botgram_intake_v1.messages(id),
+                    read_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+                    PRIMARY KEY (user_id, message_id));
+                CREATE TABLE botgram_backend_v1.pinned_messages (
+                    conversation_id text NOT NULL REFERENCES botgram_backend_v1.conversations(id),
+                    message_id bigint NOT NULL REFERENCES botgram_intake_v1.messages(id),
+                    pinned_by text NOT NULL REFERENCES botgram_backend_v1.accounts(id),
+                    pinned_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+                    PRIMARY KEY (conversation_id, message_id));
+                CREATE UNIQUE INDEX backend_pinned_messages_message
+                    ON botgram_backend_v1.pinned_messages(message_id);
+                CREATE TABLE botgram_backend_v1.peer_reports (
+                    reporter_id text NOT NULL REFERENCES botgram_backend_v1.accounts(id),
+                    conversation_id text NOT NULL REFERENCES botgram_backend_v1.conversations(id),
+                    kind text NOT NULL,
+                    created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+                    PRIMARY KEY (reporter_id, conversation_id, kind));
+                CREATE TABLE botgram_backend_v1.message_views (
+                    message_id bigint PRIMARY KEY REFERENCES botgram_intake_v1.messages(id),
+                    view_count bigint NOT NULL DEFAULT 0 CHECK (view_count >= 0));
+                CREATE TABLE botgram_backend_v1.message_viewers (
+                    message_id bigint NOT NULL REFERENCES botgram_intake_v1.messages(id),
+                    user_id text NOT NULL REFERENCES botgram_backend_v1.accounts(id),
+                    PRIMARY KEY (message_id, user_id));
+                CREATE TABLE botgram_backend_v1.call_deletions (
+                    user_id text PRIMARY KEY REFERENCES botgram_backend_v1.accounts(id),
+                    cleared_through timestamptz NOT NULL);
+                ALTER TABLE botgram_backend_v1.receipts ADD COLUMN read_at timestamptz;
+                -- Pre-v10 receipts only stored the cursor; record the migration instant so
+                -- messages.getOutboxReadDate has a real value for existing conversations.
+                UPDATE botgram_backend_v1.receipts SET read_at=clock_timestamp() WHERE read_at IS NULL;
+                -- Batch A pts-stream event types join the schema-1 shape contract.
+                ALTER TABLE botgram_intake_v1.events DROP CONSTRAINT backend_event_shape;
+                ALTER TABLE botgram_intake_v1.events ADD CONSTRAINT backend_event_shape CHECK (
+                    (schema_version=1 AND (
+                        (type='message.created' AND message_id IS NOT NULL)
+                        OR (type IN ('conversation.created','receipt.updated','call.updated','call.signal','user.gid_changed',
+                                     'message.edited','message.deleted','message.pinned','content.read',
+                                     'draft.changed','user.typing')
+                            AND message_id IS NULL AND payload IS NOT NULL)
+                        OR (type='call.tl_signal' AND message_id IS NULL AND payload IS NOT NULL)))
+                    OR (schema_version=2 AND type='wallpaper.changed' AND message_id IS NULL AND payload IS NOT NULL)
+                    OR (schema_version=3 AND type='user.presence_changed' AND message_id IS NULL AND payload IS NOT NULL)
+                    OR (schema_version=4 AND type IN ('call.updated','call.tl_signal')
+                        AND message_id IS NULL AND payload IS NOT NULL));
+                INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(10);
+            END IF;
+            END $migration$;
+            DO $migration$ BEGIN
+            IF NOT EXISTS(SELECT 1 FROM botgram_backend_v1.schema_versions WHERE version=11) THEN
+                -- Batch I media. Bytes are stored in bounded part rows (bounded streaming per
+                -- request); incomplete uploads are invisible until a message references them.
+                CREATE TABLE botgram_backend_v1.media_files (
+                    id bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+                    owner_id text NOT NULL REFERENCES botgram_backend_v1.accounts(id),
+                    client_file_id bigint NOT NULL,
+                    kind text NOT NULL DEFAULT 'document' CHECK (kind IN ('photo','document')),
+                    mime text NOT NULL DEFAULT '',
+                    file_name text NOT NULL DEFAULT '',
+                    byte_size bigint NOT NULL DEFAULT 0 CHECK (byte_size >= 0),
+                    width integer NOT NULL DEFAULT 0 CHECK (width >= 0),
+                    height integer NOT NULL DEFAULT 0 CHECK (height >= 0),
+                    duration integer NOT NULL DEFAULT 0 CHECK (duration >= 0),
+                    total_parts integer NOT NULL DEFAULT 0 CHECK (total_parts >= 0),
+                    completed boolean NOT NULL DEFAULT false,
+                    created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+                    UNIQUE (owner_id, client_file_id));
+                CREATE TABLE botgram_backend_v1.media_parts (
+                    media_id bigint NOT NULL REFERENCES botgram_backend_v1.media_files(id) ON DELETE CASCADE,
+                    part integer NOT NULL CHECK (part >= 0),
+                    bytes bytea NOT NULL,
+                    PRIMARY KEY (media_id, part));
+                CREATE TABLE botgram_backend_v1.media_shares (
+                    media_id bigint NOT NULL REFERENCES botgram_backend_v1.media_files(id) ON DELETE CASCADE,
+                    conversation_id text NOT NULL REFERENCES botgram_backend_v1.conversations(id),
+                    PRIMARY KEY (media_id, conversation_id));
+                CREATE INDEX IF NOT EXISTS backend_media_shares_conversation
+                    ON botgram_backend_v1.media_shares(conversation_id);
+                CREATE INDEX IF NOT EXISTS backend_media_files_pending
+                    ON botgram_backend_v1.media_files(created_at) WHERE NOT completed;
+                INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(11);
+            END IF;
+            END $migration$;
+            DO $migration$ BEGIN
+            IF NOT EXISTS(SELECT 1 FROM botgram_backend_v1.schema_versions WHERE version=12) THEN
+                -- Which messages reference a media file. Downloads and reuse require at least
+                -- one reference that is still visible to the caller; deleting a message
+                -- therefore also revokes its bytes without touching the stored parts.
+                CREATE TABLE botgram_backend_v1.media_messages (
+                    media_id bigint NOT NULL REFERENCES botgram_backend_v1.media_files(id) ON DELETE CASCADE,
+                    message_id bigint NOT NULL REFERENCES botgram_intake_v1.messages(id),
+                    conversation_id text NOT NULL REFERENCES botgram_backend_v1.conversations(id),
+                    PRIMARY KEY (media_id, message_id));
+                CREATE INDEX IF NOT EXISTS backend_media_messages_message
+                    ON botgram_backend_v1.media_messages(message_id);
+                CREATE INDEX IF NOT EXISTS backend_media_messages_conversation
+                    ON botgram_backend_v1.media_messages(conversation_id);
+                -- Existing media messages are linked once; the block is idempotent.
+                INSERT INTO botgram_backend_v1.media_messages(media_id,message_id,conversation_id)
+                SELECT (m.body->'Media'->>'MediaId')::bigint, m.id, m.conversation_id
+                FROM botgram_intake_v1.messages m
+                JOIN botgram_backend_v1.media_files f ON f.id=(m.body->'Media'->>'MediaId')::bigint
+                WHERE m.body ? 'Media' AND m.body->'Media' ? 'MediaId'
+                ON CONFLICT DO NOTHING;
+                INSERT INTO botgram_backend_v1.schema_versions(version) VALUES(12);
             END IF;
             END $migration$;
             """, connection, transaction);

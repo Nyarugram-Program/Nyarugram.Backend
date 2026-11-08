@@ -152,14 +152,24 @@ public sealed partial class PostgresBackend
                 if (reads is null) messages = await work.Rows("""
                     SELECT m.body::text FROM botgram_intake_v1.messages m
                     JOIN botgram_intake_v1.members own ON own.conversation_id=m.conversation_id AND own.user_id=$1
-                    WHERE m.id=ANY($2) ORDER BY m.id
+                    LEFT JOIN botgram_backend_v1.dialogs d ON d.conversation_id=m.conversation_id AND d.user_id=$1
+                    WHERE m.id=ANY($2) AND m.id>COALESCE(d.cleared_through,0)
+                      AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.message_deletions del WHERE del.message_id=m.id)
+                      AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.deleted_messages h
+                          WHERE h.message_id=m.id AND h.user_id=$1)
+                    ORDER BY m.id
                     """, r => StoredMessage(r.GetString(0)), uid, ids);
                 else
                 {
                     var metadata = await work.Rows("""
                         SELECT m.id,m.conversation_id,m.conversation_sequence FROM botgram_intake_v1.messages m
                         JOIN botgram_intake_v1.members own ON own.conversation_id=m.conversation_id AND own.user_id=$1
-                        WHERE m.id=ANY($2) ORDER BY m.id
+                        LEFT JOIN botgram_backend_v1.dialogs d ON d.conversation_id=m.conversation_id AND d.user_id=$1
+                        WHERE m.id=ANY($2) AND m.id>COALESCE(d.cleared_through,0)
+                          AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.message_deletions del WHERE del.message_id=m.id)
+                          AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.deleted_messages h
+                              WHERE h.message_id=m.id AND h.user_id=$1)
+                        ORDER BY m.id
                         """, r => (Id: r.GetInt64(0), Conversation: r.GetString(1), Sequence: r.GetInt64(2)), uid, ids);
                     foreach (var item in metadata)
                         messages.Add(await ReadMessage(work, session, item.Conversation, item.Id, item.Sequence));
@@ -418,6 +428,98 @@ public sealed partial class PostgresBackend
                 response.E2EeGetPeerBundle = await PeerBundle(work, conversation, uid);
                 break;
             }
+            // --- Batch A: messages.* message lifecycle and dialog state (tags 144..169). ---
+            case P.RpcRequest.OperationOneofCase.DeleteMessages:
+                response.DeleteMessages = await DeleteMessages(work, uid, request.DeleteMessages);
+                break;
+            case P.RpcRequest.OperationOneofCase.DeleteHistory:
+                response.DeleteHistory = await DeleteHistory(work, uid, request.DeleteHistory, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.DeleteSavedHistory:
+                response.DeleteSavedHistory = await DeleteSavedHistory(work, uid, request.DeleteSavedHistory, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.DeletePhoneCallHistory:
+                response.DeletePhoneCallHistory = await DeletePhoneCallHistory(work, uid, request.DeletePhoneCallHistory);
+                break;
+            case P.RpcRequest.OperationOneofCase.EditMessage:
+                response.EditMessage = await EditMessage(work, uid, request.EditMessage, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetMessageEditData:
+                response.GetMessageEditData = await GetMessageEditData(work, uid, request.GetMessageEditData, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.ForwardMessages:
+                response.ForwardMessages = await ForwardMessages(work, session, request.ForwardMessages, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.SetTyping:
+                response.SetTyping = await SetTyping(work, uid, request.SetTyping, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.SaveDraft:
+                response.SaveDraft = await SaveDraft(work, uid, request.SaveDraft, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.ClearAllDrafts:
+                response.ClearAllDrafts = await ClearAllDrafts(work, uid);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetAllDrafts:
+                response.GetAllDrafts = await GetAllDrafts(work, uid, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.UpdatePinnedMessage:
+                response.UpdatePinnedMessage = await UpdatePinnedMessage(work, uid, request.UpdatePinnedMessage, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.UnpinAllMessages:
+                response.UnpinAllMessages = await UnpinAllMessages(work, uid, request.UnpinAllMessages, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.ToggleDialogPin:
+                response.ToggleDialogPin = await ToggleDialogPin(work, uid, request.ToggleDialogPin, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.ReorderPinnedDialogs:
+                response.ReorderPinnedDialogs = await ReorderPinnedDialogs(work, uid, request.ReorderPinnedDialogs, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.MarkDialogUnread:
+                response.MarkDialogUnread = await MarkDialogUnread(work, uid, request.MarkDialogUnread, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetDialogUnreadMarks:
+                response.GetDialogUnreadMarks = await GetDialogUnreadMarks(work, uid, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.ReadMessageContents:
+                response.ReadMessageContents = await ReadMessageContents(work, uid, request.ReadMessageContents);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetOnlines:
+                response.GetOnlines = await GetOnlines(work, uid, request.GetOnlines, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetCommonChats:
+                response.GetCommonChats = await GetCommonChats(work, uid, request.GetCommonChats, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.HidePeerSettingsBar:
+                response.HidePeerSettingsBar = await HidePeerSettingsBar(work, uid, request.HidePeerSettingsBar, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.ReportSpam:
+                response.ReportSpam = await ReportSpam(work, uid, request.ReportSpam, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetMessagesViews:
+                response.GetMessagesViews = await GetMessagesViews(work, uid, request.GetMessagesViews, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetOutboxReadDate:
+                response.GetOutboxReadDate = await GetOutboxReadDate(work, uid, request.GetOutboxReadDate, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.Search:
+                response.Search = await Search(work, uid, request.Search, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetSearchCounters:
+                response.GetSearchCounters = await GetSearchCounters(work, uid, request.GetSearchCounters, domain);
+                break;
+            // --- Batch I: media messages (tags 170..173). Bytes use /api/v1/media. ---
+            case P.RpcRequest.OperationOneofCase.UploadMedia:
+                response.UploadMedia = await UploadMedia(work, uid, request.UploadMedia, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.SendMedia:
+                response.SendMedia = await SendMedia(work, session, request.SendMedia, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.SendMultiMedia:
+                response.SendMultiMedia = await SendMultiMedia(work, session, request.SendMultiMedia, domain);
+                break;
+            case P.RpcRequest.OperationOneofCase.GetExtendedMedia:
+                response.GetExtendedMedia = GetExtendedMedia(work, uid, request.GetExtendedMedia, domain);
+                break;
             default:
                 throw new ApiException(501, "BOTGRAM_RPC_UNSUPPORTED:" + request.OperationCase);
         }

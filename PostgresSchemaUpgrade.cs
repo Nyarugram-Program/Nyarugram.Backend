@@ -47,7 +47,7 @@ public static class PostgresSchemaUpgrade
         var supported = Supported(versions) || versions.SequenceEqual(RequiredVersions);
         if (!supported)
             throw new InvalidOperationException("Unsupported schema version set: " + string.Join(',', versions)
-                + "; supported start versions are 1..8 and the target is " + TargetVersion);
+                + "; supported start versions are 1..11 and the target is " + TargetVersion);
         return identity with
         {
             VersionsBefore = versions, VersionsAfter = versions,
@@ -94,7 +94,7 @@ public static class PostgresSchemaUpgrade
         }
         if (!Supported(before))
             throw new InvalidOperationException("Unsupported schema version set: " + string.Join(',', before)
-                + "; supported start versions are 1..8 and the target is " + TargetVersion);
+                + "; supported start versions are 1..11 and the target is " + TargetVersion);
         await PostgresBackendSchema.ApplyInTransactionAsync(connection, transaction, token);
         var after = await Versions(connection, transaction, token);
         if (!after.SequenceEqual(RequiredVersions))

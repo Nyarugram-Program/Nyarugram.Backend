@@ -118,6 +118,27 @@ public static class JsonApiRetirement
             return;
         }
 
+        if (path.StartsWith("/api/v1/media/", StringComparison.OrdinalIgnoreCase))
+        {
+            // Binary media transport: PUT carries one part, GET returns a byte range. It uses
+            // the same Bearer session as the RPC plane but is not a Protobuf envelope and is
+            // never JSON; other methods and JSON bodies stay retired.
+            var upload = string.Equals(method, "PUT", StringComparison.OrdinalIgnoreCase);
+            if (!upload && !string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase))
+            {
+                await Reject(context);
+                return;
+            }
+            var mediaType = context.Request.ContentType?.Split(';')[0].Trim();
+            if (upload && !string.Equals(mediaType, "application/octet-stream", StringComparison.OrdinalIgnoreCase))
+            {
+                await RejectMediaType(context);
+                return;
+            }
+            await next();
+            return;
+        }
+
         if (IsProtobufEndpoint(path))
         {
             if (!string.Equals(method, "POST", StringComparison.OrdinalIgnoreCase))

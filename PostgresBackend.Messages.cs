@@ -6,13 +6,28 @@ namespace Botgram.Backend.Storage;
 
 public sealed partial class PostgresBackend
 {
-    private const string HistoryWindowSql = """
-        WITH anchor AS (
-            SELECT CASE WHEN $2::bigint<>0 THEN (SELECT count(*) FROM botgram_intake_v1.messages WHERE conversation_id=$1 AND id >= $2)
-            WHEN $3::bigint<>0 THEN (SELECT count(*) FROM botgram_intake_v1.messages WHERE conversation_id=$1 AND id >
-                COALESCE((SELECT max(id) FROM botgram_intake_v1.messages WHERE conversation_id=$1 AND floor(extract(epoch FROM (body->>'CreatedAt')::timestamptz)) < $3),0))
+    // One authoritative visibility rule for every read path: the caller's cleared
+    // boundary, per-user hidden rows and conversation-wide revocations. Deleted
+    // content must never reappear through history, search, dialogs or difference replay.
+    private const string VisibleMessagesSql = """
+        visible AS (
+            SELECT m.id,m.body,m.conversation_sequence
+            FROM botgram_intake_v1.messages m
+            LEFT JOIN botgram_backend_v1.dialogs d
+                ON d.conversation_id=m.conversation_id AND d.user_id=$8
+            WHERE m.conversation_id=$1
+              AND m.id>COALESCE(d.cleared_through,0)
+              AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.message_deletions del WHERE del.message_id=m.id)
+              AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.deleted_messages h
+                  WHERE h.message_id=m.id AND h.user_id=$8))
+        """;
+    private const string HistoryWindowSql = "WITH " + VisibleMessagesSql + """
+        ,anchor AS (
+            SELECT CASE WHEN $2::bigint<>0 THEN (SELECT count(*) FROM visible WHERE id >= $2)
+            WHEN $3::bigint<>0 THEN (SELECT count(*) FROM visible WHERE id >
+                COALESCE((SELECT max(id) FROM visible WHERE floor(extract(epoch FROM (body->>'CreatedAt')::timestamptz)) < $3),0))
             ELSE 0 END AS position),
-        windowed AS (SELECT id,body,conversation_sequence FROM botgram_intake_v1.messages WHERE conversation_id=$1 ORDER BY id DESC
+        windowed AS (SELECT id,body,conversation_sequence FROM visible ORDER BY id DESC
             OFFSET (SELECT greatest(0, CASE WHEN position+$4::bigint>2147483647
                 THEN position+$4::bigint-4294967296 ELSE position+$4::bigint END) FROM anchor))
         """;
@@ -38,12 +53,31 @@ public sealed partial class PostgresBackend
 
     private async Task<Message[]> HistoryMessages(Transaction work, Session session, string conversation, params object[] arguments)
     {
+        // $8 is always the caller: hidden rows are filtered inside the shared visible CTE.
         if (reads is null)
-            return (await work.Rows(HistorySql, r => StoredMessage(r.GetString(0)), [conversation, .. arguments])).ToArray();
-        var metadata = await work.Rows(HistoryMetadataSql, r => (Id: r.GetInt64(0), Sequence: r.GetInt64(1)), [conversation, .. arguments]);
+            return (await work.Rows(HistorySql, r => StoredMessage(r.GetString(0)), [conversation, .. arguments, session.UserId])).ToArray();
+        var metadata = await work.Rows(HistoryMetadataSql, r => (Id: r.GetInt64(0), Sequence: r.GetInt64(1)),
+            [conversation, .. arguments, session.UserId]);
         var messages = new List<Message>();
         foreach (var item in metadata) messages.Add(await ReadMessage(work, session, conversation, item.Id, item.Sequence));
         return messages.ToArray();
+    }
+
+    // Ids from ANY(batch) that are still visible to the caller; used to keep deleted
+    // content out of difference replay and read responses.
+    private static async Task<HashSet<long>> VisibleMessageIds(Transaction work, string uid, long[] ids)
+    {
+        if (ids.Length == 0) return [];
+        var visible = await work.Rows("""
+            SELECT m.id FROM botgram_intake_v1.messages m
+            LEFT JOIN botgram_backend_v1.dialogs d
+                ON d.conversation_id=m.conversation_id AND d.user_id=$1
+            WHERE m.id=ANY($2) AND m.id>COALESCE(d.cleared_through,0)
+              AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.message_deletions del WHERE del.message_id=m.id)
+              AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.deleted_messages h
+                  WHERE h.message_id=m.id AND h.user_id=$1)
+            """, r => r.GetInt64(0), uid, (object)ids);
+        return visible.ToHashSet();
     }
 
     private static async Task<P.Updates> MessageUpdates(Transaction work, string uid, string domain,
@@ -131,7 +165,12 @@ public sealed partial class PostgresBackend
         if (difference.Kind == DifferenceKind.Empty) return new() { Empty = new() { DateMs = now } };
         var page = new P.DifferencePage { State = new() { Pts = difference.Pts, DateMs = now } };
         page.Groups.Add(await MappedGroups(work, uid));
-        page.Messages.Add(await MappedMessages(work, uid, domain, difference.Events.Select(e => e.Payload).OfType<Message>().ToArray()));
+        // A replayed message.created must not resurrect content deleted afterwards.
+        var payloadMessages = difference.Events.Select(e => e.Payload).OfType<Message>().ToArray();
+        var visibleMessages = await VisibleMessageIds(work, uid,
+            payloadMessages.Select(m => m.Id).Distinct().ToArray());
+        page.Messages.Add(await MappedMessages(work, uid, domain,
+            payloadMessages.Where(m => visibleMessages.Contains(m.Id)).ToArray()));
         var owned = (await Owned(work, uid)).ToDictionary(c => c.Id);
         for (var i = 0; i < difference.Events.Length; i++)
         {
@@ -193,6 +232,75 @@ public sealed partial class PostgresBackend
                     });
                     break;
                 }
+                // --- Batch A message lifecycle. All carry the recipient's own pts. ---
+                case Message edited when difference.Events[i].Type == "message.edited":
+                {
+                    if (!visibleMessages.Contains(edited.Id)) break;
+                    page.Updates.Add(new P.Update
+                    {
+                        MessageEdited = new()
+                        {
+                            Message = (await MappedMessages(work, uid, domain, [edited])).Single(),
+                            Pts = difference.PreviousCount + i + 2, PtsCount = 1
+                        }
+                    });
+                    break;
+                }
+                case MessageDeleted deleted:
+                {
+                    var update = new P.MessagesDeleted { Pts = difference.PreviousCount + i + 2, PtsCount = 1 };
+                    update.MessageIds.Add(deleted.MessageIds);
+                    page.Updates.Add(new P.Update { MessagesDeleted = update });
+                    break;
+                }
+                case MessagePinned pinned when owned.TryGetValue(pinned.ConversationId, out var pinnedConversation):
+                {
+                    var update = new P.MessagesPinned
+                    {
+                        Peer = ConversationPeer(pinnedConversation, uid, domain),
+                        Pinned = pinned.Pinned,
+                        Pts = difference.PreviousCount + i + 2, PtsCount = 1
+                    };
+                    update.MessageIds.Add(pinned.MessageIds);
+                    page.Updates.Add(new P.Update { MessagesPinned = update });
+                    break;
+                }
+                case ContentsRead contents:
+                {
+                    var update = new P.ContentsRead { Pts = difference.PreviousCount + i + 2, PtsCount = 1 };
+                    update.MessageIds.Add(contents.MessageIds);
+                    page.Updates.Add(new P.Update { ContentsRead = update });
+                    break;
+                }
+                case DraftChanged draft when owned.TryGetValue(draft.ConversationId, out var draftConversation):
+                {
+                    var update = new P.DraftChanged { Peer = ConversationPeer(draftConversation, uid, domain) };
+                    if (draft.Draft is { } stored)
+                    {
+                        var state = new P.DraftState
+                        {
+                            Text = stored.Text,
+                            UpdatedAtMs = stored.UpdatedAt.ToUnixTimeMilliseconds()
+                        };
+                        // proto3 optional scalars use presence accessors, not nullable types.
+                        if (stored.ReplyTo is { } reply) state.ReplyToMessageId = reply;
+                        state.Entities.Add((stored.Entities ?? []).Select(ProtobufRpcMapper.MapEntity));
+                        update.Draft = state;
+                    }
+                    page.Updates.Add(new P.Update { DraftChanged = update });
+                    break;
+                }
+                case UserTyping typing when owned.TryGetValue(typing.ConversationId, out var typingConversation):
+                    page.Updates.Add(new P.Update
+                    {
+                        UserTyping = new()
+                        {
+                            Peer = ConversationPeer(typingConversation, uid, domain),
+                            User = new() { ServerDomain = domain, UserId = typing.UserId },
+                            Action = (P.TypingAction)typing.Action
+                        }
+                    });
+                    break;
             }
         }
         var subjects = difference.Events.Select(e => e.Payload).OfType<PresenceChanged>().Select(p => p.UserId)
@@ -208,9 +316,17 @@ public sealed partial class PostgresBackend
     private async Task<ReadResult> ReadThrough(Transaction work, string uid, Conversation conversation, long maxId)
     {
         await work.Scalar("SELECT sequence FROM botgram_intake_v1.conversations WHERE id=$1 FOR UPDATE", conversation.Id);
+        // Only visible messages can advance the cursor: clearing history must not leave
+        // the receipt parked on a hidden message.
         var max = (long)(await work.Scalar("""
-            SELECT COALESCE(max(id),0) FROM botgram_intake_v1.messages WHERE conversation_id=$1 AND id<=$2
-            """, conversation.Id, maxId))!;
+            SELECT COALESCE(max(m.id),0) FROM botgram_intake_v1.messages m
+            LEFT JOIN botgram_backend_v1.dialogs d
+                ON d.conversation_id=m.conversation_id AND d.user_id=$2
+            WHERE m.conversation_id=$1 AND m.id<=$3 AND m.id>COALESCE(d.cleared_through,0)
+              AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.message_deletions del WHERE del.message_id=m.id)
+              AND NOT EXISTS(SELECT 1 FROM botgram_backend_v1.deleted_messages h
+                  WHERE h.message_id=m.id AND h.user_id=$2)
+            """, conversation.Id, uid, maxId))!;
         if (max == 0) return new(null, false);
         var previous = await work.Scalar("""
             SELECT message_id FROM botgram_backend_v1.receipts WHERE conversation_id=$1 AND user_id=$2
@@ -218,9 +334,12 @@ public sealed partial class PostgresBackend
         if (previous is long read && read >= max) return new(new(conversation.Id, uid, read), false);
         var receipt = new Receipt(conversation.Id, uid, max);
         await Emit(work, "receipt.updated", receipt, conversation.Id, conversation.Members);
+        // read_at backs messages.getOutboxReadDate for the author's private seen row.
         await work.Execute("""
-            INSERT INTO botgram_backend_v1.receipts(conversation_id,user_id,message_id) VALUES($1,$2,$3)
-            ON CONFLICT(conversation_id,user_id) DO UPDATE SET message_id=excluded.message_id
+            INSERT INTO botgram_backend_v1.receipts(conversation_id,user_id,message_id,read_at)
+            VALUES($1,$2,$3,clock_timestamp())
+            ON CONFLICT(conversation_id,user_id) DO UPDATE
+                SET message_id=excluded.message_id,read_at=excluded.read_at
             """, conversation.Id, uid, max);
         return new(receipt, true);
     }

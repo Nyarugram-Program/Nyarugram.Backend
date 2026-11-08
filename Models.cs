@@ -4,10 +4,40 @@ public sealed record User(string Id, string Username, string DisplayName, string
     DateTimeOffset? LastSeen = null, bool Online = false, DateTimeOffset? PresenceNotifiedAt = null);
 public sealed record Session(string TokenHash, string UserId, DateTimeOffset ExpiresAt, DateTimeOffset? ForegroundAt = null);
 public sealed record Conversation(string Id, string Kind, string Title, string[] Members, DateTimeOffset CreatedAt) : IEventPayload;
+// Media metadata shared by the message body and the media tables (batch I).
+public sealed record MessageMedia(long MediaId, string Kind, string Mime, long ByteSize,
+    int Width, int Height, int Duration, string FileName, int TotalParts);
+// Immutable snapshot of the accepted media send request (batch I). The live body's text
+// and entities are editable; a retry is judged against this snapshot instead.
+public sealed record MediaRequestIdentity(string Caption, MessageEntity[]? Entities,
+    long? ReplyToMessageId, bool Silent, long MediaId);
 public sealed record Message(long Id, string ConversationId, string SenderId, string ClientMessageId, string Text, DateTimeOffset CreatedAt,
     string? ServiceTitle = null, string[]? ServiceMembers = null, MessageEntity[]? TelegramEntities = null,
     long? ReplyToMessageId = null, bool Silent = false, byte[]? E2eeEnvelope = null,
-    string? ServiceKind = null) : IEventPayload;
+    string? ServiceKind = null,
+    // Forward attribution for copied messages (schema v10). Omitted when absent so legacy
+    // JSON snapshots keep their exact previous shape.
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    string? ForwardFromUserId = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    DateTimeOffset? ForwardFromAt = null,
+    // Persisted forward request identity. A retry is recognised by these fields instead of
+    // re-reading the source, so later edits, deletions or cleared history cannot turn a
+    // committed retry into a conflict. Absent on natively sent messages.
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    string? ForwardSourceConversationId = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    long? ForwardSourceMessageId = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    bool? ForwardDropAuthor = null,
+    // Media body and album grouping (batch I); absent on text and service messages.
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    MessageMedia? Media = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    long? GroupedId = null,
+    // Original media send request; survives caption edits so a retry stays idempotent.
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    MediaRequestIdentity? MediaRequest = null) : IEventPayload;
 // Public pre-key material only. Private keys, PINs and plaintext never enter the database.
 public sealed record E2eeOneTimePreKey(int KeyId, byte[] PublicKey, bool Consumed);
 public sealed record E2eeDevice(string UserId, uint DeviceId, int RegistrationId, byte[] IdentityKey,

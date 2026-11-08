@@ -181,18 +181,18 @@ public sealed class RelationalOutboxCompletionService : BackgroundService
         }
         if (staged.Count == 0) return 0;
 
-        var messageIds = staged.Where(entry => entry.Lease.Delivery.Payload is Message)
+        var messageIds = staged.Where(entry => entry.Lease.Delivery.Type == "message.created")
             .Select(entry => entry.Lease.Delivery.OutboxId).ToHashSet();
         var projected = new HashSet<Guid>();
 
         // A replayed/restarted row may already have a Complete projection task. ClaimAsync
         // only returns Pending/Leased tasks, so recognise Complete here instead of re-claiming.
         foreach (var entry in staged)
-            if (entry.Lease.Delivery.Payload is Message && await AlreadyProjectedAsync(entry.Scope, entry.Lease, cancellationToken))
+            if (entry.Lease.Delivery.Type == "message.created" && await AlreadyProjectedAsync(entry.Scope, entry.Lease, cancellationToken))
                 projected.Add(entry.Lease.Delivery.OutboxId);
 
         var safety = options.MaxBatchesPerCycle * options.BatchSize;
-        foreach (var scope in staged.Where(entry => entry.Lease.Delivery.Payload is Message)
+        foreach (var scope in staged.Where(entry => entry.Lease.Delivery.Type == "message.created")
                      .Select(entry => entry.Scope).Distinct())
         {
             var remaining = staged.Count(entry => entry.Scope == scope &&
@@ -238,7 +238,7 @@ public sealed class RelationalOutboxCompletionService : BackgroundService
             cancellationToken.ThrowIfCancellationRequested();
             // Non-message events only need durable staging (StageAsync set consumed=true).
             // Messages additionally require a verified Complete projection task.
-            if (lease.Delivery.Payload is Message && !projected.Contains(lease.Delivery.OutboxId))
+            if (lease.Delivery.Type == "message.created" && !projected.Contains(lease.Delivery.OutboxId))
             {
                 await ReleaseOutboxAsync(lease);
                 continue;

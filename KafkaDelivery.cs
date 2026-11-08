@@ -59,6 +59,12 @@ public static class DeliveryEventCodec
             PresenceChanged p => "user:" + p.UserId,
             WallpaperChanged w => "user:" + w.UserId,
             CallSignal => delivery.PartitionKey,
+            // Batch A message-lifecycle events stay in their conversation partition.
+            MessageDeleted d => d.ConversationId,
+            MessagePinned p => p.ConversationId,
+            ContentsRead c => c.ConversationId,
+            DraftChanged d => d.ConversationId,
+            UserTyping t => t.ConversationId,
             _ => throw new InvalidDataException("Unknown delivery payload")
         };
         if (string.IsNullOrWhiteSpace(partition) || partition != delivery.PartitionKey)
@@ -69,6 +75,8 @@ public static class DeliveryEventCodec
             delivery.ConversationSequence is not null || delivery.MessageVersion is not null || delivery.ProjectionFormatVersion is not null)
             throw new InvalidDataException("Invalid projection metadata");
         var hasPts = delivery.Type is "message.created" or "receipt.updated" or "user.gid_changed" or "user.presence_changed"
+            or "message.deleted" or "message.edited" or "message.pinned"
+            or "content.read" or "draft.changed" or "user.typing"
             || delivery.SchemaVersion == StorageContractVersions.CallEventSchema;
         if (delivery.Type == "call.tl_signal" && delivery.SchemaVersion == StorageContractVersions.CallEventSchema &&
             delivery.ExpiresAt is null)

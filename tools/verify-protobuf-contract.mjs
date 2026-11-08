@@ -107,9 +107,9 @@ function checkFields(fields, context) {
   }
 }
 checkFields(policy.inheritedFields, 'TLObject');
-assert.equal(policy.requests.length, 21);
-assert.equal(new Set(policy.requests.map(r => r.tl)).size, 21);
-assert.equal(new Set(policy.requests.map(r => r.javaType)).size, 21);
+assert.equal(policy.requests.length, 51);
+assert.equal(new Set(policy.requests.map(r => r.tl)).size, 51);
+assert.equal(new Set(policy.requests.map(r => r.javaType)).size, 51);
 assert.equal(policy.phoneOperations.length, 9);
 assert.equal(new Set(policy.phoneOperations.map(r => r.tl)).size, 9);
 assert.equal(new Set(policy.phoneOperations.map(r => r.javaType)).size, 9);
@@ -152,8 +152,8 @@ for (const operation of policy.authOperations) {
 const registeredOperations = [...policy.requests, ...policy.transportOperations, ...policy.featureOperations,
   ...policy.e2eeOperations, ...policy.phoneOperations];
 const orderedOperations = [...registeredOperations].sort((a, b) => a.tag - b.tag);
-assert.equal(new Set(registeredOperations.map(r => r.operation)).size, 44);
-assert.equal(new Set(registeredOperations.map(r => r.tag)).size, 44);
+assert.equal(new Set(registeredOperations.map(r => r.operation)).size, 74);
+assert.equal(new Set(registeredOperations.map(r => r.tag)).size, 74);
 for (const [i, request] of orderedOperations.entries()) {
   assert.equal(request.tag, 100 + i, `Tag gap before ${request.tl ?? request.operation}`);
 }
@@ -163,7 +163,7 @@ for (const [i, request] of orderedAuth.entries()) {
 }
 for (const envelope of ['RpcRequest.operation', 'RpcResponse.outcome']) {
   const operations = oneofs.get(envelope).filter(f => f.tag >= 100);
-  assert.equal(operations.length, 54, `${envelope} requires 21 original operations + bootstrap + 8 feature operations + 5 E2EE operations + 9 phone/DH operations + 10 auth operations`);
+  assert.equal(operations.length, 84, `${envelope} requires 21 original + bootstrap + 8 feature + 5 E2EE + 9 phone/DH + 26 message-lifecycle + 4 media operations + 10 auth operations`);
   for (const request of [...registeredOperations, ...policy.authOperations]) {
     const operation = operations.find(f => f.tag === request.tag);
     assert.equal(operation?.name, request.operation, `Tag drift: ${request.tl ?? request.operation}`);
@@ -185,7 +185,7 @@ for (const [name, group] of Object.entries(policy.nested)) {
     if (variant.select?.endsWith('.self')) assert.equal(variant.value, true, subclass);
   }
 }
-console.log(`PASS: v1 typed schema, 21 original TL operations + bootstrap + wallpaper + privacy + addContact + 9 phone/DH operations, mapping targets and policy decisions (${messages.size} messages)`);
+console.log(`PASS: v1 typed schema, 21 original + bootstrap + wallpaper + privacy + addContact + 9 phone/DH + 26 message-lifecycle + 4 media operations, mapping targets and policy decisions (${messages.size} messages)`);
 
 if (androidRoot) {
   const clientProto = fs.readFileSync(path.join(androidRoot, 'Shared/botgram_rpc.proto'));
@@ -223,7 +223,7 @@ if (androidRoot) {
       coverage(inventory.types[javaType].publicFieldsIncludingInherited, { ...policy.inheritedFields, ...group.fields, ...variant.fields }, javaType);
     }
   }
-  console.log('PASS: Android inventory complete inherited field/subclass coverage; 21 inventory tags; client/backend proto byte equality');
+  console.log('PASS: Android inventory complete inherited field/subclass coverage; 51 inventory tags; client/backend proto byte equality');
   console.log('NOT RUN: wallpaper Java field/subclass inventory coverage (requires the updated client feature inventory)');
 } else {
   console.log('SKIP: Android inventory and client proto comparison (optional --android-root PATH; no Android build dependency)');

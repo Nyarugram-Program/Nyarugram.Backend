@@ -69,6 +69,15 @@ public static class RelationalHttpRoutes
         api.MapGet("/events", (long? after, int? limit, PostgresBackend backend, HttpContext c) =>
             backend.EventsAsync(Session(c), after ?? 0, limit ?? 100, c.RequestAborted));
         api.MapGet("/ws", (long? after, PostgresBackend backend, HttpContext c) => Socket(after, backend, c, policy));
+        // Binary media transport (batch I): part upload and bounded range download.
+        app.MapPut("/api/v1/media/{clientFileId:long}/{part:int}",
+                (long clientFileId, int part, PostgresBackend backend, HttpContext c) =>
+                    MediaHttpEndpoint.Upload(c, backend, clientFileId, part, c.RequestAborted))
+            .RequireRateLimiting("media");
+        app.MapGet("/api/v1/media/{mediaId:long}",
+                (long mediaId, PostgresBackend backend, HttpContext c) =>
+                    MediaHttpEndpoint.Download(c, backend, mediaId, c.RequestAborted))
+            .RequireRateLimiting("media");
         api.MapGet("/rtc/config", () => new
         {
             iceServers = configuration.GetSection("Rtc:IceServers").GetChildren().Select(server => new

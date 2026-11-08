@@ -192,7 +192,8 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
             !service.Members.Order(StringComparer.Ordinal).SequenceEqual(recipients)))
             throw new InvalidDataException("Group service does not match the authorized conversation");
         // Encrypted messages and service messages legitimately have empty text.
-        if (service is null && e2eeServiceCode is null && command.E2eeEnvelope is null &&
+        // A media message may have an empty caption; text messages still require text.
+        if (service is null && e2eeServiceCode is null && command.E2eeEnvelope is null && command.Media is null &&
             (string.IsNullOrWhiteSpace(command.Text) || command.Text.Length > 16000))
             throw new ApiException(400, input.Contract == MessageWriteContract.Telegram ? "MESSAGE_EMPTY" : "invalid_text");
         if (e2eeServiceCode is not null && command.E2eeEnvelope is not null)
@@ -221,6 +222,7 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
             if (existing.Text != command.Text || !EnvelopeEqual(existing.E2eeEnvelope, command.E2eeEnvelope) ||
                 (input.Contract == MessageWriteContract.Telegram &&
                 (existing.ReplyToMessageId != command.ReplyId || existing.Silent != command.Silent ||
+                 existing.Media?.MediaId != command.Media?.MediaId ||
                  !MessageEntityService.Equal(existing.TelegramEntities, command.Entities))))
                 throw new ApiException(409, input.Contract == MessageWriteContract.Telegram ? "RANDOM_ID_DUPLICATE" : "idempotency_conflict");
             // The retry must report the pts this message originally received for the
@@ -281,7 +283,19 @@ public sealed class PostgresMessageAcceptance(NpgsqlDataSource dataSource, int m
             command.E2eeEnvelope is null ? command.Text : "",
             DateTimeOffset.UtcNow, service?.Title ?? e2eeServiceCode, service?.Members,
             TelegramEntities: command.Entities, ReplyToMessageId: command.ReplyId, Silent: command.Silent,
-            E2eeEnvelope: command.E2eeEnvelope, ServiceKind: e2eeServiceCode is null ? null : "e2ee");
+            E2eeEnvelope: command.E2eeEnvelope, ServiceKind: e2eeServiceCode is null ? null : "e2ee",
+            ForwardFromUserId: command.ForwardFromUserId, ForwardFromAt: command.ForwardFromAt,
+            ForwardSourceConversationId: command.ForwardSourceConversationId,
+            ForwardSourceMessageId: command.ForwardSourceMessageId,
+            ForwardDropAuthor: command.ForwardDropAuthor,
+            Media: command.Media, GroupedId: command.GroupedId,
+            // Persist the accepted request, not the mutable body: a later caption edit
+            // must not turn an idempotent retry into a conflict.
+            MediaRequest: command.Media is { } acceptedMedia
+                ? new MediaRequestIdentity(command.Text,
+                    command.Entities is { Length: > 0 } kept ? kept : null,
+                    command.ReplyId, command.Silent, acceptedMedia.MediaId)
+                : null);
         var messageId = (long)(await Scalar("""
             INSERT INTO botgram_intake_v1.messages(conversation_id, conversation_sequence, sender_id, client_key, body)
             VALUES ($1, $2, $3, $4, $5::jsonb) RETURNING id

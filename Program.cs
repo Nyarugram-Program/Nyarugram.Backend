@@ -89,6 +89,10 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy("api", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Items["uid"]?.ToString() ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 300, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    // Media moves one part per request; the RPC budget would throttle ordinary uploads.
+    options.AddPolicy("media", context => RateLimitPartition.GetFixedWindowLimiter(
+        "media:" + (context.Items["uid"]?.ToString() ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 6000, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
 });
 var serverDomain = builder.Configuration["Protocol:ServerDomain"];
 if (string.IsNullOrWhiteSpace(serverDomain) || Uri.CheckHostName(serverDomain) != UriHostNameType.Dns ||

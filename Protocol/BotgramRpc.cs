@@ -24,7 +24,7 @@ namespace Botgram.Protocol.V1 {
     static BotgramRpcReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChFib3RncmFtX3JwYy5wcm90bxIOYm90Z3JhbS5ycGMudjEi5hsKClJwY1Jl",
+            "ChFib3RncmFtX3JwYy5wcm90bxIOYm90Z3JhbS5ycGMudjEi/SsKClJwY1Jl",
             "cXVlc3QSFgoOcHJvdG9jb2xfbWFqb3IYASABKA0SEgoKcmVxdWVzdF9pZBgC",
             "IAEoCRIXCgpmb3JlZ3JvdW5kGAMgASgISAGIAQESNAoJZ2V0X3N0YXRlGGQg",
             "ASgLMh8uYm90Z3JhbS5ycGMudjEuR2V0U3RhdGVSZXF1ZXN0SAASPgoOZ2V0",
@@ -90,629 +90,855 @@ namespace Botgram.Protocol.V1 {
             "ZXRTdGF0dXNSZXF1ZXN0SAASNQoJZTJlZV9saXN0GI4BIAEoCzIfLmJvdGdy",
             "YW0ucnBjLnYxLkUyZWVMaXN0UmVxdWVzdEgAEkkKFGUyZWVfZ2V0X3BlZXJf",
             "YnVuZGxlGI8BIAEoCzIoLmJvdGdyYW0ucnBjLnYxLkUyZWVHZXRQZWVyQnVu",
-            "ZGxlUmVxdWVzdEgAEkUKEWF1dGhfY2FwYWJpbGl0aWVzGMgBIAEoCzInLmJv",
-            "dGdyYW0ucnBjLnYxLkF1dGhDYXBhYmlsaXRpZXNSZXF1ZXN0SAASPQoNYXV0",
-            "aF9yZWdpc3RlchjJASABKAsyIy5ib3RncmFtLnJwYy52MS5BdXRoUmVnaXN0",
-            "ZXJSZXF1ZXN0SAASNwoKYXV0aF9sb2dpbhjKASABKAsyIC5ib3RncmFtLnJw",
-            "Yy52MS5BdXRoTG9naW5SZXF1ZXN0SAASPQoNYXV0aF9wYXNzd29yZBjLASAB",
-            "KAsyIy5ib3RncmFtLnJwYy52MS5BdXRoUGFzc3dvcmRSZXF1ZXN0SAASOwoM",
-            "YXV0aF9yZWNvdmVyGMwBIAEoCzIiLmJvdGdyYW0ucnBjLnYxLkF1dGhSZWNv",
-            "dmVyUmVxdWVzdEgAEjkKC2F1dGhfbG9nb3V0GM0BIAEoCzIhLmJvdGdyYW0u",
-            "cnBjLnYxLkF1dGhMb2dvdXRSZXF1ZXN0SAASNwoKYWNjb3VudF9tZRjOASAB",
-            "KAsyIC5ib3RncmFtLnJwYy52MS5BY2NvdW50TWVSZXF1ZXN0SAASMgoHcHJl",
-            "bWl1bRjPASABKAsyHi5ib3RncmFtLnJwYy52MS5QcmVtaXVtUmVxdWVzdEgA",
-            "EjcKCmNoYW5nZV9naWQY0AEgASgLMiAuYm90Z3JhbS5ycGMudjEuQ2hhbmdl",
-            "R2lkUmVxdWVzdEgAEiwKBHRvdHAY0QEgASgLMhsuYm90Z3JhbS5ycGMudjEu",
-            "VG90cFJlcXVlc3RIAEILCglvcGVyYXRpb25CDQoLX2ZvcmVncm91bmQi9BgK",
-            "C1JwY1Jlc3BvbnNlEhYKDnByb3RvY29sX21ham9yGAEgASgNEhIKCnJlcXVl",
-            "c3RfaWQYAiABKAkSKQoFZXJyb3IYCiABKAsyGC5ib3RncmFtLnJwYy52MS5S",
-            "cGNFcnJvckgAEi4KCWdldF9zdGF0ZRhkIAEoCzIZLmJvdGdyYW0ucnBjLnYx",
-            "LlN5bmNTdGF0ZUgAEjQKDmdldF9kaWZmZXJlbmNlGGUgASgLMhouYm90Z3Jh",
-            "bS5ycGMudjEuRGlmZmVyZW5jZUgAEjEKC2dldF9kaWFsb2dzGGYgASgLMhou",
-            "Ym90Z3JhbS5ycGMudjEuRGlhbG9nUGFnZUgAEjkKEmdldF9waW5uZWRfZGlh",
-            "bG9ncxhnIAEoCzIbLmJvdGdyYW0ucnBjLnYxLlBlZXJEaWFsb2dzSAASNwoQ",
-            "Z2V0X3BlZXJfZGlhbG9ncxhoIAEoCzIbLmJvdGdyYW0ucnBjLnYxLlBlZXJE",
-            "aWFsb2dzSAASMgoLZ2V0X2hpc3RvcnkYaSABKAsyGy5ib3RncmFtLnJwYy52",
-            "MS5NZXNzYWdlUGFnZUgAEjMKDGdldF9tZXNzYWdlcxhqIAEoCzIbLmJvdGdy",
-            "YW0ucnBjLnYxLk1lc3NhZ2VQYWdlSAASMwoMc2VuZF9tZXNzYWdlGGsgASgL",
-            "MhsuYm90Z3JhbS5ycGMudjEuTWVzc2FnZVNlbnRIABI4CgxyZWFkX2hpc3Rv",
-            "cnkYbCABKAsyIC5ib3RncmFtLnJwYy52MS5BZmZlY3RlZE1lc3NhZ2VzSAAS",
-            "NQoPc2VhcmNoX2NvbnRhY3RzGG0gASgLMhouYm90Z3JhbS5ycGMudjEuRm91",
-            "bmRQZWVyc0gAEjgKEHJlc29sdmVfdXNlcm5hbWUYbiABKAsyHC5ib3RncmFt",
-            "LnJwYy52MS5SZXNvbHZlZFBlZXJIABItCglnZXRfdXNlcnMYbyABKAsyGC5i",
-            "b3RncmFtLnJwYy52MS5Vc2VyTGlzdEgAEjMKDGdldF9jb250YWN0cxhwIAEo",
-            "CzIbLmJvdGdyYW0ucnBjLnYxLkNvbnRhY3RMaXN0SAASMwoLcmVzb2x2ZV9n",
-            "aWQYcSABKAsyHC5ib3RncmFtLnJwYy52MS5SZXNvbHZlZFBlZXJIABI7Cg9p",
-            "bXBvcnRfY29udGFjdHMYciABKAsyIC5ib3RncmFtLnJwYy52MS5JbXBvcnRl",
-            "ZENvbnRhY3RzSAASNAoMY3JlYXRlX2dyb3VwGHMgASgLMhwuYm90Z3JhbS5y",
-            "cGMudjEuR3JvdXBDcmVhdGVkSAASPwoRZ2V0X3BlZXJfc2V0dGluZ3MYdCAB",
-            "KAsyIi5ib3RncmFtLnJwYy52MS5QZWVyU2V0dGluZ3NSZXN1bHRIABI3Cg1n",
-            "ZXRfZnVsbF91c2VyGHUgASgLMh4uYm90Z3JhbS5ycGMudjEuVXNlckZ1bGxS",
-            "ZXN1bHRIABI5Cg5nZXRfZnVsbF9ncm91cBh2IAEoCzIfLmJvdGdyYW0ucnBj",
-            "LnYxLkdyb3VwRnVsbFJlc3VsdEgAEi8KCmdldF9ncm91cHMYdyABKAsyGS5i",
-            "b3RncmFtLnJwYy52MS5Hcm91cExpc3RIABI9ChNnZXRfbm90aWZ5X3NldHRp",
-            "bmdzGHggASgLMh4uYm90Z3JhbS5ycGMudjEuTm90aWZ5U2V0dGluZ3NIABJA",
-            "ChJyZXNvbHZlX2lkZW50aXRpZXMYeSABKAsyIi5ib3RncmFtLnJwYy52MS5S",
-            "ZXNvbHZlZElkZW50aXRpZXNIABI3Cg5nZXRfd2FsbHBhcGVycxh6IAEoCzId",
-            "LmJvdGdyYW0ucnBjLnYxLldhbGxwYXBlckxpc3RIABJBCg5zYXZlX3dhbGxw",
-            "YXBlchh7IAEoCzInLmJvdGdyYW0ucnBjLnYxLldhbGxwYXBlck11dGF0aW9u",
-            "UmVzdWx0SAASRAoRaW5zdGFsbF93YWxscGFwZXIYfCABKAsyJy5ib3RncmFt",
-            "LnJwYy52MS5XYWxscGFwZXJNdXRhdGlvblJlc3VsdEgAEkEKEnNldF9jaGF0",
-            "X3dhbGxwYXBlchh9IAEoCzIjLmJvdGdyYW0ucnBjLnYxLkNoYXRXYWxscGFw",
-            "ZXJSZXN1bHRIABJBCg9hY2NvdW50X3ByaXZhY3kYfiABKAsyJi5ib3RncmFt",
-            "LnJwYy52MS5BY2NvdW50UHJpdmFjeVJlc3BvbnNlSAASLgoLYWRkX2NvbnRh",
-            "Y3QYfyABKAsyFy5ib3RncmFtLnJwYy52MS5VcGRhdGVzSAASOAoMcmVxdWVz",
-            "dF9jYWxsGIABIAEoCzIfLmJvdGdyYW0ucnBjLnYxLlBob25lQ2FsbFJlc3Vs",
-            "dEgAEjMKDXJlY2VpdmVkX2NhbGwYgQEgASgLMhkuYm90Z3JhbS5ycGMudjEu",
-            "Qm9vbFZhbHVlSAASNwoLYWNjZXB0X2NhbGwYggEgASgLMh8uYm90Z3JhbS5y",
-            "cGMudjEuUGhvbmVDYWxsUmVzdWx0SAASOAoMY29uZmlybV9jYWxsGIMBIAEo",
-            "CzIfLmJvdGdyYW0ucnBjLnYxLlBob25lQ2FsbFJlc3VsdEgAEjAKDGRpc2Nh",
-            "cmRfY2FsbBiEASABKAsyFy5ib3RncmFtLnJwYy52MS5VcGRhdGVzSAASOQoT",
-            "c2VuZF9zaWduYWxpbmdfZGF0YRiFASABKAsyGS5ib3RncmFtLnJwYy52MS5C",
-            "b29sVmFsdWVIABI0Cg9nZXRfY2FsbF9jb25maWcYhgEgASgLMhguYm90Z3Jh",
-            "bS5ycGMudjEuRGF0YUpzb25IABI1Cg9zYXZlX2NhbGxfZGVidWcYhwEgASgL",
-            "MhkuYm90Z3JhbS5ycGMudjEuQm9vbFZhbHVlSAASMgoNZ2V0X2RoX2NvbmZp",
-            "ZxiIASABKAsyGC5ib3RncmFtLnJwYy52MS5EaENvbmZpZ0gAEkAKFGdldF9z",
-            "cGVjaWFsX2NvbnRhY3RzGIkBIAEoCzIfLmJvdGdyYW0ucnBjLnYxLlNwZWNp",
-            "YWxDb250YWN0c0gAEj8KE3NldF9zcGVjaWFsX2NvbnRhY3QYigEgASgLMh8u",
-            "Ym90Z3JhbS5ycGMudjEuU3BlY2lhbENvbnRhY3RzSAASPgoTZTJlZV9wdWJs",
-            "aXNoX2RldmljZRiLASABKAsyHi5ib3RncmFtLnJwYy52MS5FMmVlRGV2aWNl",
-            "SW5mb0gAEjYKC2UyZWVfYWN0aW9uGIwBIAEoCzIeLmJvdGdyYW0ucnBjLnYx",
-            "LkUyZWVDaGF0U3RhdHVzSAASPgoPZTJlZV9nZXRfc3RhdHVzGI0BIAEoCzIi",
-            "LmJvdGdyYW0ucnBjLnYxLkUyZWVDaGF0U3RhdHVzTGlzdEgAEjgKCWUyZWVf",
-            "bGlzdBiOASABKAsyIi5ib3RncmFtLnJwYy52MS5FMmVlQ2hhdFN0YXR1c0xp",
-            "c3RIABI/ChRlMmVlX2dldF9wZWVyX2J1bmRsZRiPASABKAsyHi5ib3RncmFt",
-            "LnJwYy52MS5FMmVlUGVlckJ1bmRsZUgAEj4KEWF1dGhfY2FwYWJpbGl0aWVz",
-            "GMgBIAEoCzIgLmJvdGdyYW0ucnBjLnYxLkF1dGhDYXBhYmlsaXRpZXNIABI1",
-            "Cg1hdXRoX3JlZ2lzdGVyGMkBIAEoCzIbLmJvdGdyYW0ucnBjLnYxLkF1dGhT",
-            "ZXNzaW9uSAASMgoKYXV0aF9sb2dpbhjKASABKAsyGy5ib3RncmFtLnJwYy52",
-            "MS5BdXRoU2Vzc2lvbkgAEjoKDWF1dGhfcGFzc3dvcmQYywEgASgLMiAuYm90",
-            "Z3JhbS5ycGMudjEuQXV0aFBhc3N3b3JkSW5mb0gAEjQKDGF1dGhfcmVjb3Zl",
-            "chjMASABKAsyGy5ib3RncmFtLnJwYy52MS5BdXRoU2Vzc2lvbkgAEjEKC2F1",
-            "dGhfbG9nb3V0GM0BIAEoCzIZLmJvdGdyYW0ucnBjLnYxLkJvb2xWYWx1ZUgA",
-            "EjUKCmFjY291bnRfbWUYzgEgASgLMh4uYm90Z3JhbS5ycGMudjEuQWNjb3Vu",
-            "dFByb2ZpbGVIABIxCgdwcmVtaXVtGM8BIAEoCzIdLmJvdGdyYW0ucnBjLnYx",
-            "LlByZW1pdW1TdGF0dXNIABI1CgpjaGFuZ2VfZ2lkGNABIAEoCzIeLmJvdGdy",
-            "YW0ucnBjLnYxLkFjY291bnRQcm9maWxlSAASKwoEdG90cBjRASABKAsyGi5i",
-            "b3RncmFtLnJwYy52MS5Ub3RwUmVzdWx0SABCCQoHb3V0Y29tZSKBAQoIUnBj",
-            "RXJyb3ISDAoEY29kZRgBIAEoCRIPCgdtZXNzYWdlGAIgASgJEhEKCXJldHJ5",
-            "YWJsZRgDIAEoCBIbCg5yZXRyeV9hZnRlcl9tcxgEIAEoDUgAiAEBEhMKC2h0",
-            "dHBfc3RhdHVzGAUgASgNQhEKD19yZXRyeV9hZnRlcl9tcyJrCglFdmVudEhp",
-            "bnQSFgoOcHJvdG9jb2xfbWFqb3IYASABKA0SDgoGY3Vyc29yGAIgASgDEh8K",
-            "EndhbGxwYXBlcl9yZXZpc2lvbhgDIAEoA0gAiAEBQhUKE193YWxscGFwZXJf",
-            "cmV2aXNpb24iGwoZR2V0U3BlY2lhbENvbnRhY3RzUmVxdWVzdCJXChhTZXRT",
-            "cGVjaWFsQ29udGFjdFJlcXVlc3QSKgoEdXNlchgBIAEoCzIcLmJvdGdyYW0u",
-            "cnBjLnYxLlVzZXJTZWxlY3RvchIPCgdlbmFibGVkGAIgASgIIksKD1NwZWNp",
-            "YWxDb250YWN0cxIQCghyZXZpc2lvbhgBIAEoAxImCgV1c2VycxgCIAMoCzIX",
-            "LmJvdGdyYW0ucnBjLnYxLlVzZXJSZWYiBwoFRW1wdHkiiwsKFUFjY291bnRQ",
-            "cml2YWN5UmVxdWVzdBI2CglnZXRfcnVsZXMYASABKAsyIS5ib3RncmFtLnJw",
-            "Yy52MS5Qcml2YWN5S2V5UmVxdWVzdEgAEjMKCXNldF9ydWxlcxgCIAEoCzIe",
-            "LmJvdGdyYW0ucnBjLnYxLlByaXZhY3lSdWxlU2V0SAASKwoKZ2V0X2dsb2Jh",
-            "bBgDIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASOwoKc2V0X2dsb2Jh",
-            "bBgEIAEoCzIlLmJvdGdyYW0ucnBjLnYxLkdsb2JhbFByaXZhY3lTZXR0aW5n",
-            "c0gAEjAKD2dldF9hY2NvdW50X3R0bBgFIAEoCzIVLmJvdGdyYW0ucnBjLnYx",
-            "LkVtcHR5SAASNQoPc2V0X2FjY291bnRfdHRsGAYgASgLMhouYm90Z3JhbS5y",
-            "cGMudjEuQWNjb3VudFR0bEgAEjgKF2dldF9kZWZhdWx0X2hpc3RvcnlfdHRs",
-            "GAcgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABI9ChdzZXRfZGVmYXVs",
-            "dF9oaXN0b3J5X3R0bBgIIAEoCzIaLmJvdGdyYW0ucnBjLnYxLkhpc3RvcnlU",
-            "dGxIABI5CgtnZXRfYmxvY2tlZBgJIAEoCzIiLmJvdGdyYW0ucnBjLnYxLkJs",
-            "b2NrZWRQYWdlUmVxdWVzdEgAEi0KCmJsb2NrX3VzZXIYCiABKAsyFy5ib3Rn",
-            "cmFtLnJwYy52MS5Vc2VyUmVmSAASLwoMdW5ibG9ja191c2VyGAsgASgLMhcu",
-            "Ym90Z3JhbS5ycGMudjEuVXNlclJlZkgAEjMKEmdldF9hdXRob3JpemF0aW9u",
-            "cxgMIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASPgoTcmVzZXRfYXV0",
-            "aG9yaXphdGlvbhgNIAEoCzIfLmJvdGdyYW0ucnBjLnYxLkF1dGhvcml6YXRp",
-            "b25JZEgAEjsKGnJlc2V0X290aGVyX2F1dGhvcml6YXRpb25zGA4gASgLMhUu",
-            "Ym90Z3JhbS5ycGMudjEuRW1wdHlIABItCgxnZXRfcGFzc3dvcmQYDyABKAsy",
-            "FS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEjkKFWdldF9wYXNzd29yZF9zZXR0",
-            "aW5ncxgQIAEoCzIYLmJvdGdyYW0ucnBjLnYxLlNycFByb29mSAASQgoYdXBk",
-            "YXRlX3Bhc3N3b3JkX3NldHRpbmdzGBEgASgLMh4uYm90Z3JhbS5ycGMudjEu",
-            "UGFzc3dvcmRVcGRhdGVIABI3Cg9kZWxldGVfY29udGFjdHMYEiABKAsyHC5i",
-            "b3RncmFtLnJwYy52MS5Qcml2YWN5VXNlcnNIABI1ChRyZXNldF9zYXZlZF9j",
-            "b250YWN0cxgTIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASGgoQdG9n",
-            "Z2xlX3RvcF9wZWVycxgUIAEoCEgAEjcKFmdldF93ZWJfYXV0aG9yaXphdGlv",
-            "bnMYFSABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEkIKF3Jlc2V0X3dl",
-            "Yl9hdXRob3JpemF0aW9uGBYgASgLMh8uYm90Z3JhbS5ycGMudjEuQXV0aG9y",
-            "aXphdGlvbklkSAASOQoYcmVzZXRfd2ViX2F1dGhvcml6YXRpb25zGBcgASgL",
-            "MhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABI+ChJjbGVhcl9wYXltZW50X2lu",
-            "Zm8YGCABKAsyIC5ib3RncmFtLnJwYy52MS5DbGVhclBheW1lbnRJbmZvSAAS",
-            "LQoMZ2V0X3Bhc3NrZXlzGBkgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlI",
-            "AEILCglvcGVyYXRpb24iPAoRUHJpdmFjeUtleVJlcXVlc3QSJwoDa2V5GAEg",
-            "ASgOMhouYm90Z3JhbS5ycGMudjEuUHJpdmFjeUtleSJ3CgtQcml2YWN5UnVs",
-            "ZRItCgRraW5kGAEgASgOMh8uYm90Z3JhbS5ycGMudjEuUHJpdmFjeVJ1bGVL",
-            "aW5kEiYKBXVzZXJzGAIgAygLMhcuYm90Z3JhbS5ycGMudjEuVXNlclJlZhIR",
-            "Cglncm91cF9pZHMYAyADKAkiZQoOUHJpdmFjeVJ1bGVTZXQSJwoDa2V5GAEg",
-            "ASgOMhouYm90Z3JhbS5ycGMudjEuUHJpdmFjeUtleRIqCgVydWxlcxgCIAMo",
-            "CzIbLmJvdGdyYW0ucnBjLnYxLlByaXZhY3lSdWxlIr8DChVHbG9iYWxQcml2",
-            "YWN5U2V0dGluZ3MSLQolYXJjaGl2ZV9hbmRfbXV0ZV9uZXdfbm9uY29udGFj",
-            "dF9wZWVycxgBIAEoCBIdChVrZWVwX2FyY2hpdmVkX3VubXV0ZWQYAiABKAgS",
-            "HQoVa2VlcF9hcmNoaXZlZF9mb2xkZXJzGAMgASgIEhcKD2hpZGVfcmVhZF9t",
-            "YXJrcxgEIAEoCBIsCiRuZXdfbm9uY29udGFjdF9wZWVyc19yZXF1aXJlX3By",
-            "ZW1pdW0YBSABKAgSHAoUZGlzcGxheV9naWZ0c19idXR0b24YBiABKAgSIwob",
-            "bm9uY29udGFjdF9wZWVyc19wYWlkX3N0YXJzGAcgASgDEiIKGmRpc2FsbG93",
-            "ZWRfZ2lmdHNfdW5saW1pdGVkGAggASgIEiAKGGRpc2FsbG93ZWRfZ2lmdHNf",
-            "bGltaXRlZBgJIAEoCBIfChdkaXNhbGxvd2VkX2dpZnRzX3VuaXF1ZRgKIAEo",
-            "CBIgChhkaXNhbGxvd2VkX2dpZnRzX3ByZW1pdW0YCyABKAgSJgoeZGlzYWxs",
-            "b3dlZF9naWZ0c19mcm9tX2NoYW5uZWxzGAwgASgIIhoKCkFjY291bnRUdGwS",
-            "DAoEZGF5cxgBIAEoBSIdCgpIaXN0b3J5VHRsEg8KB3NlY29uZHMYASABKAUi",
-            "MwoSQmxvY2tlZFBhZ2VSZXF1ZXN0Eg4KBm9mZnNldBgBIAEoBRINCgVsaW1p",
-            "dBgCIAEoBSJLCgtCbG9ja2VkVXNlchIlCgR1c2VyGAEgASgLMhcuYm90Z3Jh",
-            "bS5ycGMudjEuVXNlclJlZhIVCg1ibG9ja2VkX2F0X21zGAIgASgDIksKDEJs",
-            "b2NrZWRVc2VycxINCgVjb3VudBgBIAEoBRIsCgdibG9ja2VkGAIgAygLMhsu",
-            "Ym90Z3JhbS5ycGMudjEuQmxvY2tlZFVzZXIiHwoPQXV0aG9yaXphdGlvbklk",
-            "EgwKBGhhc2gYASABKAMi0gEKEUF1dGhvcml6YXRpb25JbmZvEgwKBGhhc2gY",
-            "ASABKAMSDwoHY3VycmVudBgCIAEoCBIUCgxkZXZpY2VfbW9kZWwYAyABKAkS",
-            "EAoIcGxhdGZvcm0YBCABKAkSFgoOc3lzdGVtX3ZlcnNpb24YBSABKAkSEAoI",
-            "YXBwX25hbWUYBiABKAkSEwoLYXBwX3ZlcnNpb24YByABKAkSFQoNY3JlYXRl",
-            "ZF9hdF9tcxgIIAEoAxIUCgxhY3RpdmVfYXRfbXMYCSABKAMSCgoCaXAYCiAB",
-            "KAkiZQoOQXV0aG9yaXphdGlvbnMSMwoIc2Vzc2lvbnMYASADKAsyIS5ib3Rn",
-            "cmFtLnJwYy52MS5BdXRob3JpemF0aW9uSW5mbxIeChZhdXRob3JpemF0aW9u",
-            "X3R0bF9kYXlzGAIgASgFIkEKC1Bhc3N3b3JkS2RmEg0KBXNhbHQxGAEgASgM",
-            "Eg0KBXNhbHQyGAIgASgMEgkKAWcYAyABKAUSCQoBcBgEIAEoDCJACghTcnBQ",
-            "cm9vZhIOCgZzcnBfaWQYASABKAMSCQoBYRgCIAEoDBIKCgJtMRgDIAEoDBIN",
-            "CgVlbXB0eRgEIAEoCCLjAQoMUGFzc3dvcmRJbmZvEhQKDGhhc19wYXNzd29y",
-            "ZBgBIAEoCBIxCgxjdXJyZW50X2FsZ28YAiABKAsyGy5ib3RncmFtLnJwYy52",
-            "MS5QYXNzd29yZEtkZhINCgVzcnBfYhgDIAEoDBIOCgZzcnBfaWQYBCABKAMS",
-            "DAoEaGludBgFIAEoCRItCghuZXdfYWxnbxgGIAEoCzIbLmJvdGdyYW0ucnBj",
-            "LnYxLlBhc3N3b3JkS2RmEhcKD25ld19zZWN1cmVfc2FsdBgHIAEoDBIVCg1z",
-            "ZWN1cmVfcmFuZG9tGAggASgMIu8BCg5QYXNzd29yZFVwZGF0ZRInCgVwcm9v",
-            "ZhgBIAEoCzIYLmJvdGdyYW0ucnBjLnYxLlNycFByb29mEhcKD2NoYW5nZV9w",
-            "YXNzd29yZBgCIAEoCBItCghuZXdfYWxnbxgDIAEoCzIbLmJvdGdyYW0ucnBj",
-            "LnYxLlBhc3N3b3JkS2RmEhkKEW5ld19wYXNzd29yZF9oYXNoGAQgASgMEgwK",
-            "BGhpbnQYBSABKAkSFAoMY2hhbmdlX2VtYWlsGAYgASgIEg0KBWVtYWlsGAcg",
-            "ASgJEh4KFmNoYW5nZV9zZWN1cmVfc2V0dGluZ3MYCCABKAgiIQoQUGFzc3dv",
-            "cmRTZXR0aW5ncxINCgVlbWFpbBgBIAEoCSI2CgxQcml2YWN5VXNlcnMSJgoF",
-            "dXNlcnMYASADKAsyFy5ib3RncmFtLnJwYy52MS5Vc2VyUmVmIjUKEENsZWFy",
-            "UGF5bWVudEluZm8SEwoLY3JlZGVudGlhbHMYASABKAgSDAoEaW5mbxgCIAEo",
-            "CCLOBQoWQWNjb3VudFByaXZhY3lSZXNwb25zZRIqCgV1c2VycxgBIAMoCzIb",
-            "LmJvdGdyYW0ucnBjLnYxLlVzZXJTdW1tYXJ5EiwKBmdyb3VwcxgCIAMoCzIc",
-            "LmJvdGdyYW0ucnBjLnYxLkdyb3VwU3VtbWFyeRIvCgVydWxlcxgKIAEoCzIe",
-            "LmJvdGdyYW0ucnBjLnYxLlByaXZhY3lSdWxlU2V0SAASNwoGZ2xvYmFsGAsg",
-            "ASgLMiUuYm90Z3JhbS5ycGMudjEuR2xvYmFsUHJpdmFjeVNldHRpbmdzSAAS",
-            "MQoLYWNjb3VudF90dGwYDCABKAsyGi5ib3RncmFtLnJwYy52MS5BY2NvdW50",
-            "VHRsSAASMQoLaGlzdG9yeV90dGwYDSABKAsyGi5ib3RncmFtLnJwYy52MS5I",
-            "aXN0b3J5VHRsSAASLwoHYmxvY2tlZBgOIAEoCzIcLmJvdGdyYW0ucnBjLnYx",
-            "LkJsb2NrZWRVc2Vyc0gAEhEKB2FwcGxpZWQYDyABKAhIABI4Cg5hdXRob3Jp",
-            "emF0aW9ucxgQIAEoCzIeLmJvdGdyYW0ucnBjLnYxLkF1dGhvcml6YXRpb25z",
-            "SAASMAoIcGFzc3dvcmQYESABKAsyHC5ib3RncmFtLnJwYy52MS5QYXNzd29y",
-            "ZEluZm9IABI9ChFwYXNzd29yZF9zZXR0aW5ncxgSIAEoCzIgLmJvdGdyYW0u",
-            "cnBjLnYxLlBhc3N3b3JkU2V0dGluZ3NIABIxChBjb250YWN0c19kZWxldGVk",
-            "GBMgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABIzChJ3ZWJfYXV0aG9y",
-            "aXphdGlvbnMYFCABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEikKCHBh",
-            "c3NrZXlzGBUgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIAEIICgZyZXN1",
-            "bHQiMQoHVXNlclJlZhIVCg1zZXJ2ZXJfZG9tYWluGAEgASgJEg8KB3VzZXJf",
-            "aWQYAiABKAkiUQoMVXNlclNlbGVjdG9yEicKBHVzZXIYASABKAsyFy5ib3Rn",
-            "cmFtLnJwYy52MS5Vc2VyUmVmSAASDgoEc2VsZhgCIAEoCEgAQggKBnRhcmdl",
-            "dCJeCgdQZWVyUmVmEicKBHVzZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5V",
-            "c2VyUmVmSAASEgoIZ3JvdXBfaWQYAiABKAlIABIOCgRzZWxmGAMgASgISABC",
-            "BgoEcGVlciLKAgoLVXNlclN1bW1hcnkSKQoIaWRlbnRpdHkYASABKAsyFy5i",
-            "b3RncmFtLnJwYy52MS5Vc2VyUmVmEhIKCnRsX3VzZXJfaWQYAiABKAMSEAoI",
-            "dXNlcm5hbWUYAyABKAkSFAoMZGlzcGxheV9uYW1lGAQgASgJEhIKCmZpcnN0",
-            "X25hbWUYBSABKAkSEQoJbGFzdF9uYW1lGAYgASgJEgsKA2dpZBgHIAEoCRIP",
-            "Cgdpc19zZWxmGAggASgIEhIKCmlzX2NvbnRhY3QYCSABKAgSGQoRaXNfbXV0",
-            "dWFsX2NvbnRhY3QYCiABKAgSHgoRbnlhcnVncmFtX3ByZW1pdW0YCyABKAhI",
-            "AIgBARIqCgZzdGF0dXMYDCABKAsyGi5ib3RncmFtLnJwYy52MS5Vc2VyU3Rh",
-            "dHVzQhQKEl9ueWFydWdyYW1fcHJlbWl1bSJHCgpVc2VyU3RhdHVzEhkKD29u",
-            "bGluZV91bnRpbF9tcxgBIAEoA0gAEhYKDGxhc3Rfc2Vlbl9tcxgCIAEoA0gA",
-            "QgYKBGtpbmQiZAoPUHJlc2VuY2VDaGFuZ2VkEiUKBHVzZXIYASABKAsyFy5i",
-            "b3RncmFtLnJwYy52MS5Vc2VyUmVmEioKBnN0YXR1cxgCIAEoCzIaLmJvdGdy",
-            "YW0ucnBjLnYxLlVzZXJTdGF0dXMiZgoRQWRkQ29udGFjdFJlcXVlc3QSKgoE",
-            "dXNlchgBIAEoCzIcLmJvdGdyYW0ucnBjLnYxLlVzZXJTZWxlY3RvchISCgpm",
-            "aXJzdF9uYW1lGAIgASgJEhEKCWxhc3RfbmFtZRgDIAEoCSJACgdDb250YWN0",
-            "EiUKBHVzZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5Vc2VyUmVmEg4KBm11",
-            "dHVhbBgCIAEoCCKGAQoMR3JvdXBTdW1tYXJ5EhAKCGdyb3VwX2lkGAEgASgJ",
-            "EhIKCnRsX2NoYXRfaWQYAiABKAMSDQoFdGl0bGUYAyABKAkSGQoRcGFydGlj",
-            "aXBhbnRfY291bnQYBCABKAUSFQoNY3JlYXRlZF9hdF9tcxgFIAEoAxIPCgd2",
-            "ZXJzaW9uGAYgASgFInQKC1BhcnRpY2lwYW50EiUKBHVzZXIYASABKAsyFy5i",
-            "b3RncmFtLnJwYy52MS5Vc2VyUmVmEigKB2ludml0ZXIYAiABKAsyFy5ib3Rn",
-            "cmFtLnJwYy52MS5Vc2VyUmVmEhQKDGpvaW5lZF9hdF9tcxgDIAEoAyK4BQoN",
-            "TWVzc2FnZUVudGl0eRIUCgxvZmZzZXRfdXRmMTYYASABKA0SFAoMbGVuZ3Ro",
-            "X3V0ZjE2GAIgASgNEiUKBGJvbGQYCiABKAsyFS5ib3RncmFtLnJwYy52MS5F",
-            "bXB0eUgAEicKBml0YWxpYxgLIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5",
-            "SAASKAoDcHJlGAwgASgLMhkuYm90Z3JhbS5ycGMudjEuUHJlRW50aXR5SAAS",
-            "MQoIdGV4dF91cmwYDSABKAsyHS5ib3RncmFtLnJwYy52MS5UZXh0VXJsRW50",
-            "aXR5SAASKgoJdW5kZXJsaW5lGA4gASgLMhUuYm90Z3JhbS5ycGMudjEuRW1w",
-            "dHlIABInCgZzdHJpa2UYDyABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgA",
-            "EigKB3Nwb2lsZXIYECABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEiUK",
-            "BGNvZGUYESABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEiQKA3VybBgS",
-            "IAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASJgoFZW1haWwYEyABKAsy",
-            "FS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEiYKBXBob25lGBQgASgLMhUuYm90",
-            "Z3JhbS5ycGMudjEuRW1wdHlIABIoCgdtZW50aW9uGBUgASgLMhUuYm90Z3Jh",
-            "bS5ycGMudjEuRW1wdHlIABIoCgdoYXNodGFnGBYgASgLMhUuYm90Z3JhbS5y",
-            "cGMudjEuRW1wdHlIABIoCgdjYXNodGFnGBcgASgLMhUuYm90Z3JhbS5ycGMu",
-            "djEuRW1wdHlIABIsCgtib3RfY29tbWFuZBgYIAEoCzIVLmJvdGdyYW0ucnBj",
-            "LnYxLkVtcHR5SABCBgoEa2luZCIdCglQcmVFbnRpdHkSEAoIbGFuZ3VhZ2UY",
-            "ASABKAkiHAoNVGV4dFVybEVudGl0eRILCgN1cmwYASABKAkiHgoIUmVwbHlS",
-            "ZWYSEgoKbWVzc2FnZV9pZBgBIAEoAyKFAQoLVGV4dE1lc3NhZ2USDAoEdGV4",
+            "ZGxlUmVxdWVzdEgAEkEKD2RlbGV0ZV9tZXNzYWdlcxiQASABKAsyJS5ib3Rn",
+            "cmFtLnJwYy52MS5EZWxldGVNZXNzYWdlc1JlcXVlc3RIABI/Cg5kZWxldGVf",
+            "aGlzdG9yeRiRASABKAsyJC5ib3RncmFtLnJwYy52MS5EZWxldGVIaXN0b3J5",
+            "UmVxdWVzdEgAEkoKFGRlbGV0ZV9zYXZlZF9oaXN0b3J5GJIBIAEoCzIpLmJv",
+            "dGdyYW0ucnBjLnYxLkRlbGV0ZVNhdmVkSGlzdG9yeVJlcXVlc3RIABJTChlk",
+            "ZWxldGVfcGhvbmVfY2FsbF9oaXN0b3J5GJMBIAEoCzItLmJvdGdyYW0ucnBj",
+            "LnYxLkRlbGV0ZVBob25lQ2FsbEhpc3RvcnlSZXF1ZXN0SAASOwoMZWRpdF9t",
+            "ZXNzYWdlGJQBIAEoCzIiLmJvdGdyYW0ucnBjLnYxLkVkaXRNZXNzYWdlUmVx",
+            "dWVzdEgAEksKFWdldF9tZXNzYWdlX2VkaXRfZGF0YRiVASABKAsyKS5ib3Rn",
+            "cmFtLnJwYy52MS5HZXRNZXNzYWdlRWRpdERhdGFSZXF1ZXN0SAASQwoQZm9y",
+            "d2FyZF9tZXNzYWdlcxiWASABKAsyJi5ib3RncmFtLnJwYy52MS5Gb3J3YXJk",
+            "TWVzc2FnZXNSZXF1ZXN0SAASNwoKc2V0X3R5cGluZxiXASABKAsyIC5ib3Rn",
+            "cmFtLnJwYy52MS5TZXRUeXBpbmdSZXF1ZXN0SAASNwoKc2F2ZV9kcmFmdBiY",
+            "ASABKAsyIC5ib3RncmFtLnJwYy52MS5TYXZlRHJhZnRSZXF1ZXN0SAASQgoQ",
+            "Y2xlYXJfYWxsX2RyYWZ0cxiZASABKAsyJS5ib3RncmFtLnJwYy52MS5DbGVh",
+            "ckFsbERyYWZ0c1JlcXVlc3RIABI+Cg5nZXRfYWxsX2RyYWZ0cxiaASABKAsy",
+            "Iy5ib3RncmFtLnJwYy52MS5HZXRBbGxEcmFmdHNSZXF1ZXN0SAASTAoVdXBk",
+            "YXRlX3Bpbm5lZF9tZXNzYWdlGJsBIAEoCzIqLmJvdGdyYW0ucnBjLnYxLlVw",
+            "ZGF0ZVBpbm5lZE1lc3NhZ2VSZXF1ZXN0SAASRgoSdW5waW5fYWxsX21lc3Nh",
+            "Z2VzGJwBIAEoCzInLmJvdGdyYW0ucnBjLnYxLlVucGluQWxsTWVzc2FnZXNS",
+            "ZXF1ZXN0SAASRAoRdG9nZ2xlX2RpYWxvZ19waW4YnQEgASgLMiYuYm90Z3Jh",
+            "bS5ycGMudjEuVG9nZ2xlRGlhbG9nUGluUmVxdWVzdEgAEk4KFnJlb3JkZXJf",
+            "cGlubmVkX2RpYWxvZ3MYngEgASgLMisuYm90Z3JhbS5ycGMudjEuUmVvcmRl",
+            "clBpbm5lZERpYWxvZ3NSZXF1ZXN0SAASRgoSbWFya19kaWFsb2dfdW5yZWFk",
+            "GJ8BIAEoCzInLmJvdGdyYW0ucnBjLnYxLk1hcmtEaWFsb2dVbnJlYWRSZXF1",
+            "ZXN0SAASTwoXZ2V0X2RpYWxvZ191bnJlYWRfbWFya3MYoAEgASgLMisuYm90",
+            "Z3JhbS5ycGMudjEuR2V0RGlhbG9nVW5yZWFkTWFya3NSZXF1ZXN0SAASTAoV",
+            "cmVhZF9tZXNzYWdlX2NvbnRlbnRzGKEBIAEoCzIqLmJvdGdyYW0ucnBjLnYx",
+            "LlJlYWRNZXNzYWdlQ29udGVudHNSZXF1ZXN0SAASOQoLZ2V0X29ubGluZXMY",
+            "ogEgASgLMiEuYm90Z3JhbS5ycGMudjEuR2V0T25saW5lc1JlcXVlc3RIABJC",
+            "ChBnZXRfY29tbW9uX2NoYXRzGKMBIAEoCzIlLmJvdGdyYW0ucnBjLnYxLkdl",
+            "dENvbW1vbkNoYXRzUmVxdWVzdEgAEk0KFmhpZGVfcGVlcl9zZXR0aW5nc19i",
+            "YXIYpAEgASgLMiouYm90Z3JhbS5ycGMudjEuSGlkZVBlZXJTZXR0aW5nc0Jh",
+            "clJlcXVlc3RIABI5CgtyZXBvcnRfc3BhbRilASABKAsyIS5ib3RncmFtLnJw",
+            "Yy52MS5SZXBvcnRTcGFtUmVxdWVzdEgAEkYKEmdldF9tZXNzYWdlc192aWV3",
+            "cximASABKAsyJy5ib3RncmFtLnJwYy52MS5HZXRNZXNzYWdlc1ZpZXdzUmVx",
+            "dWVzdEgAEkkKFGdldF9vdXRib3hfcmVhZF9kYXRlGKcBIAEoCzIoLmJvdGdy",
+            "YW0ucnBjLnYxLkdldE91dGJveFJlYWREYXRlUmVxdWVzdEgAEjAKBnNlYXJj",
+            "aBioASABKAsyHS5ib3RncmFtLnJwYy52MS5TZWFyY2hSZXF1ZXN0SAASSAoT",
+            "Z2V0X3NlYXJjaF9jb3VudGVycxipASABKAsyKC5ib3RncmFtLnJwYy52MS5H",
+            "ZXRTZWFyY2hDb3VudGVyc1JlcXVlc3RIABI7Cgx1cGxvYWRfbWVkaWEYqgEg",
+            "ASgLMiIuYm90Z3JhbS5ycGMudjEuVXBsb2FkTWVkaWFSZXF1ZXN0SAASNwoK",
+            "c2VuZF9tZWRpYRirASABKAsyIC5ib3RncmFtLnJwYy52MS5TZW5kTWVkaWFS",
+            "ZXF1ZXN0SAASQgoQc2VuZF9tdWx0aV9tZWRpYRisASABKAsyJS5ib3RncmFt",
+            "LnJwYy52MS5TZW5kTXVsdGlNZWRpYVJlcXVlc3RIABJGChJnZXRfZXh0ZW5k",
+            "ZWRfbWVkaWEYrQEgASgLMicuYm90Z3JhbS5ycGMudjEuR2V0RXh0ZW5kZWRN",
+            "ZWRpYVJlcXVlc3RIABJFChFhdXRoX2NhcGFiaWxpdGllcxjIASABKAsyJy5i",
+            "b3RncmFtLnJwYy52MS5BdXRoQ2FwYWJpbGl0aWVzUmVxdWVzdEgAEj0KDWF1",
+            "dGhfcmVnaXN0ZXIYyQEgASgLMiMuYm90Z3JhbS5ycGMudjEuQXV0aFJlZ2lz",
+            "dGVyUmVxdWVzdEgAEjcKCmF1dGhfbG9naW4YygEgASgLMiAuYm90Z3JhbS5y",
+            "cGMudjEuQXV0aExvZ2luUmVxdWVzdEgAEj0KDWF1dGhfcGFzc3dvcmQYywEg",
+            "ASgLMiMuYm90Z3JhbS5ycGMudjEuQXV0aFBhc3N3b3JkUmVxdWVzdEgAEjsK",
+            "DGF1dGhfcmVjb3ZlchjMASABKAsyIi5ib3RncmFtLnJwYy52MS5BdXRoUmVj",
+            "b3ZlclJlcXVlc3RIABI5CgthdXRoX2xvZ291dBjNASABKAsyIS5ib3RncmFt",
+            "LnJwYy52MS5BdXRoTG9nb3V0UmVxdWVzdEgAEjcKCmFjY291bnRfbWUYzgEg",
+            "ASgLMiAuYm90Z3JhbS5ycGMudjEuQWNjb3VudE1lUmVxdWVzdEgAEjIKB3By",
+            "ZW1pdW0YzwEgASgLMh4uYm90Z3JhbS5ycGMudjEuUHJlbWl1bVJlcXVlc3RI",
+            "ABI3CgpjaGFuZ2VfZ2lkGNABIAEoCzIgLmJvdGdyYW0ucnBjLnYxLkNoYW5n",
+            "ZUdpZFJlcXVlc3RIABIsCgR0b3RwGNEBIAEoCzIbLmJvdGdyYW0ucnBjLnYx",
+            "LlRvdHBSZXF1ZXN0SABCCwoJb3BlcmF0aW9uQg0KC19mb3JlZ3JvdW5kIs8m",
+            "CgtScGNSZXNwb25zZRIWCg5wcm90b2NvbF9tYWpvchgBIAEoDRISCgpyZXF1",
+            "ZXN0X2lkGAIgASgJEikKBWVycm9yGAogASgLMhguYm90Z3JhbS5ycGMudjEu",
+            "UnBjRXJyb3JIABIuCglnZXRfc3RhdGUYZCABKAsyGS5ib3RncmFtLnJwYy52",
+            "MS5TeW5jU3RhdGVIABI0Cg5nZXRfZGlmZmVyZW5jZRhlIAEoCzIaLmJvdGdy",
+            "YW0ucnBjLnYxLkRpZmZlcmVuY2VIABIxCgtnZXRfZGlhbG9ncxhmIAEoCzIa",
+            "LmJvdGdyYW0ucnBjLnYxLkRpYWxvZ1BhZ2VIABI5ChJnZXRfcGlubmVkX2Rp",
+            "YWxvZ3MYZyABKAsyGy5ib3RncmFtLnJwYy52MS5QZWVyRGlhbG9nc0gAEjcK",
+            "EGdldF9wZWVyX2RpYWxvZ3MYaCABKAsyGy5ib3RncmFtLnJwYy52MS5QZWVy",
+            "RGlhbG9nc0gAEjIKC2dldF9oaXN0b3J5GGkgASgLMhsuYm90Z3JhbS5ycGMu",
+            "djEuTWVzc2FnZVBhZ2VIABIzCgxnZXRfbWVzc2FnZXMYaiABKAsyGy5ib3Rn",
+            "cmFtLnJwYy52MS5NZXNzYWdlUGFnZUgAEjMKDHNlbmRfbWVzc2FnZRhrIAEo",
+            "CzIbLmJvdGdyYW0ucnBjLnYxLk1lc3NhZ2VTZW50SAASOAoMcmVhZF9oaXN0",
+            "b3J5GGwgASgLMiAuYm90Z3JhbS5ycGMudjEuQWZmZWN0ZWRNZXNzYWdlc0gA",
+            "EjUKD3NlYXJjaF9jb250YWN0cxhtIAEoCzIaLmJvdGdyYW0ucnBjLnYxLkZv",
+            "dW5kUGVlcnNIABI4ChByZXNvbHZlX3VzZXJuYW1lGG4gASgLMhwuYm90Z3Jh",
+            "bS5ycGMudjEuUmVzb2x2ZWRQZWVySAASLQoJZ2V0X3VzZXJzGG8gASgLMhgu",
+            "Ym90Z3JhbS5ycGMudjEuVXNlckxpc3RIABIzCgxnZXRfY29udGFjdHMYcCAB",
+            "KAsyGy5ib3RncmFtLnJwYy52MS5Db250YWN0TGlzdEgAEjMKC3Jlc29sdmVf",
+            "Z2lkGHEgASgLMhwuYm90Z3JhbS5ycGMudjEuUmVzb2x2ZWRQZWVySAASOwoP",
+            "aW1wb3J0X2NvbnRhY3RzGHIgASgLMiAuYm90Z3JhbS5ycGMudjEuSW1wb3J0",
+            "ZWRDb250YWN0c0gAEjQKDGNyZWF0ZV9ncm91cBhzIAEoCzIcLmJvdGdyYW0u",
+            "cnBjLnYxLkdyb3VwQ3JlYXRlZEgAEj8KEWdldF9wZWVyX3NldHRpbmdzGHQg",
+            "ASgLMiIuYm90Z3JhbS5ycGMudjEuUGVlclNldHRpbmdzUmVzdWx0SAASNwoN",
+            "Z2V0X2Z1bGxfdXNlchh1IAEoCzIeLmJvdGdyYW0ucnBjLnYxLlVzZXJGdWxs",
+            "UmVzdWx0SAASOQoOZ2V0X2Z1bGxfZ3JvdXAYdiABKAsyHy5ib3RncmFtLnJw",
+            "Yy52MS5Hcm91cEZ1bGxSZXN1bHRIABIvCgpnZXRfZ3JvdXBzGHcgASgLMhku",
+            "Ym90Z3JhbS5ycGMudjEuR3JvdXBMaXN0SAASPQoTZ2V0X25vdGlmeV9zZXR0",
+            "aW5ncxh4IAEoCzIeLmJvdGdyYW0ucnBjLnYxLk5vdGlmeVNldHRpbmdzSAAS",
+            "QAoScmVzb2x2ZV9pZGVudGl0aWVzGHkgASgLMiIuYm90Z3JhbS5ycGMudjEu",
+            "UmVzb2x2ZWRJZGVudGl0aWVzSAASNwoOZ2V0X3dhbGxwYXBlcnMYeiABKAsy",
+            "HS5ib3RncmFtLnJwYy52MS5XYWxscGFwZXJMaXN0SAASQQoOc2F2ZV93YWxs",
+            "cGFwZXIYeyABKAsyJy5ib3RncmFtLnJwYy52MS5XYWxscGFwZXJNdXRhdGlv",
+            "blJlc3VsdEgAEkQKEWluc3RhbGxfd2FsbHBhcGVyGHwgASgLMicuYm90Z3Jh",
+            "bS5ycGMudjEuV2FsbHBhcGVyTXV0YXRpb25SZXN1bHRIABJBChJzZXRfY2hh",
+            "dF93YWxscGFwZXIYfSABKAsyIy5ib3RncmFtLnJwYy52MS5DaGF0V2FsbHBh",
+            "cGVyUmVzdWx0SAASQQoPYWNjb3VudF9wcml2YWN5GH4gASgLMiYuYm90Z3Jh",
+            "bS5ycGMudjEuQWNjb3VudFByaXZhY3lSZXNwb25zZUgAEi4KC2FkZF9jb250",
+            "YWN0GH8gASgLMhcuYm90Z3JhbS5ycGMudjEuVXBkYXRlc0gAEjgKDHJlcXVl",
+            "c3RfY2FsbBiAASABKAsyHy5ib3RncmFtLnJwYy52MS5QaG9uZUNhbGxSZXN1",
+            "bHRIABIzCg1yZWNlaXZlZF9jYWxsGIEBIAEoCzIZLmJvdGdyYW0ucnBjLnYx",
+            "LkJvb2xWYWx1ZUgAEjcKC2FjY2VwdF9jYWxsGIIBIAEoCzIfLmJvdGdyYW0u",
+            "cnBjLnYxLlBob25lQ2FsbFJlc3VsdEgAEjgKDGNvbmZpcm1fY2FsbBiDASAB",
+            "KAsyHy5ib3RncmFtLnJwYy52MS5QaG9uZUNhbGxSZXN1bHRIABIwCgxkaXNj",
+            "YXJkX2NhbGwYhAEgASgLMhcuYm90Z3JhbS5ycGMudjEuVXBkYXRlc0gAEjkK",
+            "E3NlbmRfc2lnbmFsaW5nX2RhdGEYhQEgASgLMhkuYm90Z3JhbS5ycGMudjEu",
+            "Qm9vbFZhbHVlSAASNAoPZ2V0X2NhbGxfY29uZmlnGIYBIAEoCzIYLmJvdGdy",
+            "YW0ucnBjLnYxLkRhdGFKc29uSAASNQoPc2F2ZV9jYWxsX2RlYnVnGIcBIAEo",
+            "CzIZLmJvdGdyYW0ucnBjLnYxLkJvb2xWYWx1ZUgAEjIKDWdldF9kaF9jb25m",
+            "aWcYiAEgASgLMhguYm90Z3JhbS5ycGMudjEuRGhDb25maWdIABJAChRnZXRf",
+            "c3BlY2lhbF9jb250YWN0cxiJASABKAsyHy5ib3RncmFtLnJwYy52MS5TcGVj",
+            "aWFsQ29udGFjdHNIABI/ChNzZXRfc3BlY2lhbF9jb250YWN0GIoBIAEoCzIf",
+            "LmJvdGdyYW0ucnBjLnYxLlNwZWNpYWxDb250YWN0c0gAEj4KE2UyZWVfcHVi",
+            "bGlzaF9kZXZpY2UYiwEgASgLMh4uYm90Z3JhbS5ycGMudjEuRTJlZURldmlj",
+            "ZUluZm9IABI2CgtlMmVlX2FjdGlvbhiMASABKAsyHi5ib3RncmFtLnJwYy52",
+            "MS5FMmVlQ2hhdFN0YXR1c0gAEj4KD2UyZWVfZ2V0X3N0YXR1cxiNASABKAsy",
+            "Ii5ib3RncmFtLnJwYy52MS5FMmVlQ2hhdFN0YXR1c0xpc3RIABI4CgllMmVl",
+            "X2xpc3QYjgEgASgLMiIuYm90Z3JhbS5ycGMudjEuRTJlZUNoYXRTdGF0dXNM",
+            "aXN0SAASPwoUZTJlZV9nZXRfcGVlcl9idW5kbGUYjwEgASgLMh4uYm90Z3Jh",
+            "bS5ycGMudjEuRTJlZVBlZXJCdW5kbGVIABI8Cg9kZWxldGVfbWVzc2FnZXMY",
+            "kAEgASgLMiAuYm90Z3JhbS5ycGMudjEuQWZmZWN0ZWRNZXNzYWdlc0gAEjoK",
+            "DmRlbGV0ZV9oaXN0b3J5GJEBIAEoCzIfLmJvdGdyYW0ucnBjLnYxLkFmZmVj",
+            "dGVkSGlzdG9yeUgAEkAKFGRlbGV0ZV9zYXZlZF9oaXN0b3J5GJIBIAEoCzIf",
+            "LmJvdGdyYW0ucnBjLnYxLkFmZmVjdGVkSGlzdG9yeUgAEksKGWRlbGV0ZV9w",
+            "aG9uZV9jYWxsX2hpc3RvcnkYkwEgASgLMiUuYm90Z3JhbS5ycGMudjEuQWZm",
+            "ZWN0ZWRGb3VuZE1lc3NhZ2VzSAASMAoMZWRpdF9tZXNzYWdlGJQBIAEoCzIX",
+            "LmJvdGdyYW0ucnBjLnYxLlVwZGF0ZXNIABJBChVnZXRfbWVzc2FnZV9lZGl0",
+            "X2RhdGEYlQEgASgLMh8uYm90Z3JhbS5ycGMudjEuTWVzc2FnZUVkaXREYXRh",
+            "SAASNAoQZm9yd2FyZF9tZXNzYWdlcxiWASABKAsyFy5ib3RncmFtLnJwYy52",
+            "MS5VcGRhdGVzSAASMAoKc2V0X3R5cGluZxiXASABKAsyGS5ib3RncmFtLnJw",
+            "Yy52MS5Cb29sVmFsdWVIABIwCgpzYXZlX2RyYWZ0GJgBIAEoCzIZLmJvdGdy",
+            "YW0ucnBjLnYxLkJvb2xWYWx1ZUgAEjYKEGNsZWFyX2FsbF9kcmFmdHMYmQEg",
+            "ASgLMhkuYm90Z3JhbS5ycGMudjEuQm9vbFZhbHVlSAASMgoOZ2V0X2FsbF9k",
+            "cmFmdHMYmgEgASgLMhcuYm90Z3JhbS5ycGMudjEuVXBkYXRlc0gAEjkKFXVw",
+            "ZGF0ZV9waW5uZWRfbWVzc2FnZRibASABKAsyFy5ib3RncmFtLnJwYy52MS5V",
+            "cGRhdGVzSAASPgoSdW5waW5fYWxsX21lc3NhZ2VzGJwBIAEoCzIfLmJvdGdy",
+            "YW0ucnBjLnYxLkFmZmVjdGVkSGlzdG9yeUgAEjcKEXRvZ2dsZV9kaWFsb2df",
+            "cGluGJ0BIAEoCzIZLmJvdGdyYW0ucnBjLnYxLkJvb2xWYWx1ZUgAEjwKFnJl",
+            "b3JkZXJfcGlubmVkX2RpYWxvZ3MYngEgASgLMhkuYm90Z3JhbS5ycGMudjEu",
+            "Qm9vbFZhbHVlSAASOAoSbWFya19kaWFsb2dfdW5yZWFkGJ8BIAEoCzIZLmJv",
+            "dGdyYW0ucnBjLnYxLkJvb2xWYWx1ZUgAEjwKF2dldF9kaWFsb2dfdW5yZWFk",
+            "X21hcmtzGKABIAEoCzIYLmJvdGdyYW0ucnBjLnYxLlBlZXJMaXN0SAASQgoV",
+            "cmVhZF9tZXNzYWdlX2NvbnRlbnRzGKEBIAEoCzIgLmJvdGdyYW0ucnBjLnYx",
+            "LkFmZmVjdGVkTWVzc2FnZXNIABIzCgtnZXRfb25saW5lcxiiASABKAsyGy5i",
+            "b3RncmFtLnJwYy52MS5DaGF0T25saW5lc0gAEjYKEGdldF9jb21tb25fY2hh",
+            "dHMYowEgASgLMhkuYm90Z3JhbS5ycGMudjEuR3JvdXBMaXN0SAASPAoWaGlk",
+            "ZV9wZWVyX3NldHRpbmdzX2JhchikASABKAsyGS5ib3RncmFtLnJwYy52MS5C",
+            "b29sVmFsdWVIABIxCgtyZXBvcnRfc3BhbRilASABKAsyGS5ib3RncmFtLnJw",
+            "Yy52MS5Cb29sVmFsdWVIABI/ChJnZXRfbWVzc2FnZXNfdmlld3MYpgEgASgL",
+            "MiAuYm90Z3JhbS5ycGMudjEuTWVzc2FnZVZpZXdzTGlzdEgAEj8KFGdldF9v",
+            "dXRib3hfcmVhZF9kYXRlGKcBIAEoCzIeLmJvdGdyYW0ucnBjLnYxLk91dGJv",
+            "eFJlYWREYXRlSAASLQoGc2VhcmNoGKgBIAEoCzIaLmJvdGdyYW0ucnBjLnYx",
+            "LlNlYXJjaFBhZ2VIABI+ChNnZXRfc2VhcmNoX2NvdW50ZXJzGKkBIAEoCzIe",
+            "LmJvdGdyYW0ucnBjLnYxLlNlYXJjaENvdW50ZXJzSAASOgoMdXBsb2FkX21l",
+            "ZGlhGKoBIAEoCzIhLmJvdGdyYW0ucnBjLnYxLlVwbG9hZE1lZGlhUmVzdWx0",
+            "SAASLgoKc2VuZF9tZWRpYRirASABKAsyFy5ib3RncmFtLnJwYy52MS5VcGRh",
+            "dGVzSAASNAoQc2VuZF9tdWx0aV9tZWRpYRisASABKAsyFy5ib3RncmFtLnJw",
+            "Yy52MS5VcGRhdGVzSAASNgoSZ2V0X2V4dGVuZGVkX21lZGlhGK0BIAEoCzIX",
+            "LmJvdGdyYW0ucnBjLnYxLlVwZGF0ZXNIABI+ChFhdXRoX2NhcGFiaWxpdGll",
+            "cxjIASABKAsyIC5ib3RncmFtLnJwYy52MS5BdXRoQ2FwYWJpbGl0aWVzSAAS",
+            "NQoNYXV0aF9yZWdpc3RlchjJASABKAsyGy5ib3RncmFtLnJwYy52MS5BdXRo",
+            "U2Vzc2lvbkgAEjIKCmF1dGhfbG9naW4YygEgASgLMhsuYm90Z3JhbS5ycGMu",
+            "djEuQXV0aFNlc3Npb25IABI6Cg1hdXRoX3Bhc3N3b3JkGMsBIAEoCzIgLmJv",
+            "dGdyYW0ucnBjLnYxLkF1dGhQYXNzd29yZEluZm9IABI0CgxhdXRoX3JlY292",
+            "ZXIYzAEgASgLMhsuYm90Z3JhbS5ycGMudjEuQXV0aFNlc3Npb25IABIxCgth",
+            "dXRoX2xvZ291dBjNASABKAsyGS5ib3RncmFtLnJwYy52MS5Cb29sVmFsdWVI",
+            "ABI1CgphY2NvdW50X21lGM4BIAEoCzIeLmJvdGdyYW0ucnBjLnYxLkFjY291",
+            "bnRQcm9maWxlSAASMQoHcHJlbWl1bRjPASABKAsyHS5ib3RncmFtLnJwYy52",
+            "MS5QcmVtaXVtU3RhdHVzSAASNQoKY2hhbmdlX2dpZBjQASABKAsyHi5ib3Rn",
+            "cmFtLnJwYy52MS5BY2NvdW50UHJvZmlsZUgAEisKBHRvdHAY0QEgASgLMhou",
+            "Ym90Z3JhbS5ycGMudjEuVG90cFJlc3VsdEgAQgkKB291dGNvbWUigQEKCFJw",
+            "Y0Vycm9yEgwKBGNvZGUYASABKAkSDwoHbWVzc2FnZRgCIAEoCRIRCglyZXRy",
+            "eWFibGUYAyABKAgSGwoOcmV0cnlfYWZ0ZXJfbXMYBCABKA1IAIgBARITCgto",
+            "dHRwX3N0YXR1cxgFIAEoDUIRCg9fcmV0cnlfYWZ0ZXJfbXMiawoJRXZlbnRI",
+            "aW50EhYKDnByb3RvY29sX21ham9yGAEgASgNEg4KBmN1cnNvchgCIAEoAxIf",
+            "ChJ3YWxscGFwZXJfcmV2aXNpb24YAyABKANIAIgBAUIVChNfd2FsbHBhcGVy",
+            "X3JldmlzaW9uIhsKGUdldFNwZWNpYWxDb250YWN0c1JlcXVlc3QiVwoYU2V0",
+            "U3BlY2lhbENvbnRhY3RSZXF1ZXN0EioKBHVzZXIYASABKAsyHC5ib3RncmFt",
+            "LnJwYy52MS5Vc2VyU2VsZWN0b3ISDwoHZW5hYmxlZBgCIAEoCCJLCg9TcGVj",
+            "aWFsQ29udGFjdHMSEAoIcmV2aXNpb24YASABKAMSJgoFdXNlcnMYAiADKAsy",
+            "Fy5ib3RncmFtLnJwYy52MS5Vc2VyUmVmIgcKBUVtcHR5IosLChVBY2NvdW50",
+            "UHJpdmFjeVJlcXVlc3QSNgoJZ2V0X3J1bGVzGAEgASgLMiEuYm90Z3JhbS5y",
+            "cGMudjEuUHJpdmFjeUtleVJlcXVlc3RIABIzCglzZXRfcnVsZXMYAiABKAsy",
+            "Hi5ib3RncmFtLnJwYy52MS5Qcml2YWN5UnVsZVNldEgAEisKCmdldF9nbG9i",
+            "YWwYAyABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEjsKCnNldF9nbG9i",
+            "YWwYBCABKAsyJS5ib3RncmFtLnJwYy52MS5HbG9iYWxQcml2YWN5U2V0dGlu",
+            "Z3NIABIwCg9nZXRfYWNjb3VudF90dGwYBSABKAsyFS5ib3RncmFtLnJwYy52",
+            "MS5FbXB0eUgAEjUKD3NldF9hY2NvdW50X3R0bBgGIAEoCzIaLmJvdGdyYW0u",
+            "cnBjLnYxLkFjY291bnRUdGxIABI4ChdnZXRfZGVmYXVsdF9oaXN0b3J5X3R0",
+            "bBgHIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASPQoXc2V0X2RlZmF1",
+            "bHRfaGlzdG9yeV90dGwYCCABKAsyGi5ib3RncmFtLnJwYy52MS5IaXN0b3J5",
+            "VHRsSAASOQoLZ2V0X2Jsb2NrZWQYCSABKAsyIi5ib3RncmFtLnJwYy52MS5C",
+            "bG9ja2VkUGFnZVJlcXVlc3RIABItCgpibG9ja191c2VyGAogASgLMhcuYm90",
+            "Z3JhbS5ycGMudjEuVXNlclJlZkgAEi8KDHVuYmxvY2tfdXNlchgLIAEoCzIX",
+            "LmJvdGdyYW0ucnBjLnYxLlVzZXJSZWZIABIzChJnZXRfYXV0aG9yaXphdGlv",
+            "bnMYDCABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEj4KE3Jlc2V0X2F1",
+            "dGhvcml6YXRpb24YDSABKAsyHy5ib3RncmFtLnJwYy52MS5BdXRob3JpemF0",
+            "aW9uSWRIABI7ChpyZXNldF9vdGhlcl9hdXRob3JpemF0aW9ucxgOIAEoCzIV",
+            "LmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASLQoMZ2V0X3Bhc3N3b3JkGA8gASgL",
+            "MhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABI5ChVnZXRfcGFzc3dvcmRfc2V0",
+            "dGluZ3MYECABKAsyGC5ib3RncmFtLnJwYy52MS5TcnBQcm9vZkgAEkIKGHVw",
+            "ZGF0ZV9wYXNzd29yZF9zZXR0aW5ncxgRIAEoCzIeLmJvdGdyYW0ucnBjLnYx",
+            "LlBhc3N3b3JkVXBkYXRlSAASNwoPZGVsZXRlX2NvbnRhY3RzGBIgASgLMhwu",
+            "Ym90Z3JhbS5ycGMudjEuUHJpdmFjeVVzZXJzSAASNQoUcmVzZXRfc2F2ZWRf",
+            "Y29udGFjdHMYEyABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEhoKEHRv",
+            "Z2dsZV90b3BfcGVlcnMYFCABKAhIABI3ChZnZXRfd2ViX2F1dGhvcml6YXRp",
+            "b25zGBUgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABJCChdyZXNldF93",
+            "ZWJfYXV0aG9yaXphdGlvbhgWIAEoCzIfLmJvdGdyYW0ucnBjLnYxLkF1dGhv",
+            "cml6YXRpb25JZEgAEjkKGHJlc2V0X3dlYl9hdXRob3JpemF0aW9ucxgXIAEo",
+            "CzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASPgoSY2xlYXJfcGF5bWVudF9p",
+            "bmZvGBggASgLMiAuYm90Z3JhbS5ycGMudjEuQ2xlYXJQYXltZW50SW5mb0gA",
+            "Ei0KDGdldF9wYXNza2V5cxgZIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5",
+            "SABCCwoJb3BlcmF0aW9uIjwKEVByaXZhY3lLZXlSZXF1ZXN0EicKA2tleRgB",
+            "IAEoDjIaLmJvdGdyYW0ucnBjLnYxLlByaXZhY3lLZXkidwoLUHJpdmFjeVJ1",
+            "bGUSLQoEa2luZBgBIAEoDjIfLmJvdGdyYW0ucnBjLnYxLlByaXZhY3lSdWxl",
+            "S2luZBImCgV1c2VycxgCIAMoCzIXLmJvdGdyYW0ucnBjLnYxLlVzZXJSZWYS",
+            "EQoJZ3JvdXBfaWRzGAMgAygJImUKDlByaXZhY3lSdWxlU2V0EicKA2tleRgB",
+            "IAEoDjIaLmJvdGdyYW0ucnBjLnYxLlByaXZhY3lLZXkSKgoFcnVsZXMYAiAD",
+            "KAsyGy5ib3RncmFtLnJwYy52MS5Qcml2YWN5UnVsZSK/AwoVR2xvYmFsUHJp",
+            "dmFjeVNldHRpbmdzEi0KJWFyY2hpdmVfYW5kX211dGVfbmV3X25vbmNvbnRh",
+            "Y3RfcGVlcnMYASABKAgSHQoVa2VlcF9hcmNoaXZlZF91bm11dGVkGAIgASgI",
+            "Eh0KFWtlZXBfYXJjaGl2ZWRfZm9sZGVycxgDIAEoCBIXCg9oaWRlX3JlYWRf",
+            "bWFya3MYBCABKAgSLAokbmV3X25vbmNvbnRhY3RfcGVlcnNfcmVxdWlyZV9w",
+            "cmVtaXVtGAUgASgIEhwKFGRpc3BsYXlfZ2lmdHNfYnV0dG9uGAYgASgIEiMK",
+            "G25vbmNvbnRhY3RfcGVlcnNfcGFpZF9zdGFycxgHIAEoAxIiChpkaXNhbGxv",
+            "d2VkX2dpZnRzX3VubGltaXRlZBgIIAEoCBIgChhkaXNhbGxvd2VkX2dpZnRz",
+            "X2xpbWl0ZWQYCSABKAgSHwoXZGlzYWxsb3dlZF9naWZ0c191bmlxdWUYCiAB",
+            "KAgSIAoYZGlzYWxsb3dlZF9naWZ0c19wcmVtaXVtGAsgASgIEiYKHmRpc2Fs",
+            "bG93ZWRfZ2lmdHNfZnJvbV9jaGFubmVscxgMIAEoCCIaCgpBY2NvdW50VHRs",
+            "EgwKBGRheXMYASABKAUiHQoKSGlzdG9yeVR0bBIPCgdzZWNvbmRzGAEgASgF",
+            "IjMKEkJsb2NrZWRQYWdlUmVxdWVzdBIOCgZvZmZzZXQYASABKAUSDQoFbGlt",
+            "aXQYAiABKAUiSwoLQmxvY2tlZFVzZXISJQoEdXNlchgBIAEoCzIXLmJvdGdy",
+            "YW0ucnBjLnYxLlVzZXJSZWYSFQoNYmxvY2tlZF9hdF9tcxgCIAEoAyJLCgxC",
+            "bG9ja2VkVXNlcnMSDQoFY291bnQYASABKAUSLAoHYmxvY2tlZBgCIAMoCzIb",
+            "LmJvdGdyYW0ucnBjLnYxLkJsb2NrZWRVc2VyIh8KD0F1dGhvcml6YXRpb25J",
+            "ZBIMCgRoYXNoGAEgASgDItIBChFBdXRob3JpemF0aW9uSW5mbxIMCgRoYXNo",
+            "GAEgASgDEg8KB2N1cnJlbnQYAiABKAgSFAoMZGV2aWNlX21vZGVsGAMgASgJ",
+            "EhAKCHBsYXRmb3JtGAQgASgJEhYKDnN5c3RlbV92ZXJzaW9uGAUgASgJEhAK",
+            "CGFwcF9uYW1lGAYgASgJEhMKC2FwcF92ZXJzaW9uGAcgASgJEhUKDWNyZWF0",
+            "ZWRfYXRfbXMYCCABKAMSFAoMYWN0aXZlX2F0X21zGAkgASgDEgoKAmlwGAog",
+            "ASgJImUKDkF1dGhvcml6YXRpb25zEjMKCHNlc3Npb25zGAEgAygLMiEuYm90",
+            "Z3JhbS5ycGMudjEuQXV0aG9yaXphdGlvbkluZm8SHgoWYXV0aG9yaXphdGlv",
+            "bl90dGxfZGF5cxgCIAEoBSJBCgtQYXNzd29yZEtkZhINCgVzYWx0MRgBIAEo",
+            "DBINCgVzYWx0MhgCIAEoDBIJCgFnGAMgASgFEgkKAXAYBCABKAwiQAoIU3Jw",
+            "UHJvb2YSDgoGc3JwX2lkGAEgASgDEgkKAWEYAiABKAwSCgoCbTEYAyABKAwS",
+            "DQoFZW1wdHkYBCABKAgi4wEKDFBhc3N3b3JkSW5mbxIUCgxoYXNfcGFzc3dv",
+            "cmQYASABKAgSMQoMY3VycmVudF9hbGdvGAIgASgLMhsuYm90Z3JhbS5ycGMu",
+            "djEuUGFzc3dvcmRLZGYSDQoFc3JwX2IYAyABKAwSDgoGc3JwX2lkGAQgASgD",
+            "EgwKBGhpbnQYBSABKAkSLQoIbmV3X2FsZ28YBiABKAsyGy5ib3RncmFtLnJw",
+            "Yy52MS5QYXNzd29yZEtkZhIXCg9uZXdfc2VjdXJlX3NhbHQYByABKAwSFQoN",
+            "c2VjdXJlX3JhbmRvbRgIIAEoDCLvAQoOUGFzc3dvcmRVcGRhdGUSJwoFcHJv",
+            "b2YYASABKAsyGC5ib3RncmFtLnJwYy52MS5TcnBQcm9vZhIXCg9jaGFuZ2Vf",
+            "cGFzc3dvcmQYAiABKAgSLQoIbmV3X2FsZ28YAyABKAsyGy5ib3RncmFtLnJw",
+            "Yy52MS5QYXNzd29yZEtkZhIZChFuZXdfcGFzc3dvcmRfaGFzaBgEIAEoDBIM",
+            "CgRoaW50GAUgASgJEhQKDGNoYW5nZV9lbWFpbBgGIAEoCBINCgVlbWFpbBgH",
+            "IAEoCRIeChZjaGFuZ2Vfc2VjdXJlX3NldHRpbmdzGAggASgIIiEKEFBhc3N3",
+            "b3JkU2V0dGluZ3MSDQoFZW1haWwYASABKAkiNgoMUHJpdmFjeVVzZXJzEiYK",
+            "BXVzZXJzGAEgAygLMhcuYm90Z3JhbS5ycGMudjEuVXNlclJlZiI1ChBDbGVh",
+            "clBheW1lbnRJbmZvEhMKC2NyZWRlbnRpYWxzGAEgASgIEgwKBGluZm8YAiAB",
+            "KAgizgUKFkFjY291bnRQcml2YWN5UmVzcG9uc2USKgoFdXNlcnMYASADKAsy",
+            "Gy5ib3RncmFtLnJwYy52MS5Vc2VyU3VtbWFyeRIsCgZncm91cHMYAiADKAsy",
+            "HC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1hcnkSLwoFcnVsZXMYCiABKAsy",
+            "Hi5ib3RncmFtLnJwYy52MS5Qcml2YWN5UnVsZVNldEgAEjcKBmdsb2JhbBgL",
+            "IAEoCzIlLmJvdGdyYW0ucnBjLnYxLkdsb2JhbFByaXZhY3lTZXR0aW5nc0gA",
+            "EjEKC2FjY291bnRfdHRsGAwgASgLMhouYm90Z3JhbS5ycGMudjEuQWNjb3Vu",
+            "dFR0bEgAEjEKC2hpc3RvcnlfdHRsGA0gASgLMhouYm90Z3JhbS5ycGMudjEu",
+            "SGlzdG9yeVR0bEgAEi8KB2Jsb2NrZWQYDiABKAsyHC5ib3RncmFtLnJwYy52",
+            "MS5CbG9ja2VkVXNlcnNIABIRCgdhcHBsaWVkGA8gASgISAASOAoOYXV0aG9y",
+            "aXphdGlvbnMYECABKAsyHi5ib3RncmFtLnJwYy52MS5BdXRob3JpemF0aW9u",
+            "c0gAEjAKCHBhc3N3b3JkGBEgASgLMhwuYm90Z3JhbS5ycGMudjEuUGFzc3dv",
+            "cmRJbmZvSAASPQoRcGFzc3dvcmRfc2V0dGluZ3MYEiABKAsyIC5ib3RncmFt",
+            "LnJwYy52MS5QYXNzd29yZFNldHRpbmdzSAASMQoQY29udGFjdHNfZGVsZXRl",
+            "ZBgTIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASMwoSd2ViX2F1dGhv",
+            "cml6YXRpb25zGBQgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABIpCghw",
+            "YXNza2V5cxgVIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SABCCAoGcmVz",
+            "dWx0IjEKB1VzZXJSZWYSFQoNc2VydmVyX2RvbWFpbhgBIAEoCRIPCgd1c2Vy",
+            "X2lkGAIgASgJIlEKDFVzZXJTZWxlY3RvchInCgR1c2VyGAEgASgLMhcuYm90",
+            "Z3JhbS5ycGMudjEuVXNlclJlZkgAEg4KBHNlbGYYAiABKAhIAEIICgZ0YXJn",
+            "ZXQiXgoHUGVlclJlZhInCgR1c2VyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEu",
+            "VXNlclJlZkgAEhIKCGdyb3VwX2lkGAIgASgJSAASDgoEc2VsZhgDIAEoCEgA",
+            "QgYKBHBlZXIiygIKC1VzZXJTdW1tYXJ5EikKCGlkZW50aXR5GAEgASgLMhcu",
+            "Ym90Z3JhbS5ycGMudjEuVXNlclJlZhISCgp0bF91c2VyX2lkGAIgASgDEhAK",
+            "CHVzZXJuYW1lGAMgASgJEhQKDGRpc3BsYXlfbmFtZRgEIAEoCRISCgpmaXJz",
+            "dF9uYW1lGAUgASgJEhEKCWxhc3RfbmFtZRgGIAEoCRILCgNnaWQYByABKAkS",
+            "DwoHaXNfc2VsZhgIIAEoCBISCgppc19jb250YWN0GAkgASgIEhkKEWlzX211",
+            "dHVhbF9jb250YWN0GAogASgIEh4KEW55YXJ1Z3JhbV9wcmVtaXVtGAsgASgI",
+            "SACIAQESKgoGc3RhdHVzGAwgASgLMhouYm90Z3JhbS5ycGMudjEuVXNlclN0",
+            "YXR1c0IUChJfbnlhcnVncmFtX3ByZW1pdW0iRwoKVXNlclN0YXR1cxIZCg9v",
+            "bmxpbmVfdW50aWxfbXMYASABKANIABIWCgxsYXN0X3NlZW5fbXMYAiABKANI",
+            "AEIGCgRraW5kImQKD1ByZXNlbmNlQ2hhbmdlZBIlCgR1c2VyGAEgASgLMhcu",
+            "Ym90Z3JhbS5ycGMudjEuVXNlclJlZhIqCgZzdGF0dXMYAiABKAsyGi5ib3Rn",
+            "cmFtLnJwYy52MS5Vc2VyU3RhdHVzImYKEUFkZENvbnRhY3RSZXF1ZXN0EioK",
+            "BHVzZXIYASABKAsyHC5ib3RncmFtLnJwYy52MS5Vc2VyU2VsZWN0b3ISEgoK",
+            "Zmlyc3RfbmFtZRgCIAEoCRIRCglsYXN0X25hbWUYAyABKAkiQAoHQ29udGFj",
+            "dBIlCgR1c2VyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEuVXNlclJlZhIOCgZt",
+            "dXR1YWwYAiABKAgihgEKDEdyb3VwU3VtbWFyeRIQCghncm91cF9pZBgBIAEo",
+            "CRISCgp0bF9jaGF0X2lkGAIgASgDEg0KBXRpdGxlGAMgASgJEhkKEXBhcnRp",
+            "Y2lwYW50X2NvdW50GAQgASgFEhUKDWNyZWF0ZWRfYXRfbXMYBSABKAMSDwoH",
+            "dmVyc2lvbhgGIAEoBSJ0CgtQYXJ0aWNpcGFudBIlCgR1c2VyGAEgASgLMhcu",
+            "Ym90Z3JhbS5ycGMudjEuVXNlclJlZhIoCgdpbnZpdGVyGAIgASgLMhcuYm90",
+            "Z3JhbS5ycGMudjEuVXNlclJlZhIUCgxqb2luZWRfYXRfbXMYAyABKAMiuAUK",
+            "DU1lc3NhZ2VFbnRpdHkSFAoMb2Zmc2V0X3V0ZjE2GAEgASgNEhQKDGxlbmd0",
+            "aF91dGYxNhgCIAEoDRIlCgRib2xkGAogASgLMhUuYm90Z3JhbS5ycGMudjEu",
+            "RW1wdHlIABInCgZpdGFsaWMYCyABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0",
+            "eUgAEigKA3ByZRgMIAEoCzIZLmJvdGdyYW0ucnBjLnYxLlByZUVudGl0eUgA",
+            "EjEKCHRleHRfdXJsGA0gASgLMh0uYm90Z3JhbS5ycGMudjEuVGV4dFVybEVu",
+            "dGl0eUgAEioKCXVuZGVybGluZRgOIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVt",
+            "cHR5SAASJwoGc3RyaWtlGA8gASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlI",
+            "ABIoCgdzcG9pbGVyGBAgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABIl",
+            "CgRjb2RlGBEgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABIkCgN1cmwY",
+            "EiABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAEiYKBWVtYWlsGBMgASgL",
+            "MhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABImCgVwaG9uZRgUIAEoCzIVLmJv",
+            "dGdyYW0ucnBjLnYxLkVtcHR5SAASKAoHbWVudGlvbhgVIAEoCzIVLmJvdGdy",
+            "YW0ucnBjLnYxLkVtcHR5SAASKAoHaGFzaHRhZxgWIAEoCzIVLmJvdGdyYW0u",
+            "cnBjLnYxLkVtcHR5SAASKAoHY2FzaHRhZxgXIAEoCzIVLmJvdGdyYW0ucnBj",
+            "LnYxLkVtcHR5SAASLAoLYm90X2NvbW1hbmQYGCABKAsyFS5ib3RncmFtLnJw",
+            "Yy52MS5FbXB0eUgAQgYKBGtpbmQiHQoJUHJlRW50aXR5EhAKCGxhbmd1YWdl",
+            "GAEgASgJIhwKDVRleHRVcmxFbnRpdHkSCwoDdXJsGAEgASgJIh4KCFJlcGx5",
+            "UmVmEhIKCm1lc3NhZ2VfaWQYASABKAMihQEKC1RleHRNZXNzYWdlEgwKBHRl",
+            "eHQYASABKAkSLwoIZW50aXRpZXMYAiADKAsyHS5ib3RncmFtLnJwYy52MS5N",
+            "ZXNzYWdlRW50aXR5EicKBXJlcGx5GAMgASgLMhguYm90Z3JhbS5ycGMudjEu",
+            "UmVwbHlSZWYSDgoGc2lsZW50GAQgASgIIk0KEkdyb3VwQ3JlYXRlZEFjdGlv",
+            "bhINCgV0aXRsZRgBIAEoCRIoCgdtZW1iZXJzGAIgAygLMhcuYm90Z3JhbS5y",
+            "cGMudjEuVXNlclJlZiIgChBFMmVlU3lzdGVtQWN0aW9uEgwKBHRleHQYASAB",
+            "KAkikAEKDlNlcnZpY2VNZXNzYWdlEjsKDWdyb3VwX2NyZWF0ZWQYASABKAsy",
+            "Ii5ib3RncmFtLnJwYy52MS5Hcm91cENyZWF0ZWRBY3Rpb25IABI3CgtlMmVl",
+            "X3N5c3RlbRgCIAEoCzIgLmJvdGdyYW0ucnBjLnYxLkUyZWVTeXN0ZW1BY3Rp",
+            "b25IAEIICgZhY3Rpb24i+wEKDEUyZWVFbnZlbG9wZRIYChBwcm90b2NvbF92",
+            "ZXJzaW9uGAEgASgNEhcKD2NvbnZlcnNhdGlvbl9pZBgCIAEoCRIWCg5zZW5k",
+            "ZXJfdXNlcl9pZBgDIAEoCRIYChBzZW5kZXJfZGV2aWNlX2lkGAQgASgNEhkK",
+            "EXJlY2lwaWVudF91c2VyX2lkGAUgASgJEhsKE3JlY2lwaWVudF9kZXZpY2Vf",
+            "aWQYBiABKA0SEQoJa2V5X2Vwb2NoGAcgASgDEhEKCXJhbmRvbV9pZBgIIAEo",
+            "EBISCgpjaXBoZXJ0ZXh0GAkgASgMEhQKDG1lc3NhZ2VfdHlwZRgKIAEoDSLy",
+            "AQoJRTJlZUlubmVyEhgKEHByb3RvY29sX3ZlcnNpb24YASABKA0SFwoPY29u",
+            "dmVyc2F0aW9uX2lkGAIgASgJEhYKDnNlbmRlcl91c2VyX2lkGAMgASgJEhgK",
+            "EHNlbmRlcl9kZXZpY2VfaWQYBCABKA0SGQoRcmVjaXBpZW50X3VzZXJfaWQY",
+            "BSABKAkSGwoTcmVjaXBpZW50X2RldmljZV9pZBgGIAEoDRIRCglrZXlfZXBv",
+            "Y2gYByABKAMSEQoJcmFuZG9tX2lkGAggASgQEhQKDHRpbWVzdGFtcF9tcxgJ",
+            "IAEoAxIMCgR0ZXh0GAogASgJIpIECgdNZXNzYWdlEhIKCm1lc3NhZ2VfaWQY",
+            "ASABKAMSJQoEcGVlchgCIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYS",
+            "JwoGc2VuZGVyGAMgASgLMhcuYm90Z3JhbS5ycGMudjEuVXNlclJlZhIVCg1j",
+            "cmVhdGVkX2F0X21zGAQgASgDEhAKCG91dGdvaW5nGAUgASgIEg4KBnVucmVh",
+            "ZBgGIAEoCBIrCgR0ZXh0GAogASgLMhsuYm90Z3JhbS5ycGMudjEuVGV4dE1l",
+            "c3NhZ2VIABIxCgdzZXJ2aWNlGAsgASgLMh4uYm90Z3JhbS5ycGMudjEuU2Vy",
+            "dmljZU1lc3NhZ2VIABIsCgRlMmVlGAwgASgLMhwuYm90Z3JhbS5ycGMudjEu",
+            "RTJlZUVudmVsb3BlSAASMgoMZm9yd2FyZF9mcm9tGA0gASgLMhcuYm90Z3Jh",
+            "bS5ycGMudjEuVXNlclJlZkgBiAEBEiEKFGZvcndhcmRfZnJvbV9kYXRlX21z",
+            "GA4gASgDSAKIAQESKwoFbWVkaWEYDyABKAsyHC5ib3RncmFtLnJwYy52MS5N",
+            "ZWRpYU1lc3NhZ2USFwoKZ3JvdXBlZF9pZBgQIAEoA0gDiAEBQgYKBGJvZHlC",
+            "DwoNX2ZvcndhcmRfZnJvbUIXChVfZm9yd2FyZF9mcm9tX2RhdGVfbXNCDQoL",
+            "X2dyb3VwZWRfaWQijAEKDk5vdGlmeVNldHRpbmdzEhoKDXNob3dfcHJldmll",
+            "d3MYASABKAhIAIgBARITCgZzaWxlbnQYAiABKAhIAYgBARIaCg1tdXRlX3Vu",
+            "dGlsX21zGAMgASgDSAKIAQFCEAoOX3Nob3dfcHJldmlld3NCCQoHX3NpbGVu",
+            "dEIQCg5fbXV0ZV91bnRpbF9tcyIOCgxQZWVyU2V0dGluZ3MirAIKBkRpYWxv",
+            "ZxIlCgRwZWVyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZhIWCg50",
+            "b3BfbWVzc2FnZV9pZBgCIAEoAxIZChFyZWFkX2luYm94X21heF9pZBgDIAEo",
+            "AxIaChJyZWFkX291dGJveF9tYXhfaWQYBCABKAMSFAoMdW5yZWFkX2NvdW50",
+            "GAUgASgFEjcKD25vdGlmeV9zZXR0aW5ncxgGIAEoCzIeLmJvdGdyYW0ucnBj",
+            "LnYxLk5vdGlmeVNldHRpbmdzEg4KBnBpbm5lZBgHIAEoCBITCgt1bnJlYWRf",
+            "bWFyaxgIIAEoCBIuCgVkcmFmdBgJIAEoCzIaLmJvdGdyYW0ucnBjLnYxLkRy",
+            "YWZ0U3RhdGVIAIgBAUIICgZfZHJhZnQiWQoJU3luY1N0YXRlEgsKA3B0cxgB",
+            "IAEoBRILCgNxdHMYAiABKAUSDwoHZGF0ZV9tcxgDIAEoAxILCgNzZXEYBCAB",
+            "KAUSFAoMdW5yZWFkX2NvdW50GAUgASgFImwKC1JlYWRSZWNlaXB0EiUKBHBl",
+            "ZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5QZWVyUmVmEhYKDm1heF9tZXNz",
+            "YWdlX2lkGAIgASgDEgsKA3B0cxgDIAEoBRIRCglwdHNfY291bnQYBCABKAUi",
+            "OQoQTWVzc2FnZUlkTWFwcGluZxIRCglyYW5kb21faWQYASABKBASEgoKbWVz",
+            "c2FnZV9pZBgCIAEoAyJWCgpOZXdNZXNzYWdlEigKB21lc3NhZ2UYASABKAsy",
+            "Fy5ib3RncmFtLnJwYy52MS5NZXNzYWdlEgsKA3B0cxgCIAEoBRIRCglwdHNf",
+            "Y291bnQYAyABKAUiQAoKR2lkQ2hhbmdlZBIlCgR1c2VyGAEgASgLMhcuYm90",
+            "Z3JhbS5ycGMudjEuVXNlclJlZhILCgNnaWQYAiABKAki7AYKBlVwZGF0ZRIx",
+            "CgtuZXdfbWVzc2FnZRgBIAEoCzIaLmJvdGdyYW0ucnBjLnYxLk5ld01lc3Nh",
+            "Z2VIABI2CgptZXNzYWdlX2lkGAIgASgLMiAuYm90Z3JhbS5ycGMudjEuTWVz",
+            "c2FnZUlkTWFwcGluZ0gAEjEKCnJlYWRfaW5ib3gYAyABKAsyGy5ib3RncmFt",
+            "LnJwYy52MS5SZWFkUmVjZWlwdEgAEjIKC3JlYWRfb3V0Ym94GAQgASgLMhsu",
+            "Ym90Z3JhbS5ycGMudjEuUmVhZFJlY2VpcHRIABIxCgtnaWRfY2hhbmdlZBgF",
+            "IAEoCzIaLmJvdGdyYW0ucnBjLnYxLkdpZENoYW5nZWRIABJGChZwZWVyX3dh",
+            "bGxwYXBlcl9jaGFuZ2VkGAYgASgLMiQuYm90Z3JhbS5ycGMudjEuUGVlcldh",
+            "bGxwYXBlckNoYW5nZWRIABI7ChBwcmVzZW5jZV9jaGFuZ2VkGAcgASgLMh8u",
+            "Ym90Z3JhbS5ycGMudjEuUHJlc2VuY2VDaGFuZ2VkSAASNgoKcGhvbmVfY2Fs",
+            "bBgIIAEoCzIgLmJvdGdyYW0ucnBjLnYxLlBob25lQ2FsbENoYW5nZWRIABJG",
+            "ChRwaG9uZV9jYWxsX3NpZ25hbGluZxgJIAEoCzImLmJvdGdyYW0ucnBjLnYx",
+            "LlBob25lQ2FsbFNpZ25hbGluZ0RhdGFIABI7ChBtZXNzYWdlc19kZWxldGVk",
+            "GAogASgLMh8uYm90Z3JhbS5ycGMudjEuTWVzc2FnZXNEZWxldGVkSAASNwoO",
+            "bWVzc2FnZV9lZGl0ZWQYCyABKAsyHS5ib3RncmFtLnJwYy52MS5NZXNzYWdl",
+            "RWRpdGVkSAASOQoPbWVzc2FnZXNfcGlubmVkGAwgASgLMh4uYm90Z3JhbS5y",
+            "cGMudjEuTWVzc2FnZXNQaW5uZWRIABI1Cg1jb250ZW50c19yZWFkGA0gASgL",
+            "MhwuYm90Z3JhbS5ycGMudjEuQ29udGVudHNSZWFkSAASNQoNZHJhZnRfY2hh",
+            "bmdlZBgOIAEoCzIcLmJvdGdyYW0ucnBjLnYxLkRyYWZ0Q2hhbmdlZEgAEjEK",
+            "C3VzZXJfdHlwaW5nGA8gASgLMhouYm90Z3JhbS5ycGMudjEuVXNlclR5cGlu",
+            "Z0gAQgYKBGtpbmQiqgEKB1VwZGF0ZXMSJwoHdXBkYXRlcxgBIAMoCzIWLmJv",
+            "dGdyYW0ucnBjLnYxLlVwZGF0ZRIqCgV1c2VycxgCIAMoCzIbLmJvdGdyYW0u",
+            "cnBjLnYxLlVzZXJTdW1tYXJ5EiwKBmdyb3VwcxgDIAMoCzIcLmJvdGdyYW0u",
+            "cnBjLnYxLkdyb3VwU3VtbWFyeRIPCgdkYXRlX21zGAQgASgDEgsKA3NlcRgF",
+            "IAEoBSIvCg9EaWZmZXJlbmNlRW1wdHkSDwoHZGF0ZV9tcxgBIAEoAxILCgNz",
+            "ZXEYAiABKAUiIAoRRGlmZmVyZW5jZVRvb0xvbmcSCwoDcHRzGAEgASgFIugB",
+            "Cg5EaWZmZXJlbmNlUGFnZRIpCghtZXNzYWdlcxgBIAMoCzIXLmJvdGdyYW0u",
+            "cnBjLnYxLk1lc3NhZ2USJwoHdXBkYXRlcxgCIAMoCzIWLmJvdGdyYW0ucnBj",
+            "LnYxLlVwZGF0ZRIqCgV1c2VycxgDIAMoCzIbLmJvdGdyYW0ucnBjLnYxLlVz",
+            "ZXJTdW1tYXJ5EiwKBmdyb3VwcxgEIAMoCzIcLmJvdGdyYW0ucnBjLnYxLkdy",
+            "b3VwU3VtbWFyeRIoCgVzdGF0ZRgFIAEoCzIZLmJvdGdyYW0ucnBjLnYxLlN5",
+            "bmNTdGF0ZSLiAQoKRGlmZmVyZW5jZRIwCgVlbXB0eRgBIAEoCzIfLmJvdGdy",
+            "YW0ucnBjLnYxLkRpZmZlcmVuY2VFbXB0eUgAEjUKCHRvb19sb25nGAIgASgL",
+            "MiEuYm90Z3JhbS5ycGMudjEuRGlmZmVyZW5jZVRvb0xvbmdIABIyCghjb21w",
+            "bGV0ZRgDIAEoCzIeLmJvdGdyYW0ucnBjLnYxLkRpZmZlcmVuY2VQYWdlSAAS",
+            "LwoFc2xpY2UYBCABKAsyHi5ib3RncmFtLnJwYy52MS5EaWZmZXJlbmNlUGFn",
+            "ZUgAQgYKBGtpbmQi4QEKCkRpYWxvZ1BhZ2USJwoHZGlhbG9ncxgBIAMoCzIW",
+            "LmJvdGdyYW0ucnBjLnYxLkRpYWxvZxIpCghtZXNzYWdlcxgCIAMoCzIXLmJv",
+            "dGdyYW0ucnBjLnYxLk1lc3NhZ2USKgoFdXNlcnMYAyADKAsyGy5ib3RncmFt",
+            "LnJwYy52MS5Vc2VyU3VtbWFyeRIsCgZncm91cHMYBCADKAsyHC5ib3RncmFt",
+            "LnJwYy52MS5Hcm91cFN1bW1hcnkSEwoLdG90YWxfY291bnQYBSABKAUSEAoI",
+            "aXNfc2xpY2UYBiABKAgi5QEKC1BlZXJEaWFsb2dzEicKB2RpYWxvZ3MYASAD",
+            "KAsyFi5ib3RncmFtLnJwYy52MS5EaWFsb2cSKQoIbWVzc2FnZXMYAiADKAsy",
+            "Fy5ib3RncmFtLnJwYy52MS5NZXNzYWdlEioKBXVzZXJzGAMgAygLMhsuYm90",
+            "Z3JhbS5ycGMudjEuVXNlclN1bW1hcnkSLAoGZ3JvdXBzGAQgAygLMhwuYm90",
+            "Z3JhbS5ycGMudjEuR3JvdXBTdW1tYXJ5EigKBXN0YXRlGAUgASgLMhkuYm90",
+            "Z3JhbS5ycGMudjEuU3luY1N0YXRlIpIBCgtNZXNzYWdlUGFnZRIpCghtZXNz",
+            "YWdlcxgBIAMoCzIXLmJvdGdyYW0ucnBjLnYxLk1lc3NhZ2USKgoFdXNlcnMY",
+            "AiADKAsyGy5ib3RncmFtLnJwYy52MS5Vc2VyU3VtbWFyeRIsCgZncm91cHMY",
+            "AyADKAsyHC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1hcnkilAEKC01lc3Nh",
+            "Z2VTZW50EigKB21lc3NhZ2UYASABKAsyFy5ib3RncmFtLnJwYy52MS5NZXNz",
+            "YWdlEjEKB21hcHBpbmcYAiABKAsyIC5ib3RncmFtLnJwYy52MS5NZXNzYWdl",
+            "SWRNYXBwaW5nEigKB3VwZGF0ZXMYAyABKAsyFy5ib3RncmFtLnJwYy52MS5V",
+            "cGRhdGVzIjIKEEFmZmVjdGVkTWVzc2FnZXMSCwoDcHRzGAEgASgFEhEKCXB0",
+            "c19jb3VudBgCIAEoBSK9AQoKRm91bmRQZWVycxIoCgdyZXN1bHRzGAEgAygL",
+            "MhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZhIrCgpteV9yZXN1bHRzGAIgAygL",
+            "MhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZhIqCgV1c2VycxgDIAMoCzIbLmJv",
+            "dGdyYW0ucnBjLnYxLlVzZXJTdW1tYXJ5EiwKBmdyb3VwcxgEIAMoCzIcLmJv",
+            "dGdyYW0ucnBjLnYxLkdyb3VwU3VtbWFyeSKPAQoMUmVzb2x2ZWRQZWVyEiUK",
+            "BHBlZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5QZWVyUmVmEioKBXVzZXJz",
+            "GAIgAygLMhsuYm90Z3JhbS5ycGMudjEuVXNlclN1bW1hcnkSLAoGZ3JvdXBz",
+            "GAMgAygLMhwuYm90Z3JhbS5ycGMudjEuR3JvdXBTdW1tYXJ5IjYKCFVzZXJM",
+            "aXN0EioKBXVzZXJzGAEgAygLMhsuYm90Z3JhbS5ycGMudjEuVXNlclN1bW1h",
+            "cnkieQoLQ29udGFjdExpc3QSKQoIY29udGFjdHMYASADKAsyFy5ib3RncmFt",
+            "LnJwYy52MS5Db250YWN0EioKBXVzZXJzGAIgAygLMhsuYm90Z3JhbS5ycGMu",
+            "djEuVXNlclN1bW1hcnkSEwoLc2F2ZWRfY291bnQYAyABKAUiSwoPSW1wb3J0",
+            "ZWRDb250YWN0EiUKBHVzZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5Vc2Vy",
+            "UmVmEhEKCWNsaWVudF9pZBgCIAEoECI1Cg1Qb3B1bGFySW52aXRlEhEKCWNs",
+            "aWVudF9pZBgBIAEoEBIRCglpbXBvcnRlcnMYAiABKAUiwQEKEEltcG9ydGVk",
+            "Q29udGFjdHMSMQoIaW1wb3J0ZWQYASADKAsyHy5ib3RncmFtLnJwYy52MS5J",
+            "bXBvcnRlZENvbnRhY3QSKgoFdXNlcnMYAiADKAsyGy5ib3RncmFtLnJwYy52",
+            "MS5Vc2VyU3VtbWFyeRIWCg5yZXRyeV9jb250YWN0cxgDIAMoEBI2Cg9wb3B1",
+            "bGFyX2ludml0ZXMYBCADKAsyHS5ib3RncmFtLnJwYy52MS5Qb3B1bGFySW52",
+            "aXRlInwKDk1pc3NpbmdJbnZpdGVlEiUKBHVzZXIYASABKAsyFy5ib3RncmFt",
+            "LnJwYy52MS5Vc2VyUmVmEiIKGnByZW1pdW1fd291bGRfYWxsb3dfaW52aXRl",
+            "GAIgASgIEh8KF3ByZW1pdW1fcmVxdWlyZWRfZm9yX3BtGAMgASgIIp8BCgxH",
+            "cm91cENyZWF0ZWQSKwoFZ3JvdXAYASABKAsyHC5ib3RncmFtLnJwYy52MS5H",
+            "cm91cFN1bW1hcnkSKAoHdXBkYXRlcxgCIAEoCzIXLmJvdGdyYW0ucnBjLnYx",
+            "LlVwZGF0ZXMSOAoQbWlzc2luZ19pbnZpdGVlcxgDIAMoCzIeLmJvdGdyYW0u",
+            "cnBjLnYxLk1pc3NpbmdJbnZpdGVlIp4BChJQZWVyU2V0dGluZ3NSZXN1bHQS",
+            "LgoIc2V0dGluZ3MYASABKAsyHC5ib3RncmFtLnJwYy52MS5QZWVyU2V0dGlu",
+            "Z3MSKgoFdXNlcnMYAiADKAsyGy5ib3RncmFtLnJwYy52MS5Vc2VyU3VtbWFy",
+            "eRIsCgZncm91cHMYAyADKAsyHC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1h",
+            "cnkitAMKDlVzZXJGdWxsUmVzdWx0EiUKBHVzZXIYASABKAsyFy5ib3RncmFt",
+            "LnJwYy52MS5Vc2VyUmVmEi4KCHNldHRpbmdzGAIgASgLMhwuYm90Z3JhbS5y",
+            "cGMudjEuUGVlclNldHRpbmdzEjcKD25vdGlmeV9zZXR0aW5ncxgDIAEoCzIe",
+            "LmJvdGdyYW0ucnBjLnYxLk5vdGlmeVNldHRpbmdzEg0KBWFib3V0GAQgASgJ",
+            "EhsKE2NvbW1vbl9ncm91cHNfY291bnQYBSABKAUSHQoVcGhvbmVfY2FsbHNf",
+            "YXZhaWxhYmxlGAYgASgIEhsKE3Bob25lX2NhbGxzX3ByaXZhdGUYByABKAgS",
+            "KgoFdXNlcnMYCCADKAsyGy5ib3RncmFtLnJwYy52MS5Vc2VyU3VtbWFyeRIs",
+            "CgZncm91cHMYCSADKAsyHC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1hcnkS",
+            "MQoJd2FsbHBhcGVyGAogASgLMh4uYm90Z3JhbS5ycGMudjEuV2FsbHBhcGVy",
+            "U3RhdGUSHQoVdmlkZW9fY2FsbHNfYXZhaWxhYmxlGAsgASgIIuQCCg9Hcm91",
+            "cEZ1bGxSZXN1bHQSKwoFZ3JvdXAYASABKAsyHC5ib3RncmFtLnJwYy52MS5H",
+            "cm91cFN1bW1hcnkSDQoFYWJvdXQYAiABKAkSMQoMcGFydGljaXBhbnRzGAMg",
+            "AygLMhsuYm90Z3JhbS5ycGMudjEuUGFydGljaXBhbnQSHAoUcGFydGljaXBh",
+            "bnRzX3ZlcnNpb24YBCABKAUSNwoPbm90aWZ5X3NldHRpbmdzGAUgASgLMh4u",
+            "Ym90Z3JhbS5ycGMudjEuTm90aWZ5U2V0dGluZ3MSKgoFdXNlcnMYBiADKAsy",
+            "Gy5ib3RncmFtLnJwYy52MS5Vc2VyU3VtbWFyeRIsCgZncm91cHMYByADKAsy",
+            "HC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1hcnkSMQoJd2FsbHBhcGVyGAgg",
+            "ASgLMh4uYm90Z3JhbS5ycGMudjEuV2FsbHBhcGVyU3RhdGUiOQoJR3JvdXBM",
+            "aXN0EiwKBmdyb3VwcxgBIAMoCzIcLmJvdGdyYW0ucnBjLnYxLkdyb3VwU3Vt",
+            "bWFyeSIRCg9HZXRTdGF0ZVJlcXVlc3QiIwoUR2V0RGlmZmVyZW5jZVJlcXVl",
+            "c3QSCwoDcHRzGAEgASgFIo0BChFHZXREaWFsb2dzUmVxdWVzdBISCgVsaW1p",
+            "dBgBIAEoBUgAiAEBEhkKEW9mZnNldF9tZXNzYWdlX2lkGAIgASgDEiwKC29m",
+            "ZnNldF9wZWVyGAMgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZhIRCglm",
+            "b2xkZXJfaWQYBCABKAVCCAoGX2xpbWl0IhkKF0dldFBpbm5lZERpYWxvZ3NS",
+            "ZXF1ZXN0IlIKFUdldFBlZXJEaWFsb2dzUmVxdWVzdBImCgVwZWVycxgBIAMo",
+            "CzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYSEQoJZm9sZGVyX2lkGAIgASgF",
+            "Is8BChFHZXRIaXN0b3J5UmVxdWVzdBIlCgRwZWVyGAEgASgLMhcuYm90Z3Jh",
+            "bS5ycGMudjEuUGVlclJlZhIZChFvZmZzZXRfbWVzc2FnZV9pZBgCIAEoAxIW",
+            "Cg5vZmZzZXRfZGF0ZV9tcxgDIAEoAxISCgphZGRfb2Zmc2V0GAQgASgFEhYK",
+            "Dm1pbl9tZXNzYWdlX2lkGAUgASgDEhYKDm1heF9tZXNzYWdlX2lkGAYgASgD",
+            "EhIKBWxpbWl0GAcgASgFSACIAQFCCAoGX2xpbWl0IikKEkdldE1lc3NhZ2Vz",
+            "UmVxdWVzdBITCgttZXNzYWdlX2lkcxgBIAMoAyKRAgoSU2VuZE1lc3NhZ2VS",
+            "ZXF1ZXN0EiUKBHBlZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5QZWVyUmVm",
+            "EhEKCXJhbmRvbV9pZBgCIAEoEBIMCgR0ZXh0GAMgASgJEi8KCGVudGl0aWVz",
+            "GAQgAygLMh0uYm90Z3JhbS5ycGMudjEuTWVzc2FnZUVudGl0eRIgChNyZXBs",
+            "eV90b19tZXNzYWdlX2lkGAUgASgDSACIAQESDgoGc2lsZW50GAYgASgIEi8K",
+            "BGUyZWUYByABKAsyHC5ib3RncmFtLnJwYy52MS5FMmVlRW52ZWxvcGVIAYgB",
+            "AUIWChRfcmVwbHlfdG9fbWVzc2FnZV9pZEIHCgVfZTJlZSI3ChFFMmVlT25l",
+            "VGltZVByZUtleRIOCgZrZXlfaWQYASABKAUSEgoKcHVibGljX2tleRgCIAEo",
+            "DCLBAgoYRTJlZVB1Ymxpc2hEZXZpY2VSZXF1ZXN0EhEKCWRldmljZV9pZBgB",
+            "IAEoDRIXCg9yZWdpc3RyYXRpb25faWQYAiABKAUSFAoMaWRlbnRpdHlfa2V5",
+            "GAMgASgMEhkKEXNpZ25lZF9wcmVfa2V5X2lkGAQgASgFEhYKDnNpZ25lZF9w",
+            "cmVfa2V5GAUgASgMEiAKGHNpZ25lZF9wcmVfa2V5X3NpZ25hdHVyZRgGIAEo",
+            "DBIYChBreWJlcl9wcmVfa2V5X2lkGAcgASgFEhUKDWt5YmVyX3ByZV9rZXkY",
+            "CCABKAwSHwoXa3liZXJfcHJlX2tleV9zaWduYXR1cmUYCSABKAwSPAoRb25l",
+            "X3RpbWVfcHJlX2tleXMYCiADKAsyIS5ib3RncmFtLnJwYy52MS5FMmVlT25l",
+            "VGltZVByZUtleSLNAgoORTJlZURldmljZUluZm8SEQoJZGV2aWNlX2lkGAEg",
+            "ASgNEhcKD3JlZ2lzdHJhdGlvbl9pZBgCIAEoBRIUCgxpZGVudGl0eV9rZXkY",
+            "AyABKAwSGQoRc2lnbmVkX3ByZV9rZXlfaWQYBCABKAUSFgoOc2lnbmVkX3By",
+            "ZV9rZXkYBSABKAwSIAoYc2lnbmVkX3ByZV9rZXlfc2lnbmF0dXJlGAYgASgM",
+            "EhgKEGt5YmVyX3ByZV9rZXlfaWQYByABKAUSFQoNa3liZXJfcHJlX2tleRgI",
+            "IAEoDBIfChdreWJlcl9wcmVfa2V5X3NpZ25hdHVyZRgJIAEoDBIjChtyZW1h",
+            "aW5pbmdfb25lX3RpbWVfcHJlX2tleXMYCiABKAUSEgoKZ2VuZXJhdGlvbhgL",
+            "IAEoAxIZChFpZGVudGl0eV9yZXBsYWNlZBgMIAEoCCJBChhFMmVlR2V0UGVl",
+            "ckJ1bmRsZVJlcXVlc3QSJQoEcGVlchgBIAEoCzIXLmJvdGdyYW0ucnBjLnYx",
+            "LlBlZXJSZWYisgIKDkUyZWVQZWVyQnVuZGxlEhEKCWRldmljZV9pZBgBIAEo",
+            "DRIXCg9yZWdpc3RyYXRpb25faWQYAiABKAUSEgoKcHJlX2tleV9pZBgDIAEo",
+            "BRIPCgdwcmVfa2V5GAQgASgMEhkKEXNpZ25lZF9wcmVfa2V5X2lkGAUgASgF",
+            "EhYKDnNpZ25lZF9wcmVfa2V5GAYgASgMEiAKGHNpZ25lZF9wcmVfa2V5X3Np",
+            "Z25hdHVyZRgHIAEoDBIUCgxpZGVudGl0eV9rZXkYCCABKAwSGAoQa3liZXJf",
+            "cHJlX2tleV9pZBgJIAEoBRIVCg1reWJlcl9wcmVfa2V5GAogASgMEh8KF2t5",
+            "YmVyX3ByZV9rZXlfc2lnbmF0dXJlGAsgASgMEhIKCmdlbmVyYXRpb24YDCAB",
+            "KAMidwoYRTJlZUlkZW50aXR5Q29uZmlybWF0aW9uEhkKEXBlZXJfaWRlbnRp",
+            "dHlfa2V5GAEgASgMEhcKD3BlZXJfZ2VuZXJhdGlvbhgCIAEoAxINCgVlcG9j",
+            "aBgDIAEoAxIYChBpZGVudGl0eV92ZXJzaW9uGAQgASgJIs0BChFFMmVlQWN0",
+            "aW9uUmVxdWVzdBIlCgRwZWVyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVl",
+            "clJlZhIuCgZhY3Rpb24YAiABKA4yHi5ib3RncmFtLnJwYy52MS5FMmVlQWN0",
+            "aW9uS2luZBIYChBwcm90b2NvbF92ZXJzaW9uGAMgASgNEkcKFWlkZW50aXR5",
+            "X2NvbmZpcm1hdGlvbhgEIAEoCzIoLmJvdGdyYW0ucnBjLnYxLkUyZWVJZGVu",
+            "dGl0eUNvbmZpcm1hdGlvbiI+ChRFMmVlR2V0U3RhdHVzUmVxdWVzdBImCgVw",
+            "ZWVycxgBIAMoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYiKgoPRTJlZUxp",
+            "c3RSZXF1ZXN0EhcKD2luY2x1ZGVfcGVuZGluZxgBIAEoCCLlBAoORTJlZUNo",
+            "YXRTdGF0dXMSJQoEcGVlchgBIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJS",
+            "ZWYSKAoFc3RhdGUYAiABKA4yGS5ib3RncmFtLnJwYy52MS5FMmVlU3RhdGUS",
+            "GAoQcHJvdG9jb2xfdmVyc2lvbhgDIAEoDRINCgVlcG9jaBgEIAEoAxIbChNi",
+            "b3VuZGFyeV9tZXNzYWdlX2lkGAUgASgDEhYKDnNlbGZfaW5pdGlhdG9yGAYg",
+            "ASgIEhUKDWF3YWl0aW5nX3NlbGYYByABKAgSFgoOcGVlcl9zdXBwb3J0ZWQY",
+            "CCABKAgSGAoQaWRlbnRpdHlfY2hhbmdlZBgJIAEoCBIhChljbG9zZV9ib3Vu",
+            "ZGFyeV9tZXNzYWdlX2lkGAogASgDEhkKEWluaXRpYXRvcl91c2VyX2lkGAsg",
+            "ASgJEhkKEWNsb3NlZF9ieV91c2VyX2lkGAwgASgJEh8KF3NlbGZfY29uZmly",
+            "bWVkX2lkZW50aXR5GA0gASgIEh8KF3BlZXJfY29uZmlybWVkX2lkZW50aXR5",
+            "GA4gASgIEhYKDnNlbGZfZGV2aWNlX2lkGA8gASgNEhYKDnBlZXJfZGV2aWNl",
+            "X2lkGBAgASgNEhkKEXBlZXJfaWRlbnRpdHlfa2V5GBEgASgMEhcKD3BlZXJf",
+            "Z2VuZXJhdGlvbhgSIAEoAxIVCg11cGRhdGVkX2F0X21zGBMgASgDEhcKD2Nv",
+            "bnZlcnNhdGlvbl9pZBgUIAEoCRISCgp0bF91c2VyX2lkGBUgASgDEhgKEGlk",
+            "ZW50aXR5X3ZlcnNpb24YFiABKAkiQwoSRTJlZUNoYXRTdGF0dXNMaXN0Ei0K",
+            "BWNoYXRzGAEgAygLMh4uYm90Z3JhbS5ycGMudjEuRTJlZUNoYXRTdGF0dXMi",
+            "UwoSUmVhZEhpc3RvcnlSZXF1ZXN0EiUKBHBlZXIYASABKAsyFy5ib3RncmFt",
+            "LnJwYy52MS5QZWVyUmVmEhYKDm1heF9tZXNzYWdlX2lkGAIgASgDIiYKFVNl",
+            "YXJjaENvbnRhY3RzUmVxdWVzdBINCgVxdWVyeRgBIAEoCSIqChZSZXNvbHZl",
+            "VXNlcm5hbWVSZXF1ZXN0EhAKCHVzZXJuYW1lGAEgASgJIj4KD0dldFVzZXJz",
+            "UmVxdWVzdBIrCgV1c2VycxgBIAMoCzIcLmJvdGdyYW0ucnBjLnYxLlVzZXJT",
+            "ZWxlY3RvciIUChJHZXRDb250YWN0c1JlcXVlc3QiIAoRUmVzb2x2ZUdpZFJl",
+            "cXVlc3QSCwoDZ2lkGAEgASgJIlYKDUltcG9ydENvbnRhY3QSEQoJY2xpZW50",
+            "X2lkGAEgASgQEgsKA2dpZBgCIAEoCRISCgpmaXJzdF9uYW1lGAMgASgJEhEK",
+            "CWxhc3RfbmFtZRgEIAEoCSJIChVJbXBvcnRDb250YWN0c1JlcXVlc3QSLwoI",
+            "Y29udGFjdHMYASADKAsyHS5ib3RncmFtLnJwYy52MS5JbXBvcnRDb250YWN0",
+            "IlAKEkNyZWF0ZUdyb3VwUmVxdWVzdBINCgV0aXRsZRgBIAEoCRIrCgV1c2Vy",
+            "cxgCIAMoCzIcLmJvdGdyYW0ucnBjLnYxLlVzZXJTZWxlY3RvciI/ChZHZXRQ",
+            "ZWVyU2V0dGluZ3NSZXF1ZXN0EiUKBHBlZXIYASABKAsyFy5ib3RncmFtLnJw",
+            "Yy52MS5QZWVyUmVmIkAKEkdldEZ1bGxVc2VyUmVxdWVzdBIqCgR1c2VyGAEg",
+            "ASgLMhwuYm90Z3JhbS5ycGMudjEuVXNlclNlbGVjdG9yIicKE0dldEZ1bGxH",
+            "cm91cFJlcXVlc3QSEAoIZ3JvdXBfaWQYASABKAkiJQoQR2V0R3JvdXBzUmVx",
+            "dWVzdBIRCglncm91cF9pZHMYASADKAkiywEKDE5vdGlmeVRhcmdldBInCgRw",
+            "ZWVyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZkgAEioKCWFsbF91",
+            "c2VycxgCIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASKwoKYWxsX2dy",
+            "b3VwcxgDIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAASLwoOYWxsX2Jy",
+            "b2FkY2FzdHMYBCABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAQggKBnRh",
+            "cmdldCJIChhHZXROb3RpZnlTZXR0aW5nc1JlcXVlc3QSLAoGdGFyZ2V0GAEg",
+            "ASgLMhwuYm90Z3JhbS5ycGMudjEuTm90aWZ5VGFyZ2V0IkQKGFJlc29sdmVJ",
+            "ZGVudGl0aWVzUmVxdWVzdBITCgt0bF91c2VyX2lkcxgBIAMoAxITCgt0bF9j",
+            "aGF0X2lkcxgCIAMoAyKFAQoSUmVzb2x2ZWRJZGVudGl0aWVzEhUKDXNlcnZl",
+            "cl9kb21haW4YASABKAkSKgoFdXNlcnMYAiADKAsyGy5ib3RncmFtLnJwYy52",
+            "MS5Vc2VyU3VtbWFyeRIsCgZncm91cHMYAyADKAsyHC5ib3RncmFtLnJwYy52",
+            "MS5Hcm91cFN1bW1hcnkilwMKEVdhbGxwYXBlclNldHRpbmdzEh0KEGJhY2tn",
+            "cm91bmRfY29sb3IYASABKA1IAIgBARIkChdzZWNvbmRfYmFja2dyb3VuZF9j",
+            "b2xvchgCIAEoDUgBiAEBEiMKFnRoaXJkX2JhY2tncm91bmRfY29sb3IYAyAB",
+            "KA1IAogBARIkChdmb3VydGhfYmFja2dyb3VuZF9jb2xvchgEIAEoDUgDiAEB",
+            "EhUKCHJvdGF0aW9uGAUgASgFSASIAQESFgoJaW50ZW5zaXR5GAYgASgFSAWI",
+            "AQESDAoEYmx1chgHIAEoCBIOCgZtb3Rpb24YCCABKAgSFQoIZW1vdGljb24Y",
+            "CSABKAlIBogBAUITChFfYmFja2dyb3VuZF9jb2xvckIaChhfc2Vjb25kX2Jh",
+            "Y2tncm91bmRfY29sb3JCGQoXX3RoaXJkX2JhY2tncm91bmRfY29sb3JCGgoY",
+            "X2ZvdXJ0aF9iYWNrZ3JvdW5kX2NvbG9yQgsKCV9yb3RhdGlvbkIMCgpfaW50",
+            "ZW5zaXR5QgsKCV9lbW90aWNvbiJoCg9Ob0ZpbGVXYWxscGFwZXISMwoIc2V0",
+            "dGluZ3MYASABKAsyIS5ib3RncmFtLnJwYy52MS5XYWxscGFwZXJTZXR0aW5n",
+            "cxIMCgRkYXJrGAIgASgIEhIKCmlzX2RlZmF1bHQYAyABKAgiUwoJV2FsbHBh",
+            "cGVyEgoKAmlkGAEgASgQEjIKB25vX2ZpbGUYCiABKAsyHy5ib3RncmFtLnJw",
+            "Yy52MS5Ob0ZpbGVXYWxscGFwZXJIAEIGCgRraW5kIocBCg5XYWxscGFwZXJT",
+            "dGF0ZRIuCgl3YWxscGFwZXIYASABKAsyGS5ib3RncmFtLnJwYy52MS5XYWxs",
+            "cGFwZXJIABIoCgdjbGVhcmVkGAIgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1w",
+            "dHlIABISCgpvdmVycmlkZGVuGAMgASgIQgcKBXZhbHVlIjIKFEdldFdhbGxw",
+            "YXBlcnNSZXF1ZXN0EhEKBGhhc2gYASABKBBIAIgBAUIHCgVfaGFzaCKnAQoN",
+            "V2FsbHBhcGVyTGlzdBItCgp3YWxscGFwZXJzGAEgAygLMhkuYm90Z3JhbS5y",
+            "cGMudjEuV2FsbHBhcGVyEjEKCWluc3RhbGxlZBgCIAEoCzIeLmJvdGdyYW0u",
+            "cnBjLnYxLldhbGxwYXBlclN0YXRlEhAKCHJldmlzaW9uGAMgASgDEgwKBGhh",
+            "c2gYBCABKBASFAoMbm90X21vZGlmaWVkGAUgASgIIlQKFFNhdmVXYWxscGFw",
+            "ZXJSZXF1ZXN0EiwKCXdhbGxwYXBlchgBIAEoCzIZLmJvdGdyYW0ucnBjLnYx",
+            "LldhbGxwYXBlchIOCgZ1bnNhdmUYAiABKAgifgoXSW5zdGFsbFdhbGxwYXBl",
+            "clJlcXVlc3QSLgoJd2FsbHBhcGVyGAEgASgLMhkuYm90Z3JhbS5ycGMudjEu",
+            "V2FsbHBhcGVySAASJgoFY2xlYXIYAiABKAsyFS5ib3RncmFtLnJwYy52MS5F",
+            "bXB0eUgAQgsKCXNlbGVjdGlvbiJvChdXYWxscGFwZXJNdXRhdGlvblJlc3Vs",
+            "dBIPCgdhcHBsaWVkGAEgASgIEhAKCHJldmlzaW9uGAIgASgDEjEKCWluc3Rh",
+            "bGxlZBgDIAEoCzIeLmJvdGdyYW0ucnBjLnYxLldhbGxwYXBlclN0YXRlIuUB",
+            "ChdTZXRDaGF0V2FsbHBhcGVyUmVxdWVzdBIlCgRwZWVyGAEgASgLMhcuYm90",
+            "Z3JhbS5ycGMudjEuUGVlclJlZhIuCgl3YWxscGFwZXIYAiABKAsyGS5ib3Rn",
+            "cmFtLnJwYy52MS5XYWxscGFwZXJIABImCgVjbGVhchgDIAEoCzIVLmJvdGdy",
+            "YW0ucnBjLnYxLkVtcHR5SAASHAoSc2VydmljZV9tZXNzYWdlX2lkGAQgASgD",
+            "SAASEAoIZm9yX2JvdGgYBSABKAgSDgoGcmV2ZXJ0GAYgASgIQgsKCXNlbGVj",
+            "dGlvbiJsChRQZWVyV2FsbHBhcGVyQ2hhbmdlZBIlCgRwZWVyGAEgASgLMhcu",
+            "Ym90Z3JhbS5ycGMudjEuUGVlclJlZhItCgVzdGF0ZRgCIAEoCzIeLmJvdGdy",
+            "YW0ucnBjLnYxLldhbGxwYXBlclN0YXRlIoABChNDaGF0V2FsbHBhcGVyUmVz",
+            "dWx0EigKB3VwZGF0ZXMYASABKAsyFy5ib3RncmFtLnJwYy52MS5VcGRhdGVz",
+            "Ei0KBXN0YXRlGAIgASgLMh4uYm90Z3JhbS5ycGMudjEuV2FsbHBhcGVyU3Rh",
+            "dGUSEAoIcmV2aXNpb24YAyABKAMiewoRUGhvbmVDYWxsUHJvdG9jb2wSDwoH",
+            "dWRwX3AycBgBIAEoCBIVCg11ZHBfcmVmbGVjdG9yGAIgASgIEhEKCW1pbl9s",
+            "YXllchgDIAEoBRIRCgltYXhfbGF5ZXIYBCABKAUSGAoQbGlicmFyeV92ZXJz",
+            "aW9ucxgFIAMoCSKFAQoPUGhvbmVDb25uZWN0aW9uEgoKAmlkGAEgASgDEgoK",
+            "AmlwGAIgASgJEgwKBGlwdjYYAyABKAkSDAoEcG9ydBgEIAEoBRIMCgR0dXJu",
+            "GAUgASgIEgwKBHN0dW4YBiABKAgSEAoIdXNlcm5hbWUYByABKAkSEAoIcGFz",
+            "c3dvcmQYCCABKAkiNAoMUGhvbmVDYWxsUmVmEg8KB2NhbGxfaWQYASABKAMS",
+            "EwoLYWNjZXNzX2hhc2gYAiABKAMihgQKCVBob25lQ2FsbBIPCgdjYWxsX2lk",
+            "GAEgASgDEhMKC2FjY2Vzc19oYXNoGAIgASgDEi0KBXN0YXRlGAMgASgOMh4u",
+            "Ym90Z3JhbS5ycGMudjEuUGhvbmVDYWxsU3RhdGUSGAoQYWRtaW5fdGxfdXNl",
+            "cl9pZBgEIAEoAxIeChZwYXJ0aWNpcGFudF90bF91c2VyX2lkGAUgASgDEg8K",
+            "B2RhdGVfbXMYBiABKAMSDQoFdmlkZW8YByABKAgSEwoLcDJwX2FsbG93ZWQY",
+            "CCABKAgSMwoIcHJvdG9jb2wYCSABKAsyIS5ib3RncmFtLnJwYy52MS5QaG9u",
+            "ZUNhbGxQcm90b2NvbBIXCg9yZWNlaXZlX2RhdGVfbXMYCiABKAMSFQoNc3Rh",
+            "cnRfZGF0ZV9tcxgLIAEoAxIQCghnX2FfaGFzaBgMIAEoDBILCgNnX2IYDSAB",
+            "KAwSEAoIZ19hX29yX2IYDiABKAwSFwoPa2V5X2ZpbmdlcnByaW50GA8gASgD",
+            "EjQKC2Nvbm5lY3Rpb25zGBAgAygLMh8uYm90Z3JhbS5ycGMudjEuUGhvbmVD",
+            "b25uZWN0aW9uEj4KDmRpc2NhcmRfcmVhc29uGBEgASgOMiYuYm90Z3JhbS5y",
+            "cGMudjEuUGhvbmVDYWxsRGlzY2FyZFJlYXNvbhIQCghkdXJhdGlvbhgSIAEo",
+            "BSJsCg9QaG9uZUNhbGxSZXN1bHQSLQoKcGhvbmVfY2FsbBgBIAEoCzIZLmJv",
+            "dGdyYW0ucnBjLnYxLlBob25lQ2FsbBIqCgV1c2VycxgCIAMoCzIbLmJvdGdy",
+            "YW0ucnBjLnYxLlVzZXJTdW1tYXJ5IhoKCUJvb2xWYWx1ZRINCgV2YWx1ZRgB",
+            "IAEoCCIYCghEYXRhSnNvbhIMCgRkYXRhGAEgASgJIq4BChdQaG9uZVJlcXVl",
+            "c3RDYWxsUmVxdWVzdBIqCgR1c2VyGAEgASgLMhwuYm90Z3JhbS5ycGMudjEu",
+            "VXNlclNlbGVjdG9yEhEKCXJhbmRvbV9pZBgCIAEoAxINCgV2aWRlbxgDIAEo",
+            "CBIQCghnX2FfaGFzaBgEIAEoDBIzCghwcm90b2NvbBgFIAEoCzIhLmJvdGdy",
+            "YW0ucnBjLnYxLlBob25lQ2FsbFByb3RvY29sIkYKGFBob25lUmVjZWl2ZWRD",
+            "YWxsUmVxdWVzdBIqCgRwZWVyGAEgASgLMhwuYm90Z3JhbS5ycGMudjEuUGhv",
+            "bmVDYWxsUmVmIoYBChZQaG9uZUFjY2VwdENhbGxSZXF1ZXN0EioKBHBlZXIY",
+            "ASABKAsyHC5ib3RncmFtLnJwYy52MS5QaG9uZUNhbGxSZWYSCwoDZ19iGAIg",
+            "ASgMEjMKCHByb3RvY29sGAMgASgLMiEuYm90Z3JhbS5ycGMudjEuUGhvbmVD",
+            "YWxsUHJvdG9jb2wioAEKF1Bob25lQ29uZmlybUNhbGxSZXF1ZXN0EioKBHBl",
+            "ZXIYASABKAsyHC5ib3RncmFtLnJwYy52MS5QaG9uZUNhbGxSZWYSCwoDZ19h",
+            "GAIgASgMEhcKD2tleV9maW5nZXJwcmludBgDIAEoAxIzCghwcm90b2NvbBgE",
+            "IAEoCzIhLmJvdGdyYW0ucnBjLnYxLlBob25lQ2FsbFByb3RvY29sIrUBChdQ",
+            "aG9uZURpc2NhcmRDYWxsUmVxdWVzdBIqCgRwZWVyGAEgASgLMhwuYm90Z3Jh",
+            "bS5ycGMudjEuUGhvbmVDYWxsUmVmEhAKCGR1cmF0aW9uGAIgASgFEjYKBnJl",
+            "YXNvbhgDIAEoDjImLmJvdGdyYW0ucnBjLnYxLlBob25lQ2FsbERpc2NhcmRS",
+            "ZWFzb24SFQoNY29ubmVjdGlvbl9pZBgEIAEoAxINCgV2aWRlbxgFIAEoCCJZ",
+            "Ch1QaG9uZVNlbmRTaWduYWxpbmdEYXRhUmVxdWVzdBIqCgRwZWVyGAEgASgL",
+            "MhwuYm90Z3JhbS5ycGMudjEuUGhvbmVDYWxsUmVmEgwKBGRhdGEYAiABKAwi",
+            "GwoZUGhvbmVHZXRDYWxsQ29uZmlnUmVxdWVzdCJWChlQaG9uZVNhdmVDYWxs",
+            "RGVidWdSZXF1ZXN0EioKBHBlZXIYASABKAsyHC5ib3RncmFtLnJwYy52MS5Q",
+            "aG9uZUNhbGxSZWYSDQoFZGVidWcYAiABKAkiQQoQUGhvbmVDYWxsQ2hhbmdl",
+            "ZBItCgpwaG9uZV9jYWxsGAEgASgLMhkuYm90Z3JhbS5ycGMudjEuUGhvbmVD",
+            "YWxsIjcKFlBob25lQ2FsbFNpZ25hbGluZ0RhdGESDwoHY2FsbF9pZBgBIAEo",
+            "AxIMCgRkYXRhGAIgASgMIjwKEkdldERoQ29uZmlnUmVxdWVzdBIPCgd2ZXJz",
+            "aW9uGAEgASgFEhUKDXJhbmRvbV9sZW5ndGgYAiABKAUiVwoIRGhDb25maWcS",
+            "DwoHdmVyc2lvbhgBIAEoBRIJCgFnGAIgASgFEgkKAXAYAyABKAwSDgoGcmFu",
+            "ZG9tGAQgASgMEhQKDG5vdF9tb2RpZmllZBgFIAEoCCIZChdBdXRoQ2FwYWJp",
+            "bGl0aWVzUmVxdWVzdCKoAQoQQXV0aENhcGFiaWxpdGllcxIbChNuZWdvdGlh",
+            "dGlvbl92ZXJzaW9uGAEgASgNEhEKCXByb3RvY29scxgCIAMoCRIZChFzZWxl",
+            "Y3RlZF9wcm90b2NvbBgDIAEoCRIaChJldmVudF9zdWJwcm90b2NvbHMYBCAD",
+            "KAkSFAoMY2FwYWJpbGl0aWVzGAUgAygJEhcKD2pzb25fYXBpX3N0YXR1cxgG",
+            "IAEoCSKDAQoTQXV0aFJlZ2lzdGVyUmVxdWVzdBIQCgh1c2VybmFtZRgBIAEo",
+            "CRIQCghwYXNzd29yZBgCIAEoCRIUCgxkaXNwbGF5X25hbWUYAyABKAkSHQoQ",
+            "bG9jYXRpb25fY291bnRyeRgEIAEoCUgAiAEBQhMKEV9sb2NhdGlvbl9jb3Vu",
+            "dHJ5IowBChBBdXRoTG9naW5SZXF1ZXN0EhAKCHVzZXJuYW1lGAEgASgJEhAK",
+            "CHBhc3N3b3JkGAIgASgJEhYKCXRvdHBfY29kZRgDIAEoCUgAiAEBEhsKDnBh",
+            "c3N3b3JkX3Byb29mGAQgASgJSAGIAQFCDAoKX3RvdHBfY29kZUIRCg9fcGFz",
+            "c3dvcmRfcHJvb2YiOQoTQXV0aFBhc3N3b3JkUmVxdWVzdBIQCgh1c2VybmFt",
+            "ZRgBIAEoCRIQCghwYXNzd29yZBgCIAEoCSJPChJBdXRoUmVjb3ZlclJlcXVl",
+            "c3QSEAoIdXNlcm5hbWUYASABKAkSEAoIcGFzc3dvcmQYAiABKAkSFQoNcmVj",
+            "b3ZlcnlfY29kZRgDIAEoCSITChFBdXRoTG9nb3V0UmVxdWVzdCISChBBY2Nv",
+            "dW50TWVSZXF1ZXN0IiIKDlByZW1pdW1SZXF1ZXN0EhAKCGFjdGl2YXRlGAEg",
+            "ASgIIjcKEENoYW5nZUdpZFJlcXVlc3QSEwoLcmVnaW9uX2NvZGUYASABKAkS",
+            "DgoGbnVtYmVyGAIgASgJIi4KC1RvdHBSZXF1ZXN0EhEKCW9wZXJhdGlvbhgB",
+            "IAEoCRIMCgRjb2RlGAIgASgJIq0CCg5BY2NvdW50UHJvZmlsZRIPCgd1c2Vy",
+            "X2lkGAEgASgJEhAKCHVzZXJuYW1lGAIgASgJEhQKDGRpc3BsYXlfbmFtZRgD",
+            "IAEoCRILCgNnaWQYBCABKAkSEgoKdGxfdXNlcl9pZBgFIAEoAxISCgpmaXJz",
+            "dF9uYW1lGAYgASgJEhEKCWxhc3RfbmFtZRgHIAEoCRIeChFueWFydWdyYW1f",
+            "cHJlbWl1bRgIIAEoCEgAiAEBEg8KB2lzX3NlbGYYCSABKAgSEgoKaXNfY29u",
+            "dGFjdBgKIAEoCBIZChFpc19tdXR1YWxfY29udGFjdBgLIAEoCBIOCgZvbmxp",
+            "bmUYDCABKAgSFAoMbGFzdF9zZWVuX21zGA0gASgDQhQKEl9ueWFydWdyYW1f",
+            "cHJlbWl1bSJhCgtBdXRoU2Vzc2lvbhINCgV0b2tlbhgBIAEoCRIVCg1leHBp",
+            "cmVzX2F0X21zGAIgASgDEiwKBHVzZXIYAyABKAsyHi5ib3RncmFtLnJwYy52",
+            "MS5BY2NvdW50UHJvZmlsZSIpChBBdXRoUGFzc3dvcmRJbmZvEhUKDXBhc3N3",
+            "b3JkX2luZm8YASABKAwiHwoNUHJlbWl1bVN0YXR1cxIOCgZhY3RpdmUYASAB",
+            "KAgiiwEKClRvdHBSZXN1bHQSDwoHZW5hYmxlZBgBIAEoCBIgChhyZWNvdmVy",
+            "eV9jb2Rlc19yZW1haW5pbmcYAiABKAUSDgoGc2VjcmV0GAMgASgJEgsKA3Vy",
+            "aRgEIAEoCRIVCg1leHBpcmVzX2F0X21zGAUgASgDEhYKDnJlY292ZXJ5X2Nv",
+            "ZGVzGAYgAygJIjwKFURlbGV0ZU1lc3NhZ2VzUmVxdWVzdBITCgttZXNzYWdl",
+            "X2lkcxgBIAMoAxIOCgZyZXZva2UYAiABKAgieQoURGVsZXRlSGlzdG9yeVJl",
+            "cXVlc3QSJQoEcGVlchgBIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYS",
+            "EgoKanVzdF9jbGVhchgCIAEoCBIOCgZyZXZva2UYAyABKAgSFgoObWF4X21l",
+            "c3NhZ2VfaWQYBCABKAMiWgoZRGVsZXRlU2F2ZWRIaXN0b3J5UmVxdWVzdBIl",
+            "CgRwZWVyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZhIWCg5tYXhf",
+            "bWVzc2FnZV9pZBgCIAEoAyIvCh1EZWxldGVQaG9uZUNhbGxIaXN0b3J5UmVx",
+            "dWVzdBIOCgZyZXZva2UYASABKAgiQQoPQWZmZWN0ZWRIaXN0b3J5EgsKA3B0",
+            "cxgBIAEoBRIRCglwdHNfY291bnQYAiABKAUSDgoGb2Zmc2V0GAMgASgFIlkK",
+            "FUFmZmVjdGVkRm91bmRNZXNzYWdlcxILCgNwdHMYASABKAUSEQoJcHRzX2Nv",
+            "dW50GAIgASgFEg4KBm9mZnNldBgDIAEoBRIQCghtZXNzYWdlcxgEIAMoAyKO",
+            "AQoSRWRpdE1lc3NhZ2VSZXF1ZXN0EiUKBHBlZXIYASABKAsyFy5ib3RncmFt",
+            "LnJwYy52MS5QZWVyUmVmEhIKCm1lc3NhZ2VfaWQYAiABKAMSDAoEdGV4dBgD",
+            "IAEoCRIvCghlbnRpdGllcxgEIAMoCzIdLmJvdGdyYW0ucnBjLnYxLk1lc3Nh",
+            "Z2VFbnRpdHkiIgoPTWVzc2FnZUVkaXREYXRhEg8KB2NhcHRpb24YASABKAgi",
+            "VgoZR2V0TWVzc2FnZUVkaXREYXRhUmVxdWVzdBIlCgRwZWVyGAEgASgLMhcu",
+            "Ym90Z3JhbS5ycGMudjEuUGVlclJlZhISCgptZXNzYWdlX2lkGAIgASgDIrwB",
+            "ChZGb3J3YXJkTWVzc2FnZXNSZXF1ZXN0EioKCWZyb21fcGVlchgBIAEoCzIX",
+            "LmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYSKAoHdG9fcGVlchgCIAEoCzIXLmJv",
+            "dGdyYW0ucnBjLnYxLlBlZXJSZWYSEwoLbWVzc2FnZV9pZHMYAyADKAMSEgoK",
+            "cmFuZG9tX2lkcxgEIAMoEBIOCgZzaWxlbnQYBSABKAgSEwoLZHJvcF9hdXRo",
+            "b3IYBiABKAgiZwoQU2V0VHlwaW5nUmVxdWVzdBIlCgRwZWVyGAEgASgLMhcu",
+            "Ym90Z3JhbS5ycGMudjEuUGVlclJlZhIsCgZhY3Rpb24YAiABKA4yHC5ib3Rn",
+            "cmFtLnJwYy52MS5UeXBpbmdBY3Rpb24inAEKCkRyYWZ0U3RhdGUSDAoEdGV4",
             "dBgBIAEoCRIvCghlbnRpdGllcxgCIAMoCzIdLmJvdGdyYW0ucnBjLnYxLk1l",
-            "c3NhZ2VFbnRpdHkSJwoFcmVwbHkYAyABKAsyGC5ib3RncmFtLnJwYy52MS5S",
-            "ZXBseVJlZhIOCgZzaWxlbnQYBCABKAgiTQoSR3JvdXBDcmVhdGVkQWN0aW9u",
-            "Eg0KBXRpdGxlGAEgASgJEigKB21lbWJlcnMYAiADKAsyFy5ib3RncmFtLnJw",
-            "Yy52MS5Vc2VyUmVmIiAKEEUyZWVTeXN0ZW1BY3Rpb24SDAoEdGV4dBgBIAEo",
-            "CSKQAQoOU2VydmljZU1lc3NhZ2USOwoNZ3JvdXBfY3JlYXRlZBgBIAEoCzIi",
-            "LmJvdGdyYW0ucnBjLnYxLkdyb3VwQ3JlYXRlZEFjdGlvbkgAEjcKC2UyZWVf",
-            "c3lzdGVtGAIgASgLMiAuYm90Z3JhbS5ycGMudjEuRTJlZVN5c3RlbUFjdGlv",
-            "bkgAQggKBmFjdGlvbiL7AQoMRTJlZUVudmVsb3BlEhgKEHByb3RvY29sX3Zl",
-            "cnNpb24YASABKA0SFwoPY29udmVyc2F0aW9uX2lkGAIgASgJEhYKDnNlbmRl",
-            "cl91c2VyX2lkGAMgASgJEhgKEHNlbmRlcl9kZXZpY2VfaWQYBCABKA0SGQoR",
-            "cmVjaXBpZW50X3VzZXJfaWQYBSABKAkSGwoTcmVjaXBpZW50X2RldmljZV9p",
-            "ZBgGIAEoDRIRCglrZXlfZXBvY2gYByABKAMSEQoJcmFuZG9tX2lkGAggASgQ",
-            "EhIKCmNpcGhlcnRleHQYCSABKAwSFAoMbWVzc2FnZV90eXBlGAogASgNIvIB",
-            "CglFMmVlSW5uZXISGAoQcHJvdG9jb2xfdmVyc2lvbhgBIAEoDRIXCg9jb252",
-            "ZXJzYXRpb25faWQYAiABKAkSFgoOc2VuZGVyX3VzZXJfaWQYAyABKAkSGAoQ",
-            "c2VuZGVyX2RldmljZV9pZBgEIAEoDRIZChFyZWNpcGllbnRfdXNlcl9pZBgF",
-            "IAEoCRIbChNyZWNpcGllbnRfZGV2aWNlX2lkGAYgASgNEhEKCWtleV9lcG9j",
-            "aBgHIAEoAxIRCglyYW5kb21faWQYCCABKBASFAoMdGltZXN0YW1wX21zGAkg",
-            "ASgDEgwKBHRleHQYCiABKAkivAIKB01lc3NhZ2USEgoKbWVzc2FnZV9pZBgB",
-            "IAEoAxIlCgRwZWVyGAIgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZhIn",
-            "CgZzZW5kZXIYAyABKAsyFy5ib3RncmFtLnJwYy52MS5Vc2VyUmVmEhUKDWNy",
-            "ZWF0ZWRfYXRfbXMYBCABKAMSEAoIb3V0Z29pbmcYBSABKAgSDgoGdW5yZWFk",
-            "GAYgASgIEisKBHRleHQYCiABKAsyGy5ib3RncmFtLnJwYy52MS5UZXh0TWVz",
-            "c2FnZUgAEjEKB3NlcnZpY2UYCyABKAsyHi5ib3RncmFtLnJwYy52MS5TZXJ2",
-            "aWNlTWVzc2FnZUgAEiwKBGUyZWUYDCABKAsyHC5ib3RncmFtLnJwYy52MS5F",
-            "MmVlRW52ZWxvcGVIAEIGCgRib2R5IowBCg5Ob3RpZnlTZXR0aW5ncxIaCg1z",
-            "aG93X3ByZXZpZXdzGAEgASgISACIAQESEwoGc2lsZW50GAIgASgISAGIAQES",
-            "GgoNbXV0ZV91bnRpbF9tcxgDIAEoA0gCiAEBQhAKDl9zaG93X3ByZXZpZXdz",
-            "QgkKB19zaWxlbnRCEAoOX211dGVfdW50aWxfbXMiDgoMUGVlclNldHRpbmdz",
-            "Is0BCgZEaWFsb2cSJQoEcGVlchgBIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBl",
-            "ZXJSZWYSFgoOdG9wX21lc3NhZ2VfaWQYAiABKAMSGQoRcmVhZF9pbmJveF9t",
-            "YXhfaWQYAyABKAMSGgoScmVhZF9vdXRib3hfbWF4X2lkGAQgASgDEhQKDHVu",
-            "cmVhZF9jb3VudBgFIAEoBRI3Cg9ub3RpZnlfc2V0dGluZ3MYBiABKAsyHi5i",
-            "b3RncmFtLnJwYy52MS5Ob3RpZnlTZXR0aW5ncyJZCglTeW5jU3RhdGUSCwoD",
-            "cHRzGAEgASgFEgsKA3F0cxgCIAEoBRIPCgdkYXRlX21zGAMgASgDEgsKA3Nl",
-            "cRgEIAEoBRIUCgx1bnJlYWRfY291bnQYBSABKAUibAoLUmVhZFJlY2VpcHQS",
-            "JQoEcGVlchgBIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYSFgoObWF4",
-            "X21lc3NhZ2VfaWQYAiABKAMSCwoDcHRzGAMgASgFEhEKCXB0c19jb3VudBgE",
-            "IAEoBSI5ChBNZXNzYWdlSWRNYXBwaW5nEhEKCXJhbmRvbV9pZBgBIAEoEBIS",
-            "CgptZXNzYWdlX2lkGAIgASgDIlYKCk5ld01lc3NhZ2USKAoHbWVzc2FnZRgB",
-            "IAEoCzIXLmJvdGdyYW0ucnBjLnYxLk1lc3NhZ2USCwoDcHRzGAIgASgFEhEK",
-            "CXB0c19jb3VudBgDIAEoBSJACgpHaWRDaGFuZ2VkEiUKBHVzZXIYASABKAsy",
-            "Fy5ib3RncmFtLnJwYy52MS5Vc2VyUmVmEgsKA2dpZBgCIAEoCSKaBAoGVXBk",
-            "YXRlEjEKC25ld19tZXNzYWdlGAEgASgLMhouYm90Z3JhbS5ycGMudjEuTmV3",
-            "TWVzc2FnZUgAEjYKCm1lc3NhZ2VfaWQYAiABKAsyIC5ib3RncmFtLnJwYy52",
-            "MS5NZXNzYWdlSWRNYXBwaW5nSAASMQoKcmVhZF9pbmJveBgDIAEoCzIbLmJv",
-            "dGdyYW0ucnBjLnYxLlJlYWRSZWNlaXB0SAASMgoLcmVhZF9vdXRib3gYBCAB",
-            "KAsyGy5ib3RncmFtLnJwYy52MS5SZWFkUmVjZWlwdEgAEjEKC2dpZF9jaGFu",
-            "Z2VkGAUgASgLMhouYm90Z3JhbS5ycGMudjEuR2lkQ2hhbmdlZEgAEkYKFnBl",
-            "ZXJfd2FsbHBhcGVyX2NoYW5nZWQYBiABKAsyJC5ib3RncmFtLnJwYy52MS5Q",
-            "ZWVyV2FsbHBhcGVyQ2hhbmdlZEgAEjsKEHByZXNlbmNlX2NoYW5nZWQYByAB",
-            "KAsyHy5ib3RncmFtLnJwYy52MS5QcmVzZW5jZUNoYW5nZWRIABI2CgpwaG9u",
-            "ZV9jYWxsGAggASgLMiAuYm90Z3JhbS5ycGMudjEuUGhvbmVDYWxsQ2hhbmdl",
-            "ZEgAEkYKFHBob25lX2NhbGxfc2lnbmFsaW5nGAkgASgLMiYuYm90Z3JhbS5y",
-            "cGMudjEuUGhvbmVDYWxsU2lnbmFsaW5nRGF0YUgAQgYKBGtpbmQiqgEKB1Vw",
-            "ZGF0ZXMSJwoHdXBkYXRlcxgBIAMoCzIWLmJvdGdyYW0ucnBjLnYxLlVwZGF0",
-            "ZRIqCgV1c2VycxgCIAMoCzIbLmJvdGdyYW0ucnBjLnYxLlVzZXJTdW1tYXJ5",
-            "EiwKBmdyb3VwcxgDIAMoCzIcLmJvdGdyYW0ucnBjLnYxLkdyb3VwU3VtbWFy",
-            "eRIPCgdkYXRlX21zGAQgASgDEgsKA3NlcRgFIAEoBSIvCg9EaWZmZXJlbmNl",
-            "RW1wdHkSDwoHZGF0ZV9tcxgBIAEoAxILCgNzZXEYAiABKAUiIAoRRGlmZmVy",
-            "ZW5jZVRvb0xvbmcSCwoDcHRzGAEgASgFIugBCg5EaWZmZXJlbmNlUGFnZRIp",
-            "CghtZXNzYWdlcxgBIAMoCzIXLmJvdGdyYW0ucnBjLnYxLk1lc3NhZ2USJwoH",
-            "dXBkYXRlcxgCIAMoCzIWLmJvdGdyYW0ucnBjLnYxLlVwZGF0ZRIqCgV1c2Vy",
-            "cxgDIAMoCzIbLmJvdGdyYW0ucnBjLnYxLlVzZXJTdW1tYXJ5EiwKBmdyb3Vw",
-            "cxgEIAMoCzIcLmJvdGdyYW0ucnBjLnYxLkdyb3VwU3VtbWFyeRIoCgVzdGF0",
-            "ZRgFIAEoCzIZLmJvdGdyYW0ucnBjLnYxLlN5bmNTdGF0ZSLiAQoKRGlmZmVy",
-            "ZW5jZRIwCgVlbXB0eRgBIAEoCzIfLmJvdGdyYW0ucnBjLnYxLkRpZmZlcmVu",
-            "Y2VFbXB0eUgAEjUKCHRvb19sb25nGAIgASgLMiEuYm90Z3JhbS5ycGMudjEu",
-            "RGlmZmVyZW5jZVRvb0xvbmdIABIyCghjb21wbGV0ZRgDIAEoCzIeLmJvdGdy",
-            "YW0ucnBjLnYxLkRpZmZlcmVuY2VQYWdlSAASLwoFc2xpY2UYBCABKAsyHi5i",
-            "b3RncmFtLnJwYy52MS5EaWZmZXJlbmNlUGFnZUgAQgYKBGtpbmQi4QEKCkRp",
-            "YWxvZ1BhZ2USJwoHZGlhbG9ncxgBIAMoCzIWLmJvdGdyYW0ucnBjLnYxLkRp",
-            "YWxvZxIpCghtZXNzYWdlcxgCIAMoCzIXLmJvdGdyYW0ucnBjLnYxLk1lc3Nh",
-            "Z2USKgoFdXNlcnMYAyADKAsyGy5ib3RncmFtLnJwYy52MS5Vc2VyU3VtbWFy",
-            "eRIsCgZncm91cHMYBCADKAsyHC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1h",
-            "cnkSEwoLdG90YWxfY291bnQYBSABKAUSEAoIaXNfc2xpY2UYBiABKAgi5QEK",
-            "C1BlZXJEaWFsb2dzEicKB2RpYWxvZ3MYASADKAsyFi5ib3RncmFtLnJwYy52",
-            "MS5EaWFsb2cSKQoIbWVzc2FnZXMYAiADKAsyFy5ib3RncmFtLnJwYy52MS5N",
-            "ZXNzYWdlEioKBXVzZXJzGAMgAygLMhsuYm90Z3JhbS5ycGMudjEuVXNlclN1",
-            "bW1hcnkSLAoGZ3JvdXBzGAQgAygLMhwuYm90Z3JhbS5ycGMudjEuR3JvdXBT",
-            "dW1tYXJ5EigKBXN0YXRlGAUgASgLMhkuYm90Z3JhbS5ycGMudjEuU3luY1N0",
-            "YXRlIpIBCgtNZXNzYWdlUGFnZRIpCghtZXNzYWdlcxgBIAMoCzIXLmJvdGdy",
-            "YW0ucnBjLnYxLk1lc3NhZ2USKgoFdXNlcnMYAiADKAsyGy5ib3RncmFtLnJw",
-            "Yy52MS5Vc2VyU3VtbWFyeRIsCgZncm91cHMYAyADKAsyHC5ib3RncmFtLnJw",
-            "Yy52MS5Hcm91cFN1bW1hcnkilAEKC01lc3NhZ2VTZW50EigKB21lc3NhZ2UY",
-            "ASABKAsyFy5ib3RncmFtLnJwYy52MS5NZXNzYWdlEjEKB21hcHBpbmcYAiAB",
-            "KAsyIC5ib3RncmFtLnJwYy52MS5NZXNzYWdlSWRNYXBwaW5nEigKB3VwZGF0",
-            "ZXMYAyABKAsyFy5ib3RncmFtLnJwYy52MS5VcGRhdGVzIjIKEEFmZmVjdGVk",
-            "TWVzc2FnZXMSCwoDcHRzGAEgASgFEhEKCXB0c19jb3VudBgCIAEoBSK9AQoK",
-            "Rm91bmRQZWVycxIoCgdyZXN1bHRzGAEgAygLMhcuYm90Z3JhbS5ycGMudjEu",
-            "UGVlclJlZhIrCgpteV9yZXN1bHRzGAIgAygLMhcuYm90Z3JhbS5ycGMudjEu",
-            "UGVlclJlZhIqCgV1c2VycxgDIAMoCzIbLmJvdGdyYW0ucnBjLnYxLlVzZXJT",
-            "dW1tYXJ5EiwKBmdyb3VwcxgEIAMoCzIcLmJvdGdyYW0ucnBjLnYxLkdyb3Vw",
-            "U3VtbWFyeSKPAQoMUmVzb2x2ZWRQZWVyEiUKBHBlZXIYASABKAsyFy5ib3Rn",
-            "cmFtLnJwYy52MS5QZWVyUmVmEioKBXVzZXJzGAIgAygLMhsuYm90Z3JhbS5y",
-            "cGMudjEuVXNlclN1bW1hcnkSLAoGZ3JvdXBzGAMgAygLMhwuYm90Z3JhbS5y",
-            "cGMudjEuR3JvdXBTdW1tYXJ5IjYKCFVzZXJMaXN0EioKBXVzZXJzGAEgAygL",
-            "MhsuYm90Z3JhbS5ycGMudjEuVXNlclN1bW1hcnkieQoLQ29udGFjdExpc3QS",
-            "KQoIY29udGFjdHMYASADKAsyFy5ib3RncmFtLnJwYy52MS5Db250YWN0EioK",
-            "BXVzZXJzGAIgAygLMhsuYm90Z3JhbS5ycGMudjEuVXNlclN1bW1hcnkSEwoL",
-            "c2F2ZWRfY291bnQYAyABKAUiSwoPSW1wb3J0ZWRDb250YWN0EiUKBHVzZXIY",
-            "ASABKAsyFy5ib3RncmFtLnJwYy52MS5Vc2VyUmVmEhEKCWNsaWVudF9pZBgC",
-            "IAEoECI1Cg1Qb3B1bGFySW52aXRlEhEKCWNsaWVudF9pZBgBIAEoEBIRCglp",
-            "bXBvcnRlcnMYAiABKAUiwQEKEEltcG9ydGVkQ29udGFjdHMSMQoIaW1wb3J0",
-            "ZWQYASADKAsyHy5ib3RncmFtLnJwYy52MS5JbXBvcnRlZENvbnRhY3QSKgoF",
-            "dXNlcnMYAiADKAsyGy5ib3RncmFtLnJwYy52MS5Vc2VyU3VtbWFyeRIWCg5y",
-            "ZXRyeV9jb250YWN0cxgDIAMoEBI2Cg9wb3B1bGFyX2ludml0ZXMYBCADKAsy",
-            "HS5ib3RncmFtLnJwYy52MS5Qb3B1bGFySW52aXRlInwKDk1pc3NpbmdJbnZp",
-            "dGVlEiUKBHVzZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5Vc2VyUmVmEiIK",
-            "GnByZW1pdW1fd291bGRfYWxsb3dfaW52aXRlGAIgASgIEh8KF3ByZW1pdW1f",
-            "cmVxdWlyZWRfZm9yX3BtGAMgASgIIp8BCgxHcm91cENyZWF0ZWQSKwoFZ3Jv",
-            "dXAYASABKAsyHC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1hcnkSKAoHdXBk",
-            "YXRlcxgCIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlVwZGF0ZXMSOAoQbWlzc2lu",
-            "Z19pbnZpdGVlcxgDIAMoCzIeLmJvdGdyYW0ucnBjLnYxLk1pc3NpbmdJbnZp",
-            "dGVlIp4BChJQZWVyU2V0dGluZ3NSZXN1bHQSLgoIc2V0dGluZ3MYASABKAsy",
-            "HC5ib3RncmFtLnJwYy52MS5QZWVyU2V0dGluZ3MSKgoFdXNlcnMYAiADKAsy",
-            "Gy5ib3RncmFtLnJwYy52MS5Vc2VyU3VtbWFyeRIsCgZncm91cHMYAyADKAsy",
-            "HC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1hcnkitAMKDlVzZXJGdWxsUmVz",
-            "dWx0EiUKBHVzZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5Vc2VyUmVmEi4K",
-            "CHNldHRpbmdzGAIgASgLMhwuYm90Z3JhbS5ycGMudjEuUGVlclNldHRpbmdz",
-            "EjcKD25vdGlmeV9zZXR0aW5ncxgDIAEoCzIeLmJvdGdyYW0ucnBjLnYxLk5v",
-            "dGlmeVNldHRpbmdzEg0KBWFib3V0GAQgASgJEhsKE2NvbW1vbl9ncm91cHNf",
-            "Y291bnQYBSABKAUSHQoVcGhvbmVfY2FsbHNfYXZhaWxhYmxlGAYgASgIEhsK",
-            "E3Bob25lX2NhbGxzX3ByaXZhdGUYByABKAgSKgoFdXNlcnMYCCADKAsyGy5i",
-            "b3RncmFtLnJwYy52MS5Vc2VyU3VtbWFyeRIsCgZncm91cHMYCSADKAsyHC5i",
-            "b3RncmFtLnJwYy52MS5Hcm91cFN1bW1hcnkSMQoJd2FsbHBhcGVyGAogASgL",
-            "Mh4uYm90Z3JhbS5ycGMudjEuV2FsbHBhcGVyU3RhdGUSHQoVdmlkZW9fY2Fs",
-            "bHNfYXZhaWxhYmxlGAsgASgIIuQCCg9Hcm91cEZ1bGxSZXN1bHQSKwoFZ3Jv",
-            "dXAYASABKAsyHC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1hcnkSDQoFYWJv",
-            "dXQYAiABKAkSMQoMcGFydGljaXBhbnRzGAMgAygLMhsuYm90Z3JhbS5ycGMu",
-            "djEuUGFydGljaXBhbnQSHAoUcGFydGljaXBhbnRzX3ZlcnNpb24YBCABKAUS",
-            "NwoPbm90aWZ5X3NldHRpbmdzGAUgASgLMh4uYm90Z3JhbS5ycGMudjEuTm90",
-            "aWZ5U2V0dGluZ3MSKgoFdXNlcnMYBiADKAsyGy5ib3RncmFtLnJwYy52MS5V",
-            "c2VyU3VtbWFyeRIsCgZncm91cHMYByADKAsyHC5ib3RncmFtLnJwYy52MS5H",
-            "cm91cFN1bW1hcnkSMQoJd2FsbHBhcGVyGAggASgLMh4uYm90Z3JhbS5ycGMu",
-            "djEuV2FsbHBhcGVyU3RhdGUiOQoJR3JvdXBMaXN0EiwKBmdyb3VwcxgBIAMo",
-            "CzIcLmJvdGdyYW0ucnBjLnYxLkdyb3VwU3VtbWFyeSIRCg9HZXRTdGF0ZVJl",
-            "cXVlc3QiIwoUR2V0RGlmZmVyZW5jZVJlcXVlc3QSCwoDcHRzGAEgASgFIo0B",
-            "ChFHZXREaWFsb2dzUmVxdWVzdBISCgVsaW1pdBgBIAEoBUgAiAEBEhkKEW9m",
-            "ZnNldF9tZXNzYWdlX2lkGAIgASgDEiwKC29mZnNldF9wZWVyGAMgASgLMhcu",
-            "Ym90Z3JhbS5ycGMudjEuUGVlclJlZhIRCglmb2xkZXJfaWQYBCABKAVCCAoG",
-            "X2xpbWl0IhkKF0dldFBpbm5lZERpYWxvZ3NSZXF1ZXN0IlIKFUdldFBlZXJE",
-            "aWFsb2dzUmVxdWVzdBImCgVwZWVycxgBIAMoCzIXLmJvdGdyYW0ucnBjLnYx",
-            "LlBlZXJSZWYSEQoJZm9sZGVyX2lkGAIgASgFIs8BChFHZXRIaXN0b3J5UmVx",
-            "dWVzdBIlCgRwZWVyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZhIZ",
-            "ChFvZmZzZXRfbWVzc2FnZV9pZBgCIAEoAxIWCg5vZmZzZXRfZGF0ZV9tcxgD",
-            "IAEoAxISCgphZGRfb2Zmc2V0GAQgASgFEhYKDm1pbl9tZXNzYWdlX2lkGAUg",
-            "ASgDEhYKDm1heF9tZXNzYWdlX2lkGAYgASgDEhIKBWxpbWl0GAcgASgFSACI",
-            "AQFCCAoGX2xpbWl0IikKEkdldE1lc3NhZ2VzUmVxdWVzdBITCgttZXNzYWdl",
-            "X2lkcxgBIAMoAyKRAgoSU2VuZE1lc3NhZ2VSZXF1ZXN0EiUKBHBlZXIYASAB",
-            "KAsyFy5ib3RncmFtLnJwYy52MS5QZWVyUmVmEhEKCXJhbmRvbV9pZBgCIAEo",
-            "EBIMCgR0ZXh0GAMgASgJEi8KCGVudGl0aWVzGAQgAygLMh0uYm90Z3JhbS5y",
-            "cGMudjEuTWVzc2FnZUVudGl0eRIgChNyZXBseV90b19tZXNzYWdlX2lkGAUg",
-            "ASgDSACIAQESDgoGc2lsZW50GAYgASgIEi8KBGUyZWUYByABKAsyHC5ib3Rn",
-            "cmFtLnJwYy52MS5FMmVlRW52ZWxvcGVIAYgBAUIWChRfcmVwbHlfdG9fbWVz",
-            "c2FnZV9pZEIHCgVfZTJlZSI3ChFFMmVlT25lVGltZVByZUtleRIOCgZrZXlf",
-            "aWQYASABKAUSEgoKcHVibGljX2tleRgCIAEoDCLBAgoYRTJlZVB1Ymxpc2hE",
-            "ZXZpY2VSZXF1ZXN0EhEKCWRldmljZV9pZBgBIAEoDRIXCg9yZWdpc3RyYXRp",
-            "b25faWQYAiABKAUSFAoMaWRlbnRpdHlfa2V5GAMgASgMEhkKEXNpZ25lZF9w",
-            "cmVfa2V5X2lkGAQgASgFEhYKDnNpZ25lZF9wcmVfa2V5GAUgASgMEiAKGHNp",
-            "Z25lZF9wcmVfa2V5X3NpZ25hdHVyZRgGIAEoDBIYChBreWJlcl9wcmVfa2V5",
-            "X2lkGAcgASgFEhUKDWt5YmVyX3ByZV9rZXkYCCABKAwSHwoXa3liZXJfcHJl",
-            "X2tleV9zaWduYXR1cmUYCSABKAwSPAoRb25lX3RpbWVfcHJlX2tleXMYCiAD",
-            "KAsyIS5ib3RncmFtLnJwYy52MS5FMmVlT25lVGltZVByZUtleSLNAgoORTJl",
-            "ZURldmljZUluZm8SEQoJZGV2aWNlX2lkGAEgASgNEhcKD3JlZ2lzdHJhdGlv",
-            "bl9pZBgCIAEoBRIUCgxpZGVudGl0eV9rZXkYAyABKAwSGQoRc2lnbmVkX3By",
-            "ZV9rZXlfaWQYBCABKAUSFgoOc2lnbmVkX3ByZV9rZXkYBSABKAwSIAoYc2ln",
-            "bmVkX3ByZV9rZXlfc2lnbmF0dXJlGAYgASgMEhgKEGt5YmVyX3ByZV9rZXlf",
-            "aWQYByABKAUSFQoNa3liZXJfcHJlX2tleRgIIAEoDBIfChdreWJlcl9wcmVf",
-            "a2V5X3NpZ25hdHVyZRgJIAEoDBIjChtyZW1haW5pbmdfb25lX3RpbWVfcHJl",
-            "X2tleXMYCiABKAUSEgoKZ2VuZXJhdGlvbhgLIAEoAxIZChFpZGVudGl0eV9y",
-            "ZXBsYWNlZBgMIAEoCCJBChhFMmVlR2V0UGVlckJ1bmRsZVJlcXVlc3QSJQoE",
-            "cGVlchgBIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYisgIKDkUyZWVQ",
-            "ZWVyQnVuZGxlEhEKCWRldmljZV9pZBgBIAEoDRIXCg9yZWdpc3RyYXRpb25f",
-            "aWQYAiABKAUSEgoKcHJlX2tleV9pZBgDIAEoBRIPCgdwcmVfa2V5GAQgASgM",
-            "EhkKEXNpZ25lZF9wcmVfa2V5X2lkGAUgASgFEhYKDnNpZ25lZF9wcmVfa2V5",
-            "GAYgASgMEiAKGHNpZ25lZF9wcmVfa2V5X3NpZ25hdHVyZRgHIAEoDBIUCgxp",
-            "ZGVudGl0eV9rZXkYCCABKAwSGAoQa3liZXJfcHJlX2tleV9pZBgJIAEoBRIV",
-            "Cg1reWJlcl9wcmVfa2V5GAogASgMEh8KF2t5YmVyX3ByZV9rZXlfc2lnbmF0",
-            "dXJlGAsgASgMEhIKCmdlbmVyYXRpb24YDCABKAMidwoYRTJlZUlkZW50aXR5",
-            "Q29uZmlybWF0aW9uEhkKEXBlZXJfaWRlbnRpdHlfa2V5GAEgASgMEhcKD3Bl",
-            "ZXJfZ2VuZXJhdGlvbhgCIAEoAxINCgVlcG9jaBgDIAEoAxIYChBpZGVudGl0",
-            "eV92ZXJzaW9uGAQgASgJIs0BChFFMmVlQWN0aW9uUmVxdWVzdBIlCgRwZWVy",
-            "GAEgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZhIuCgZhY3Rpb24YAiAB",
-            "KA4yHi5ib3RncmFtLnJwYy52MS5FMmVlQWN0aW9uS2luZBIYChBwcm90b2Nv",
-            "bF92ZXJzaW9uGAMgASgNEkcKFWlkZW50aXR5X2NvbmZpcm1hdGlvbhgEIAEo",
-            "CzIoLmJvdGdyYW0ucnBjLnYxLkUyZWVJZGVudGl0eUNvbmZpcm1hdGlvbiI+",
-            "ChRFMmVlR2V0U3RhdHVzUmVxdWVzdBImCgVwZWVycxgBIAMoCzIXLmJvdGdy",
-            "YW0ucnBjLnYxLlBlZXJSZWYiKgoPRTJlZUxpc3RSZXF1ZXN0EhcKD2luY2x1",
-            "ZGVfcGVuZGluZxgBIAEoCCLlBAoORTJlZUNoYXRTdGF0dXMSJQoEcGVlchgB",
-            "IAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYSKAoFc3RhdGUYAiABKA4y",
-            "GS5ib3RncmFtLnJwYy52MS5FMmVlU3RhdGUSGAoQcHJvdG9jb2xfdmVyc2lv",
-            "bhgDIAEoDRINCgVlcG9jaBgEIAEoAxIbChNib3VuZGFyeV9tZXNzYWdlX2lk",
-            "GAUgASgDEhYKDnNlbGZfaW5pdGlhdG9yGAYgASgIEhUKDWF3YWl0aW5nX3Nl",
-            "bGYYByABKAgSFgoOcGVlcl9zdXBwb3J0ZWQYCCABKAgSGAoQaWRlbnRpdHlf",
-            "Y2hhbmdlZBgJIAEoCBIhChljbG9zZV9ib3VuZGFyeV9tZXNzYWdlX2lkGAog",
-            "ASgDEhkKEWluaXRpYXRvcl91c2VyX2lkGAsgASgJEhkKEWNsb3NlZF9ieV91",
-            "c2VyX2lkGAwgASgJEh8KF3NlbGZfY29uZmlybWVkX2lkZW50aXR5GA0gASgI",
-            "Eh8KF3BlZXJfY29uZmlybWVkX2lkZW50aXR5GA4gASgIEhYKDnNlbGZfZGV2",
-            "aWNlX2lkGA8gASgNEhYKDnBlZXJfZGV2aWNlX2lkGBAgASgNEhkKEXBlZXJf",
-            "aWRlbnRpdHlfa2V5GBEgASgMEhcKD3BlZXJfZ2VuZXJhdGlvbhgSIAEoAxIV",
-            "Cg11cGRhdGVkX2F0X21zGBMgASgDEhcKD2NvbnZlcnNhdGlvbl9pZBgUIAEo",
-            "CRISCgp0bF91c2VyX2lkGBUgASgDEhgKEGlkZW50aXR5X3ZlcnNpb24YFiAB",
-            "KAkiQwoSRTJlZUNoYXRTdGF0dXNMaXN0Ei0KBWNoYXRzGAEgAygLMh4uYm90",
-            "Z3JhbS5ycGMudjEuRTJlZUNoYXRTdGF0dXMiUwoSUmVhZEhpc3RvcnlSZXF1",
-            "ZXN0EiUKBHBlZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5QZWVyUmVmEhYK",
-            "Dm1heF9tZXNzYWdlX2lkGAIgASgDIiYKFVNlYXJjaENvbnRhY3RzUmVxdWVz",
-            "dBINCgVxdWVyeRgBIAEoCSIqChZSZXNvbHZlVXNlcm5hbWVSZXF1ZXN0EhAK",
-            "CHVzZXJuYW1lGAEgASgJIj4KD0dldFVzZXJzUmVxdWVzdBIrCgV1c2VycxgB",
-            "IAMoCzIcLmJvdGdyYW0ucnBjLnYxLlVzZXJTZWxlY3RvciIUChJHZXRDb250",
-            "YWN0c1JlcXVlc3QiIAoRUmVzb2x2ZUdpZFJlcXVlc3QSCwoDZ2lkGAEgASgJ",
-            "IlYKDUltcG9ydENvbnRhY3QSEQoJY2xpZW50X2lkGAEgASgQEgsKA2dpZBgC",
-            "IAEoCRISCgpmaXJzdF9uYW1lGAMgASgJEhEKCWxhc3RfbmFtZRgEIAEoCSJI",
-            "ChVJbXBvcnRDb250YWN0c1JlcXVlc3QSLwoIY29udGFjdHMYASADKAsyHS5i",
-            "b3RncmFtLnJwYy52MS5JbXBvcnRDb250YWN0IlAKEkNyZWF0ZUdyb3VwUmVx",
-            "dWVzdBINCgV0aXRsZRgBIAEoCRIrCgV1c2VycxgCIAMoCzIcLmJvdGdyYW0u",
-            "cnBjLnYxLlVzZXJTZWxlY3RvciI/ChZHZXRQZWVyU2V0dGluZ3NSZXF1ZXN0",
-            "EiUKBHBlZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5QZWVyUmVmIkAKEkdl",
-            "dEZ1bGxVc2VyUmVxdWVzdBIqCgR1c2VyGAEgASgLMhwuYm90Z3JhbS5ycGMu",
-            "djEuVXNlclNlbGVjdG9yIicKE0dldEZ1bGxHcm91cFJlcXVlc3QSEAoIZ3Jv",
-            "dXBfaWQYASABKAkiJQoQR2V0R3JvdXBzUmVxdWVzdBIRCglncm91cF9pZHMY",
-            "ASADKAkiywEKDE5vdGlmeVRhcmdldBInCgRwZWVyGAEgASgLMhcuYm90Z3Jh",
-            "bS5ycGMudjEuUGVlclJlZkgAEioKCWFsbF91c2VycxgCIAEoCzIVLmJvdGdy",
-            "YW0ucnBjLnYxLkVtcHR5SAASKwoKYWxsX2dyb3VwcxgDIAEoCzIVLmJvdGdy",
-            "YW0ucnBjLnYxLkVtcHR5SAASLwoOYWxsX2Jyb2FkY2FzdHMYBCABKAsyFS5i",
-            "b3RncmFtLnJwYy52MS5FbXB0eUgAQggKBnRhcmdldCJIChhHZXROb3RpZnlT",
-            "ZXR0aW5nc1JlcXVlc3QSLAoGdGFyZ2V0GAEgASgLMhwuYm90Z3JhbS5ycGMu",
-            "djEuTm90aWZ5VGFyZ2V0IkQKGFJlc29sdmVJZGVudGl0aWVzUmVxdWVzdBIT",
-            "Cgt0bF91c2VyX2lkcxgBIAMoAxITCgt0bF9jaGF0X2lkcxgCIAMoAyKFAQoS",
-            "UmVzb2x2ZWRJZGVudGl0aWVzEhUKDXNlcnZlcl9kb21haW4YASABKAkSKgoF",
-            "dXNlcnMYAiADKAsyGy5ib3RncmFtLnJwYy52MS5Vc2VyU3VtbWFyeRIsCgZn",
-            "cm91cHMYAyADKAsyHC5ib3RncmFtLnJwYy52MS5Hcm91cFN1bW1hcnkilwMK",
-            "EVdhbGxwYXBlclNldHRpbmdzEh0KEGJhY2tncm91bmRfY29sb3IYASABKA1I",
-            "AIgBARIkChdzZWNvbmRfYmFja2dyb3VuZF9jb2xvchgCIAEoDUgBiAEBEiMK",
-            "FnRoaXJkX2JhY2tncm91bmRfY29sb3IYAyABKA1IAogBARIkChdmb3VydGhf",
-            "YmFja2dyb3VuZF9jb2xvchgEIAEoDUgDiAEBEhUKCHJvdGF0aW9uGAUgASgF",
-            "SASIAQESFgoJaW50ZW5zaXR5GAYgASgFSAWIAQESDAoEYmx1chgHIAEoCBIO",
-            "CgZtb3Rpb24YCCABKAgSFQoIZW1vdGljb24YCSABKAlIBogBAUITChFfYmFj",
-            "a2dyb3VuZF9jb2xvckIaChhfc2Vjb25kX2JhY2tncm91bmRfY29sb3JCGQoX",
-            "X3RoaXJkX2JhY2tncm91bmRfY29sb3JCGgoYX2ZvdXJ0aF9iYWNrZ3JvdW5k",
-            "X2NvbG9yQgsKCV9yb3RhdGlvbkIMCgpfaW50ZW5zaXR5QgsKCV9lbW90aWNv",
-            "biJoCg9Ob0ZpbGVXYWxscGFwZXISMwoIc2V0dGluZ3MYASABKAsyIS5ib3Rn",
-            "cmFtLnJwYy52MS5XYWxscGFwZXJTZXR0aW5ncxIMCgRkYXJrGAIgASgIEhIK",
-            "CmlzX2RlZmF1bHQYAyABKAgiUwoJV2FsbHBhcGVyEgoKAmlkGAEgASgQEjIK",
-            "B25vX2ZpbGUYCiABKAsyHy5ib3RncmFtLnJwYy52MS5Ob0ZpbGVXYWxscGFw",
-            "ZXJIAEIGCgRraW5kIocBCg5XYWxscGFwZXJTdGF0ZRIuCgl3YWxscGFwZXIY",
-            "ASABKAsyGS5ib3RncmFtLnJwYy52MS5XYWxscGFwZXJIABIoCgdjbGVhcmVk",
-            "GAIgASgLMhUuYm90Z3JhbS5ycGMudjEuRW1wdHlIABISCgpvdmVycmlkZGVu",
-            "GAMgASgIQgcKBXZhbHVlIjIKFEdldFdhbGxwYXBlcnNSZXF1ZXN0EhEKBGhh",
-            "c2gYASABKBBIAIgBAUIHCgVfaGFzaCKnAQoNV2FsbHBhcGVyTGlzdBItCgp3",
-            "YWxscGFwZXJzGAEgAygLMhkuYm90Z3JhbS5ycGMudjEuV2FsbHBhcGVyEjEK",
-            "CWluc3RhbGxlZBgCIAEoCzIeLmJvdGdyYW0ucnBjLnYxLldhbGxwYXBlclN0",
-            "YXRlEhAKCHJldmlzaW9uGAMgASgDEgwKBGhhc2gYBCABKBASFAoMbm90X21v",
-            "ZGlmaWVkGAUgASgIIlQKFFNhdmVXYWxscGFwZXJSZXF1ZXN0EiwKCXdhbGxw",
-            "YXBlchgBIAEoCzIZLmJvdGdyYW0ucnBjLnYxLldhbGxwYXBlchIOCgZ1bnNh",
-            "dmUYAiABKAgifgoXSW5zdGFsbFdhbGxwYXBlclJlcXVlc3QSLgoJd2FsbHBh",
-            "cGVyGAEgASgLMhkuYm90Z3JhbS5ycGMudjEuV2FsbHBhcGVySAASJgoFY2xl",
-            "YXIYAiABKAsyFS5ib3RncmFtLnJwYy52MS5FbXB0eUgAQgsKCXNlbGVjdGlv",
-            "biJvChdXYWxscGFwZXJNdXRhdGlvblJlc3VsdBIPCgdhcHBsaWVkGAEgASgI",
-            "EhAKCHJldmlzaW9uGAIgASgDEjEKCWluc3RhbGxlZBgDIAEoCzIeLmJvdGdy",
-            "YW0ucnBjLnYxLldhbGxwYXBlclN0YXRlIuUBChdTZXRDaGF0V2FsbHBhcGVy",
+            "c3NhZ2VFbnRpdHkSIAoTcmVwbHlfdG9fbWVzc2FnZV9pZBgDIAEoA0gAiAEB",
+            "EhUKDXVwZGF0ZWRfYXRfbXMYBCABKANCFgoUX3JlcGx5X3RvX21lc3NhZ2Vf",
+            "aWQisgEKEFNhdmVEcmFmdFJlcXVlc3QSJQoEcGVlchgBIAEoCzIXLmJvdGdy",
+            "YW0ucnBjLnYxLlBlZXJSZWYSDAoEdGV4dBgCIAEoCRIvCghlbnRpdGllcxgD",
+            "IAMoCzIdLmJvdGdyYW0ucnBjLnYxLk1lc3NhZ2VFbnRpdHkSIAoTcmVwbHlf",
+            "dG9fbWVzc2FnZV9pZBgEIAEoA0gAiAEBQhYKFF9yZXBseV90b19tZXNzYWdl",
+            "X2lkIhcKFUNsZWFyQWxsRHJhZnRzUmVxdWVzdCIVChNHZXRBbGxEcmFmdHNS",
+            "ZXF1ZXN0InYKGlVwZGF0ZVBpbm5lZE1lc3NhZ2VSZXF1ZXN0EiUKBHBlZXIY",
+            "ASABKAsyFy5ib3RncmFtLnJwYy52MS5QZWVyUmVmEhIKCm1lc3NhZ2VfaWQY",
+            "AiABKAMSDQoFdW5waW4YAyABKAgSDgoGc2lsZW50GAQgASgIIkAKF1VucGlu",
+            "QWxsTWVzc2FnZXNSZXF1ZXN0EiUKBHBlZXIYASABKAsyFy5ib3RncmFtLnJw",
+            "Yy52MS5QZWVyUmVmIk8KFlRvZ2dsZURpYWxvZ1BpblJlcXVlc3QSJQoEcGVl",
+            "chgBIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYSDgoGcGlubmVkGAIg",
+            "ASgIIlQKG1Jlb3JkZXJQaW5uZWREaWFsb2dzUmVxdWVzdBImCgVvcmRlchgB",
+            "IAMoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYSDQoFZm9yY2UYAiABKAgi",
+            "UAoXTWFya0RpYWxvZ1VucmVhZFJlcXVlc3QSJQoEcGVlchgBIAEoCzIXLmJv",
+            "dGdyYW0ucnBjLnYxLlBlZXJSZWYSDgoGdW5yZWFkGAIgASgIIh0KG0dldERp",
+            "YWxvZ1VucmVhZE1hcmtzUmVxdWVzdCIyCghQZWVyTGlzdBImCgVwZWVycxgB",
+            "IAMoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYiMQoaUmVhZE1lc3NhZ2VD",
+            "b250ZW50c1JlcXVlc3QSEwoLbWVzc2FnZV9pZHMYASADKAMiOgoRR2V0T25s",
+            "aW5lc1JlcXVlc3QSJQoEcGVlchgBIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBl",
+            "ZXJSZWYiHgoLQ2hhdE9ubGluZXMSDwoHb25saW5lcxgBIAEoBSJnChVHZXRD",
+            "b21tb25DaGF0c1JlcXVlc3QSKgoEdXNlchgBIAEoCzIcLmJvdGdyYW0ucnBj",
+            "LnYxLlVzZXJTZWxlY3RvchITCgttYXhfY2hhdF9pZBgCIAEoAxINCgVsaW1p",
+            "dBgDIAEoBSJDChpIaWRlUGVlclNldHRpbmdzQmFyUmVxdWVzdBIlCgRwZWVy",
+            "GAEgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVlclJlZiI6ChFSZXBvcnRTcGFt",
             "UmVxdWVzdBIlCgRwZWVyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVlclJl",
-            "ZhIuCgl3YWxscGFwZXIYAiABKAsyGS5ib3RncmFtLnJwYy52MS5XYWxscGFw",
-            "ZXJIABImCgVjbGVhchgDIAEoCzIVLmJvdGdyYW0ucnBjLnYxLkVtcHR5SAAS",
-            "HAoSc2VydmljZV9tZXNzYWdlX2lkGAQgASgDSAASEAoIZm9yX2JvdGgYBSAB",
-            "KAgSDgoGcmV2ZXJ0GAYgASgIQgsKCXNlbGVjdGlvbiJsChRQZWVyV2FsbHBh",
-            "cGVyQ2hhbmdlZBIlCgRwZWVyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEuUGVl",
-            "clJlZhItCgVzdGF0ZRgCIAEoCzIeLmJvdGdyYW0ucnBjLnYxLldhbGxwYXBl",
-            "clN0YXRlIoABChNDaGF0V2FsbHBhcGVyUmVzdWx0EigKB3VwZGF0ZXMYASAB",
-            "KAsyFy5ib3RncmFtLnJwYy52MS5VcGRhdGVzEi0KBXN0YXRlGAIgASgLMh4u",
-            "Ym90Z3JhbS5ycGMudjEuV2FsbHBhcGVyU3RhdGUSEAoIcmV2aXNpb24YAyAB",
-            "KAMiewoRUGhvbmVDYWxsUHJvdG9jb2wSDwoHdWRwX3AycBgBIAEoCBIVCg11",
-            "ZHBfcmVmbGVjdG9yGAIgASgIEhEKCW1pbl9sYXllchgDIAEoBRIRCgltYXhf",
-            "bGF5ZXIYBCABKAUSGAoQbGlicmFyeV92ZXJzaW9ucxgFIAMoCSKFAQoPUGhv",
-            "bmVDb25uZWN0aW9uEgoKAmlkGAEgASgDEgoKAmlwGAIgASgJEgwKBGlwdjYY",
-            "AyABKAkSDAoEcG9ydBgEIAEoBRIMCgR0dXJuGAUgASgIEgwKBHN0dW4YBiAB",
-            "KAgSEAoIdXNlcm5hbWUYByABKAkSEAoIcGFzc3dvcmQYCCABKAkiNAoMUGhv",
-            "bmVDYWxsUmVmEg8KB2NhbGxfaWQYASABKAMSEwoLYWNjZXNzX2hhc2gYAiAB",
-            "KAMihgQKCVBob25lQ2FsbBIPCgdjYWxsX2lkGAEgASgDEhMKC2FjY2Vzc19o",
-            "YXNoGAIgASgDEi0KBXN0YXRlGAMgASgOMh4uYm90Z3JhbS5ycGMudjEuUGhv",
-            "bmVDYWxsU3RhdGUSGAoQYWRtaW5fdGxfdXNlcl9pZBgEIAEoAxIeChZwYXJ0",
-            "aWNpcGFudF90bF91c2VyX2lkGAUgASgDEg8KB2RhdGVfbXMYBiABKAMSDQoF",
-            "dmlkZW8YByABKAgSEwoLcDJwX2FsbG93ZWQYCCABKAgSMwoIcHJvdG9jb2wY",
-            "CSABKAsyIS5ib3RncmFtLnJwYy52MS5QaG9uZUNhbGxQcm90b2NvbBIXCg9y",
-            "ZWNlaXZlX2RhdGVfbXMYCiABKAMSFQoNc3RhcnRfZGF0ZV9tcxgLIAEoAxIQ",
-            "CghnX2FfaGFzaBgMIAEoDBILCgNnX2IYDSABKAwSEAoIZ19hX29yX2IYDiAB",
-            "KAwSFwoPa2V5X2ZpbmdlcnByaW50GA8gASgDEjQKC2Nvbm5lY3Rpb25zGBAg",
-            "AygLMh8uYm90Z3JhbS5ycGMudjEuUGhvbmVDb25uZWN0aW9uEj4KDmRpc2Nh",
-            "cmRfcmVhc29uGBEgASgOMiYuYm90Z3JhbS5ycGMudjEuUGhvbmVDYWxsRGlz",
-            "Y2FyZFJlYXNvbhIQCghkdXJhdGlvbhgSIAEoBSJsCg9QaG9uZUNhbGxSZXN1",
-            "bHQSLQoKcGhvbmVfY2FsbBgBIAEoCzIZLmJvdGdyYW0ucnBjLnYxLlBob25l",
-            "Q2FsbBIqCgV1c2VycxgCIAMoCzIbLmJvdGdyYW0ucnBjLnYxLlVzZXJTdW1t",
-            "YXJ5IhoKCUJvb2xWYWx1ZRINCgV2YWx1ZRgBIAEoCCIYCghEYXRhSnNvbhIM",
-            "CgRkYXRhGAEgASgJIq4BChdQaG9uZVJlcXVlc3RDYWxsUmVxdWVzdBIqCgR1",
-            "c2VyGAEgASgLMhwuYm90Z3JhbS5ycGMudjEuVXNlclNlbGVjdG9yEhEKCXJh",
-            "bmRvbV9pZBgCIAEoAxINCgV2aWRlbxgDIAEoCBIQCghnX2FfaGFzaBgEIAEo",
-            "DBIzCghwcm90b2NvbBgFIAEoCzIhLmJvdGdyYW0ucnBjLnYxLlBob25lQ2Fs",
-            "bFByb3RvY29sIkYKGFBob25lUmVjZWl2ZWRDYWxsUmVxdWVzdBIqCgRwZWVy",
-            "GAEgASgLMhwuYm90Z3JhbS5ycGMudjEuUGhvbmVDYWxsUmVmIoYBChZQaG9u",
-            "ZUFjY2VwdENhbGxSZXF1ZXN0EioKBHBlZXIYASABKAsyHC5ib3RncmFtLnJw",
-            "Yy52MS5QaG9uZUNhbGxSZWYSCwoDZ19iGAIgASgMEjMKCHByb3RvY29sGAMg",
-            "ASgLMiEuYm90Z3JhbS5ycGMudjEuUGhvbmVDYWxsUHJvdG9jb2wioAEKF1Bo",
-            "b25lQ29uZmlybUNhbGxSZXF1ZXN0EioKBHBlZXIYASABKAsyHC5ib3RncmFt",
-            "LnJwYy52MS5QaG9uZUNhbGxSZWYSCwoDZ19hGAIgASgMEhcKD2tleV9maW5n",
-            "ZXJwcmludBgDIAEoAxIzCghwcm90b2NvbBgEIAEoCzIhLmJvdGdyYW0ucnBj",
-            "LnYxLlBob25lQ2FsbFByb3RvY29sIrUBChdQaG9uZURpc2NhcmRDYWxsUmVx",
-            "dWVzdBIqCgRwZWVyGAEgASgLMhwuYm90Z3JhbS5ycGMudjEuUGhvbmVDYWxs",
-            "UmVmEhAKCGR1cmF0aW9uGAIgASgFEjYKBnJlYXNvbhgDIAEoDjImLmJvdGdy",
-            "YW0ucnBjLnYxLlBob25lQ2FsbERpc2NhcmRSZWFzb24SFQoNY29ubmVjdGlv",
-            "bl9pZBgEIAEoAxINCgV2aWRlbxgFIAEoCCJZCh1QaG9uZVNlbmRTaWduYWxp",
-            "bmdEYXRhUmVxdWVzdBIqCgRwZWVyGAEgASgLMhwuYm90Z3JhbS5ycGMudjEu",
-            "UGhvbmVDYWxsUmVmEgwKBGRhdGEYAiABKAwiGwoZUGhvbmVHZXRDYWxsQ29u",
-            "ZmlnUmVxdWVzdCJWChlQaG9uZVNhdmVDYWxsRGVidWdSZXF1ZXN0EioKBHBl",
-            "ZXIYASABKAsyHC5ib3RncmFtLnJwYy52MS5QaG9uZUNhbGxSZWYSDQoFZGVi",
-            "dWcYAiABKAkiQQoQUGhvbmVDYWxsQ2hhbmdlZBItCgpwaG9uZV9jYWxsGAEg",
-            "ASgLMhkuYm90Z3JhbS5ycGMudjEuUGhvbmVDYWxsIjcKFlBob25lQ2FsbFNp",
-            "Z25hbGluZ0RhdGESDwoHY2FsbF9pZBgBIAEoAxIMCgRkYXRhGAIgASgMIjwK",
-            "EkdldERoQ29uZmlnUmVxdWVzdBIPCgd2ZXJzaW9uGAEgASgFEhUKDXJhbmRv",
-            "bV9sZW5ndGgYAiABKAUiVwoIRGhDb25maWcSDwoHdmVyc2lvbhgBIAEoBRIJ",
-            "CgFnGAIgASgFEgkKAXAYAyABKAwSDgoGcmFuZG9tGAQgASgMEhQKDG5vdF9t",
-            "b2RpZmllZBgFIAEoCCIZChdBdXRoQ2FwYWJpbGl0aWVzUmVxdWVzdCKoAQoQ",
-            "QXV0aENhcGFiaWxpdGllcxIbChNuZWdvdGlhdGlvbl92ZXJzaW9uGAEgASgN",
-            "EhEKCXByb3RvY29scxgCIAMoCRIZChFzZWxlY3RlZF9wcm90b2NvbBgDIAEo",
-            "CRIaChJldmVudF9zdWJwcm90b2NvbHMYBCADKAkSFAoMY2FwYWJpbGl0aWVz",
-            "GAUgAygJEhcKD2pzb25fYXBpX3N0YXR1cxgGIAEoCSKDAQoTQXV0aFJlZ2lz",
-            "dGVyUmVxdWVzdBIQCgh1c2VybmFtZRgBIAEoCRIQCghwYXNzd29yZBgCIAEo",
-            "CRIUCgxkaXNwbGF5X25hbWUYAyABKAkSHQoQbG9jYXRpb25fY291bnRyeRgE",
-            "IAEoCUgAiAEBQhMKEV9sb2NhdGlvbl9jb3VudHJ5IowBChBBdXRoTG9naW5S",
-            "ZXF1ZXN0EhAKCHVzZXJuYW1lGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJEhYK",
-            "CXRvdHBfY29kZRgDIAEoCUgAiAEBEhsKDnBhc3N3b3JkX3Byb29mGAQgASgJ",
-            "SAGIAQFCDAoKX3RvdHBfY29kZUIRCg9fcGFzc3dvcmRfcHJvb2YiOQoTQXV0",
-            "aFBhc3N3b3JkUmVxdWVzdBIQCgh1c2VybmFtZRgBIAEoCRIQCghwYXNzd29y",
-            "ZBgCIAEoCSJPChJBdXRoUmVjb3ZlclJlcXVlc3QSEAoIdXNlcm5hbWUYASAB",
-            "KAkSEAoIcGFzc3dvcmQYAiABKAkSFQoNcmVjb3ZlcnlfY29kZRgDIAEoCSIT",
-            "ChFBdXRoTG9nb3V0UmVxdWVzdCISChBBY2NvdW50TWVSZXF1ZXN0IiIKDlBy",
-            "ZW1pdW1SZXF1ZXN0EhAKCGFjdGl2YXRlGAEgASgIIjcKEENoYW5nZUdpZFJl",
-            "cXVlc3QSEwoLcmVnaW9uX2NvZGUYASABKAkSDgoGbnVtYmVyGAIgASgJIi4K",
-            "C1RvdHBSZXF1ZXN0EhEKCW9wZXJhdGlvbhgBIAEoCRIMCgRjb2RlGAIgASgJ",
-            "Iq0CCg5BY2NvdW50UHJvZmlsZRIPCgd1c2VyX2lkGAEgASgJEhAKCHVzZXJu",
-            "YW1lGAIgASgJEhQKDGRpc3BsYXlfbmFtZRgDIAEoCRILCgNnaWQYBCABKAkS",
-            "EgoKdGxfdXNlcl9pZBgFIAEoAxISCgpmaXJzdF9uYW1lGAYgASgJEhEKCWxh",
-            "c3RfbmFtZRgHIAEoCRIeChFueWFydWdyYW1fcHJlbWl1bRgIIAEoCEgAiAEB",
-            "Eg8KB2lzX3NlbGYYCSABKAgSEgoKaXNfY29udGFjdBgKIAEoCBIZChFpc19t",
-            "dXR1YWxfY29udGFjdBgLIAEoCBIOCgZvbmxpbmUYDCABKAgSFAoMbGFzdF9z",
-            "ZWVuX21zGA0gASgDQhQKEl9ueWFydWdyYW1fcHJlbWl1bSJhCgtBdXRoU2Vz",
-            "c2lvbhINCgV0b2tlbhgBIAEoCRIVCg1leHBpcmVzX2F0X21zGAIgASgDEiwK",
-            "BHVzZXIYAyABKAsyHi5ib3RncmFtLnJwYy52MS5BY2NvdW50UHJvZmlsZSIp",
-            "ChBBdXRoUGFzc3dvcmRJbmZvEhUKDXBhc3N3b3JkX2luZm8YASABKAwiHwoN",
-            "UHJlbWl1bVN0YXR1cxIOCgZhY3RpdmUYASABKAgiiwEKClRvdHBSZXN1bHQS",
-            "DwoHZW5hYmxlZBgBIAEoCBIgChhyZWNvdmVyeV9jb2Rlc19yZW1haW5pbmcY",
-            "AiABKAUSDgoGc2VjcmV0GAMgASgJEgsKA3VyaRgEIAEoCRIVCg1leHBpcmVz",
-            "X2F0X21zGAUgASgDEhYKDnJlY292ZXJ5X2NvZGVzGAYgAygJKqQCCgpQcml2",
-            "YWN5S2V5EhsKF1BSSVZBQ1lfS0VZX1VOU1BFQ0lGSUVEEAASFAoQU1RBVFVT",
-            "X1RJTUVTVEFNUBABEg8KC0NIQVRfSU5WSVRFEAISDgoKUEhPTkVfQ0FMTBAD",
-            "Eg0KCVBIT05FX1AyUBAEEhEKDVBST0ZJTEVfUEhPVE8QBRIMCghGT1JXQVJE",
-            "UxAGEhAKDFBIT05FX05VTUJFUhAHEhIKDkFEREVEX0JZX1BIT05FEAgSEgoO",
-            "Vk9JQ0VfTUVTU0FHRVMQCRIJCgVBQk9VVBAKEgwKCEJJUlRIREFZEAsSGAoU",
-            "U1RBUl9HSUZUU19BVVRPX1NBVkUQDBIPCgtTQVZFRF9NVVNJQxANEhQKEE5P",
-            "X1BBSURfTUVTU0FHRVMQDiqxAgoPUHJpdmFjeVJ1bGVLaW5kEiEKHVBSSVZB",
-            "Q1lfUlVMRV9LSU5EX1VOU1BFQ0lGSUVEEAASDQoJQUxMT1dfQUxMEAESEAoM",
-            "RElTQUxMT1dfQUxMEAISEgoOQUxMT1dfQ09OVEFDVFMQAxIVChFESVNBTExP",
-            "V19DT05UQUNUUxAEEg8KC0FMTE9XX1VTRVJTEAUSEgoORElTQUxMT1dfVVNF",
-            "UlMQBhIbChdBTExPV19DSEFUX1BBUlRJQ0lQQU5UUxAHEh4KGkRJU0FMTE9X",
-            "X0NIQVRfUEFSVElDSVBBTlRTEAgSEQoNQUxMT1dfUFJFTUlVTRAJEg4KCkFM",
-            "TE9XX0JPVFMQChIRCg1ESVNBTExPV19CT1RTEAsSFwoTQUxMT1dfQ0xPU0Vf",
-            "RlJJRU5EUxAMKngKCUUyZWVTdGF0ZRIRCg1FMkVFX0RJU0FCTEVEEAASEAoM",
-            "RTJFRV9QRU5ESU5HEAESDwoLRTJFRV9BQ1RJVkUQAhIQCgxFMkVFX0NMT1NJ",
-            "TkcQAxISCg5FMkVFX1NVU1BFTkRFRBAEEg8KC0UyRUVfQ0xPU0VEEAUqvQEK",
-            "DkUyZWVBY3Rpb25LaW5kEhsKF0UyRUVfQUNUSU9OX1VOU1BFQ0lGSUVEEAAS",
-            "DwoLRTJFRV9JTlZJVEUQARIPCgtFMkVFX0FDQ0VQVBACEhAKDEUyRUVfREVD",
-            "TElORRADEg8KC0UyRUVfQ0FOQ0VMEAQSFgoSRTJFRV9DTE9TRV9SRVFVRVNU",
-            "EAUSFgoSRTJFRV9DTE9TRV9DT05GSVJNEAYSGQoVRTJFRV9DT05GSVJNX0lE",
-            "RU5USVRZEAcqzAEKDlBob25lQ2FsbFN0YXRlEiAKHFBIT05FX0NBTExfU1RB",
-            "VEVfVU5TUEVDSUZJRUQQABIcChhQSE9ORV9DQUxMX1NUQVRFX1dBSVRJTkcQ",
-            "ARIeChpQSE9ORV9DQUxMX1NUQVRFX1JFUVVFU1RFRBACEh0KGVBIT05FX0NB",
-            "TExfU1RBVEVfQUNDRVBURUQQAxIbChdQSE9ORV9DQUxMX1NUQVRFX0FDVElW",
-            "RRAEEh4KGlBIT05FX0NBTExfU1RBVEVfRElTQ0FSREVEEAUq3QEKFlBob25l",
-            "Q2FsbERpc2NhcmRSZWFzb24SKQolUEhPTkVfQ0FMTF9ESVNDQVJEX1JFQVNP",
-            "Tl9VTlNQRUNJRklFRBAAEiQKIFBIT05FX0NBTExfRElTQ0FSRF9SRUFTT05f",
-            "SEFOR1VQEAESJAogUEhPTkVfQ0FMTF9ESVNDQVJEX1JFQVNPTl9NSVNTRUQQ",
-            "AhIiCh5QSE9ORV9DQUxMX0RJU0NBUkRfUkVBU09OX0JVU1kQAxIoCiRQSE9O",
-            "RV9DQUxMX0RJU0NBUkRfUkVBU09OX0RJU0NPTk5FQ1QQBEJECiBvcmcudGVs",
-            "ZWdyYW0uYm90Z3JhbS5wcm90b2NvbC52MUIKQm90Z3JhbVJwY6oCE0JvdGdy",
-            "YW0uUHJvdG9jb2wuVjFiBnByb3RvMw=="));
+            "ZiJoChdHZXRNZXNzYWdlc1ZpZXdzUmVxdWVzdBIlCgRwZWVyGAEgASgLMhcu",
+            "Ym90Z3JhbS5ycGMudjEuUGVlclJlZhITCgttZXNzYWdlX2lkcxgCIAMoAxIR",
+            "CglpbmNyZW1lbnQYAyABKAgiIQoQTWVzc2FnZVZpZXdzTGlzdBINCgV2aWV3",
+            "cxgBIAMoBSJVChhHZXRPdXRib3hSZWFkRGF0ZVJlcXVlc3QSJQoEcGVlchgB",
+            "IAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYSEgoKbWVzc2FnZV9pZBgC",
+            "IAEoAyIhCg5PdXRib3hSZWFkRGF0ZRIPCgdkYXRlX21zGAEgASgDIs8CCg1T",
+            "ZWFyY2hSZXF1ZXN0EiUKBHBlZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5Q",
+            "ZWVyUmVmEg0KBXF1ZXJ5GAIgASgJEiwKBmZpbHRlchgDIAEoDjIcLmJvdGdy",
+            "YW0ucnBjLnYxLlNlYXJjaEZpbHRlchI0Cglmcm9tX3VzZXIYBCABKAsyHC5i",
+            "b3RncmFtLnJwYy52MS5Vc2VyU2VsZWN0b3JIAIgBARITCgttaW5fZGF0ZV9t",
+            "cxgFIAEoAxITCgttYXhfZGF0ZV9tcxgGIAEoAxIZChFvZmZzZXRfbWVzc2Fn",
+            "ZV9pZBgHIAEoAxISCgphZGRfb2Zmc2V0GAggASgFEg0KBWxpbWl0GAkgASgF",
+            "EhYKDm1heF9tZXNzYWdlX2lkGAogASgDEhYKDm1pbl9tZXNzYWdlX2lkGAsg",
+            "ASgDQgwKCl9mcm9tX3VzZXIioAEKClNlYXJjaFBhZ2USKQoIbWVzc2FnZXMY",
+            "ASADKAsyFy5ib3RncmFtLnJwYy52MS5NZXNzYWdlEioKBXVzZXJzGAIgAygL",
+            "MhsuYm90Z3JhbS5ycGMudjEuVXNlclN1bW1hcnkSLAoGZ3JvdXBzGAMgAygL",
+            "MhwuYm90Z3JhbS5ycGMudjEuR3JvdXBTdW1tYXJ5Eg0KBWNvdW50GAQgASgF",
+            "InAKGEdldFNlYXJjaENvdW50ZXJzUmVxdWVzdBIlCgRwZWVyGAEgASgLMhcu",
+            "Ym90Z3JhbS5ycGMudjEuUGVlclJlZhItCgdmaWx0ZXJzGAIgAygOMhwuYm90",
+            "Z3JhbS5ycGMudjEuU2VhcmNoRmlsdGVyIkwKDVNlYXJjaENvdW50ZXISLAoG",
+            "ZmlsdGVyGAEgASgOMhwuYm90Z3JhbS5ycGMudjEuU2VhcmNoRmlsdGVyEg0K",
+            "BWNvdW50GAIgASgFIkEKDlNlYXJjaENvdW50ZXJzEi8KCGNvdW50ZXJzGAEg",
+            "AygLMh0uYm90Z3JhbS5ycGMudjEuU2VhcmNoQ291bnRlciJGCg9NZXNzYWdl",
+            "c0RlbGV0ZWQSEwoLbWVzc2FnZV9pZHMYASADKAMSCwoDcHRzGAIgASgFEhEK",
+            "CXB0c19jb3VudBgDIAEoBSJZCg1NZXNzYWdlRWRpdGVkEigKB21lc3NhZ2UY",
+            "ASABKAsyFy5ib3RncmFtLnJwYy52MS5NZXNzYWdlEgsKA3B0cxgCIAEoBRIR",
+            "CglwdHNfY291bnQYAyABKAUifAoOTWVzc2FnZXNQaW5uZWQSJQoEcGVlchgB",
+            "IAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYSEwoLbWVzc2FnZV9pZHMY",
+            "AiADKAMSDgoGcGlubmVkGAMgASgIEgsKA3B0cxgEIAEoBRIRCglwdHNfY291",
+            "bnQYBSABKAUiQwoMQ29udGVudHNSZWFkEhMKC21lc3NhZ2VfaWRzGAEgAygD",
+            "EgsKA3B0cxgCIAEoBRIRCglwdHNfY291bnQYAyABKAUibwoMRHJhZnRDaGFu",
+            "Z2VkEiUKBHBlZXIYASABKAsyFy5ib3RncmFtLnJwYy52MS5QZWVyUmVmEi4K",
+            "BWRyYWZ0GAIgASgLMhouYm90Z3JhbS5ycGMudjEuRHJhZnRTdGF0ZUgAiAEB",
+            "QggKBl9kcmFmdCKIAQoKVXNlclR5cGluZxIlCgRwZWVyGAEgASgLMhcuYm90",
+            "Z3JhbS5ycGMudjEuUGVlclJlZhIlCgR1c2VyGAIgASgLMhcuYm90Z3JhbS5y",
+            "cGMudjEuVXNlclJlZhIsCgZhY3Rpb24YAyABKA4yHC5ib3RncmFtLnJwYy52",
+            "MS5UeXBpbmdBY3Rpb24ivwEKCE1lZGlhUmVmEhAKCG1lZGlhX2lkGAEgASgD",
+            "EicKBGtpbmQYAiABKA4yGS5ib3RncmFtLnJwYy52MS5NZWRpYUtpbmQSDAoE",
+            "bWltZRgDIAEoCRIRCglieXRlX3NpemUYBCABKAMSDQoFd2lkdGgYBSABKAUS",
+            "DgoGaGVpZ2h0GAYgASgFEhAKCGR1cmF0aW9uGAcgASgFEhEKCWZpbGVfbmFt",
+            "ZRgIIAEoCRITCgt0b3RhbF9wYXJ0cxgJIAEoBSLoAQoLTWVkaWFTb3VyY2US",
+            "GAoOY2xpZW50X2ZpbGVfaWQYASABKANIABISCghtZWRpYV9pZBgCIAEoA0gA",
+            "EicKBGtpbmQYAyABKA4yGS5ib3RncmFtLnJwYy52MS5NZWRpYUtpbmQSDAoE",
+            "bWltZRgEIAEoCRIRCglmaWxlX25hbWUYBSABKAkSEQoJYnl0ZV9zaXplGAYg",
+            "ASgDEg0KBXdpZHRoGAcgASgFEg4KBmhlaWdodBgIIAEoBRIQCghkdXJhdGlv",
+            "bhgJIAEoBRITCgt0b3RhbF9wYXJ0cxgKIAEoBUIICgZvcmlnaW4iZwoSVXBs",
+            "b2FkTWVkaWFSZXF1ZXN0EiUKBHBlZXIYASABKAsyFy5ib3RncmFtLnJwYy52",
+            "MS5QZWVyUmVmEioKBW1lZGlhGAIgASgLMhsuYm90Z3JhbS5ycGMudjEuTWVk",
+            "aWFTb3VyY2UiPAoRVXBsb2FkTWVkaWFSZXN1bHQSJwoFbWVkaWEYASABKAsy",
+            "GC5ib3RncmFtLnJwYy52MS5NZWRpYVJlZiI3CgxNZWRpYU1lc3NhZ2USJwoF",
+            "bWVkaWEYASABKAsyGC5ib3RncmFtLnJwYy52MS5NZWRpYVJlZiKEAgoQU2Vu",
+            "ZE1lZGlhUmVxdWVzdBIlCgRwZWVyGAEgASgLMhcuYm90Z3JhbS5ycGMudjEu",
+            "UGVlclJlZhIRCglyYW5kb21faWQYAiABKBASKgoFbWVkaWEYAyABKAsyGy5i",
+            "b3RncmFtLnJwYy52MS5NZWRpYVNvdXJjZRIPCgdjYXB0aW9uGAQgASgJEi8K",
+            "CGVudGl0aWVzGAUgAygLMh0uYm90Z3JhbS5ycGMudjEuTWVzc2FnZUVudGl0",
+            "eRIgChNyZXBseV90b19tZXNzYWdlX2lkGAYgASgDSACIAQESDgoGc2lsZW50",
+            "GAcgASgIQhYKFF9yZXBseV90b19tZXNzYWdlX2lkItYBCglNZWRpYUl0ZW0S",
+            "EQoJcmFuZG9tX2lkGAEgASgQEioKBW1lZGlhGAIgASgLMhsuYm90Z3JhbS5y",
+            "cGMudjEuTWVkaWFTb3VyY2USDwoHY2FwdGlvbhgDIAEoCRIvCghlbnRpdGll",
+            "cxgEIAMoCzIdLmJvdGdyYW0ucnBjLnYxLk1lc3NhZ2VFbnRpdHkSIAoTcmVw",
+            "bHlfdG9fbWVzc2FnZV9pZBgFIAEoA0gAiAEBEg4KBnNpbGVudBgGIAEoCEIW",
+            "ChRfcmVwbHlfdG9fbWVzc2FnZV9pZCJoChVTZW5kTXVsdGlNZWRpYVJlcXVl",
+            "c3QSJQoEcGVlchgBIAEoCzIXLmJvdGdyYW0ucnBjLnYxLlBlZXJSZWYSKAoF",
+            "aXRlbXMYAiADKAsyGS5ib3RncmFtLnJwYy52MS5NZWRpYUl0ZW0iVQoXR2V0",
+            "RXh0ZW5kZWRNZWRpYVJlcXVlc3QSJQoEcGVlchgBIAEoCzIXLmJvdGdyYW0u",
+            "cnBjLnYxLlBlZXJSZWYSEwoLbWVzc2FnZV9pZHMYAiADKAMqpAIKClByaXZh",
+            "Y3lLZXkSGwoXUFJJVkFDWV9LRVlfVU5TUEVDSUZJRUQQABIUChBTVEFUVVNf",
+            "VElNRVNUQU1QEAESDwoLQ0hBVF9JTlZJVEUQAhIOCgpQSE9ORV9DQUxMEAMS",
+            "DQoJUEhPTkVfUDJQEAQSEQoNUFJPRklMRV9QSE9UTxAFEgwKCEZPUldBUkRT",
+            "EAYSEAoMUEhPTkVfTlVNQkVSEAcSEgoOQURERURfQllfUEhPTkUQCBISCg5W",
+            "T0lDRV9NRVNTQUdFUxAJEgkKBUFCT1VUEAoSDAoIQklSVEhEQVkQCxIYChRT",
+            "VEFSX0dJRlRTX0FVVE9fU0FWRRAMEg8KC1NBVkVEX01VU0lDEA0SFAoQTk9f",
+            "UEFJRF9NRVNTQUdFUxAOKrECCg9Qcml2YWN5UnVsZUtpbmQSIQodUFJJVkFD",
+            "WV9SVUxFX0tJTkRfVU5TUEVDSUZJRUQQABINCglBTExPV19BTEwQARIQCgxE",
+            "SVNBTExPV19BTEwQAhISCg5BTExPV19DT05UQUNUUxADEhUKEURJU0FMTE9X",
+            "X0NPTlRBQ1RTEAQSDwoLQUxMT1dfVVNFUlMQBRISCg5ESVNBTExPV19VU0VS",
+            "UxAGEhsKF0FMTE9XX0NIQVRfUEFSVElDSVBBTlRTEAcSHgoaRElTQUxMT1df",
+            "Q0hBVF9QQVJUSUNJUEFOVFMQCBIRCg1BTExPV19QUkVNSVVNEAkSDgoKQUxM",
+            "T1dfQk9UUxAKEhEKDURJU0FMTE9XX0JPVFMQCxIXChNBTExPV19DTE9TRV9G",
+            "UklFTkRTEAwqeAoJRTJlZVN0YXRlEhEKDUUyRUVfRElTQUJMRUQQABIQCgxF",
+            "MkVFX1BFTkRJTkcQARIPCgtFMkVFX0FDVElWRRACEhAKDEUyRUVfQ0xPU0lO",
+            "RxADEhIKDkUyRUVfU1VTUEVOREVEEAQSDwoLRTJFRV9DTE9TRUQQBSq9AQoO",
+            "RTJlZUFjdGlvbktpbmQSGwoXRTJFRV9BQ1RJT05fVU5TUEVDSUZJRUQQABIP",
+            "CgtFMkVFX0lOVklURRABEg8KC0UyRUVfQUNDRVBUEAISEAoMRTJFRV9ERUNM",
+            "SU5FEAMSDwoLRTJFRV9DQU5DRUwQBBIWChJFMkVFX0NMT1NFX1JFUVVFU1QQ",
+            "BRIWChJFMkVFX0NMT1NFX0NPTkZJUk0QBhIZChVFMkVFX0NPTkZJUk1fSURF",
+            "TlRJVFkQByrMAQoOUGhvbmVDYWxsU3RhdGUSIAocUEhPTkVfQ0FMTF9TVEFU",
+            "RV9VTlNQRUNJRklFRBAAEhwKGFBIT05FX0NBTExfU1RBVEVfV0FJVElORxAB",
+            "Eh4KGlBIT05FX0NBTExfU1RBVEVfUkVRVUVTVEVEEAISHQoZUEhPTkVfQ0FM",
+            "TF9TVEFURV9BQ0NFUFRFRBADEhsKF1BIT05FX0NBTExfU1RBVEVfQUNUSVZF",
+            "EAQSHgoaUEhPTkVfQ0FMTF9TVEFURV9ESVNDQVJERUQQBSrdAQoWUGhvbmVD",
+            "YWxsRGlzY2FyZFJlYXNvbhIpCiVQSE9ORV9DQUxMX0RJU0NBUkRfUkVBU09O",
+            "X1VOU1BFQ0lGSUVEEAASJAogUEhPTkVfQ0FMTF9ESVNDQVJEX1JFQVNPTl9I",
+            "QU5HVVAQARIkCiBQSE9ORV9DQUxMX0RJU0NBUkRfUkVBU09OX01JU1NFRBAC",
+            "EiIKHlBIT05FX0NBTExfRElTQ0FSRF9SRUFTT05fQlVTWRADEigKJFBIT05F",
+            "X0NBTExfRElTQ0FSRF9SRUFTT05fRElTQ09OTkVDVBAEKqECCgxUeXBpbmdB",
+            "Y3Rpb24SHQoZVFlQSU5HX0FDVElPTl9VTlNQRUNJRklFRBAAEgoKBlRZUElO",
+            "RxABEgoKBkNBTkNFTBACEhAKDFJFQ09SRF9BVURJTxADEhAKDFJFQ09SRF9W",
+            "SURFTxAEEhAKDFJFQ09SRF9ST1VORBAFEhAKDFVQTE9BRF9QSE9UTxAGEhAK",
+            "DFVQTE9BRF9WSURFTxAHEhAKDFVQTE9BRF9BVURJTxAIEhMKD1VQTE9BRF9E",
+            "T0NVTUVOVBAJEhAKDFVQTE9BRF9ST1VORBAKEhIKDkNIT09TRV9TVElDS0VS",
+            "EAsSEgoOQ0hPT1NFX0NPTlRBQ1QQDBIQCgxHRU9fTE9DQVRJT04QDRINCglH",
+            "QU1FX1BMQVkQDipECgxTZWFyY2hGaWx0ZXISHQoZU0VBUkNIX0ZJTFRFUl9V",
+            "TlNQRUNJRklFRBAAEgkKBUVNUFRZEAESCgoGUElOTkVEEAIqQAoJTWVkaWFL",
+            "aW5kEhoKFk1FRElBX0tJTkRfVU5TUEVDSUZJRUQQABIJCgVQSE9UTxABEgwK",
+            "CERPQ1VNRU5UEAJCRAogb3JnLnRlbGVncmFtLmJvdGdyYW0ucHJvdG9jb2wu",
+            "djFCCkJvdGdyYW1ScGOqAhNCb3RncmFtLlByb3RvY29sLlYxYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Botgram.Protocol.V1.PrivacyKey), typeof(global::Botgram.Protocol.V1.PrivacyRuleKind), typeof(global::Botgram.Protocol.V1.E2eeState), typeof(global::Botgram.Protocol.V1.E2eeActionKind), typeof(global::Botgram.Protocol.V1.PhoneCallState), typeof(global::Botgram.Protocol.V1.PhoneCallDiscardReason), }, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.RpcRequest), global::Botgram.Protocol.V1.RpcRequest.Parser, new[]{ "ProtocolMajor", "RequestId", "Foreground", "GetState", "GetDifference", "GetDialogs", "GetPinnedDialogs", "GetPeerDialogs", "GetHistory", "GetMessages", "SendMessage", "ReadHistory", "SearchContacts", "ResolveUsername", "GetUsers", "GetContacts", "ResolveGid", "ImportContacts", "CreateGroup", "GetPeerSettings", "GetFullUser", "GetFullGroup", "GetGroups", "GetNotifySettings", "ResolveIdentities", "GetWallpapers", "SaveWallpaper", "InstallWallpaper", "SetChatWallpaper", "AccountPrivacy", "AddContact", "RequestCall", "ReceivedCall", "AcceptCall", "ConfirmCall", "DiscardCall", "SendSignalingData", "GetCallConfig", "SaveCallDebug", "GetDhConfig", "GetSpecialContacts", "SetSpecialContact", "E2EePublishDevice", "E2EeAction", "E2EeGetStatus", "E2EeList", "E2EeGetPeerBundle", "AuthCapabilities", "AuthRegister", "AuthLogin", "AuthPassword", "AuthRecover", "AuthLogout", "AccountMe", "Premium", "ChangeGid", "Totp" }, new[]{ "Operation", "Foreground" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.RpcResponse), global::Botgram.Protocol.V1.RpcResponse.Parser, new[]{ "ProtocolMajor", "RequestId", "Error", "GetState", "GetDifference", "GetDialogs", "GetPinnedDialogs", "GetPeerDialogs", "GetHistory", "GetMessages", "SendMessage", "ReadHistory", "SearchContacts", "ResolveUsername", "GetUsers", "GetContacts", "ResolveGid", "ImportContacts", "CreateGroup", "GetPeerSettings", "GetFullUser", "GetFullGroup", "GetGroups", "GetNotifySettings", "ResolveIdentities", "GetWallpapers", "SaveWallpaper", "InstallWallpaper", "SetChatWallpaper", "AccountPrivacy", "AddContact", "RequestCall", "ReceivedCall", "AcceptCall", "ConfirmCall", "DiscardCall", "SendSignalingData", "GetCallConfig", "SaveCallDebug", "GetDhConfig", "GetSpecialContacts", "SetSpecialContact", "E2EePublishDevice", "E2EeAction", "E2EeGetStatus", "E2EeList", "E2EeGetPeerBundle", "AuthCapabilities", "AuthRegister", "AuthLogin", "AuthPassword", "AuthRecover", "AuthLogout", "AccountMe", "Premium", "ChangeGid", "Totp" }, new[]{ "Outcome" }, null, null, null),
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Botgram.Protocol.V1.PrivacyKey), typeof(global::Botgram.Protocol.V1.PrivacyRuleKind), typeof(global::Botgram.Protocol.V1.E2eeState), typeof(global::Botgram.Protocol.V1.E2eeActionKind), typeof(global::Botgram.Protocol.V1.PhoneCallState), typeof(global::Botgram.Protocol.V1.PhoneCallDiscardReason), typeof(global::Botgram.Protocol.V1.TypingAction), typeof(global::Botgram.Protocol.V1.SearchFilter), typeof(global::Botgram.Protocol.V1.MediaKind), }, null, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.RpcRequest), global::Botgram.Protocol.V1.RpcRequest.Parser, new[]{ "ProtocolMajor", "RequestId", "Foreground", "GetState", "GetDifference", "GetDialogs", "GetPinnedDialogs", "GetPeerDialogs", "GetHistory", "GetMessages", "SendMessage", "ReadHistory", "SearchContacts", "ResolveUsername", "GetUsers", "GetContacts", "ResolveGid", "ImportContacts", "CreateGroup", "GetPeerSettings", "GetFullUser", "GetFullGroup", "GetGroups", "GetNotifySettings", "ResolveIdentities", "GetWallpapers", "SaveWallpaper", "InstallWallpaper", "SetChatWallpaper", "AccountPrivacy", "AddContact", "RequestCall", "ReceivedCall", "AcceptCall", "ConfirmCall", "DiscardCall", "SendSignalingData", "GetCallConfig", "SaveCallDebug", "GetDhConfig", "GetSpecialContacts", "SetSpecialContact", "E2EePublishDevice", "E2EeAction", "E2EeGetStatus", "E2EeList", "E2EeGetPeerBundle", "DeleteMessages", "DeleteHistory", "DeleteSavedHistory", "DeletePhoneCallHistory", "EditMessage", "GetMessageEditData", "ForwardMessages", "SetTyping", "SaveDraft", "ClearAllDrafts", "GetAllDrafts", "UpdatePinnedMessage", "UnpinAllMessages", "ToggleDialogPin", "ReorderPinnedDialogs", "MarkDialogUnread", "GetDialogUnreadMarks", "ReadMessageContents", "GetOnlines", "GetCommonChats", "HidePeerSettingsBar", "ReportSpam", "GetMessagesViews", "GetOutboxReadDate", "Search", "GetSearchCounters", "UploadMedia", "SendMedia", "SendMultiMedia", "GetExtendedMedia", "AuthCapabilities", "AuthRegister", "AuthLogin", "AuthPassword", "AuthRecover", "AuthLogout", "AccountMe", "Premium", "ChangeGid", "Totp" }, new[]{ "Operation", "Foreground" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.RpcResponse), global::Botgram.Protocol.V1.RpcResponse.Parser, new[]{ "ProtocolMajor", "RequestId", "Error", "GetState", "GetDifference", "GetDialogs", "GetPinnedDialogs", "GetPeerDialogs", "GetHistory", "GetMessages", "SendMessage", "ReadHistory", "SearchContacts", "ResolveUsername", "GetUsers", "GetContacts", "ResolveGid", "ImportContacts", "CreateGroup", "GetPeerSettings", "GetFullUser", "GetFullGroup", "GetGroups", "GetNotifySettings", "ResolveIdentities", "GetWallpapers", "SaveWallpaper", "InstallWallpaper", "SetChatWallpaper", "AccountPrivacy", "AddContact", "RequestCall", "ReceivedCall", "AcceptCall", "ConfirmCall", "DiscardCall", "SendSignalingData", "GetCallConfig", "SaveCallDebug", "GetDhConfig", "GetSpecialContacts", "SetSpecialContact", "E2EePublishDevice", "E2EeAction", "E2EeGetStatus", "E2EeList", "E2EeGetPeerBundle", "DeleteMessages", "DeleteHistory", "DeleteSavedHistory", "DeletePhoneCallHistory", "EditMessage", "GetMessageEditData", "ForwardMessages", "SetTyping", "SaveDraft", "ClearAllDrafts", "GetAllDrafts", "UpdatePinnedMessage", "UnpinAllMessages", "ToggleDialogPin", "ReorderPinnedDialogs", "MarkDialogUnread", "GetDialogUnreadMarks", "ReadMessageContents", "GetOnlines", "GetCommonChats", "HidePeerSettingsBar", "ReportSpam", "GetMessagesViews", "GetOutboxReadDate", "Search", "GetSearchCounters", "UploadMedia", "SendMedia", "SendMultiMedia", "GetExtendedMedia", "AuthCapabilities", "AuthRegister", "AuthLogin", "AuthPassword", "AuthRecover", "AuthLogout", "AccountMe", "Premium", "ChangeGid", "Totp" }, new[]{ "Outcome" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.RpcError), global::Botgram.Protocol.V1.RpcError.Parser, new[]{ "Code", "Message", "Retryable", "RetryAfterMs", "HttpStatus" }, new[]{ "RetryAfterMs" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.EventHint), global::Botgram.Protocol.V1.EventHint.Parser, new[]{ "ProtocolMajor", "Cursor", "WallpaperRevision" }, new[]{ "WallpaperRevision" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetSpecialContactsRequest), global::Botgram.Protocol.V1.GetSpecialContactsRequest.Parser, null, null, null, null, null),
@@ -760,16 +986,16 @@ namespace Botgram.Protocol.V1 {
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ServiceMessage), global::Botgram.Protocol.V1.ServiceMessage.Parser, new[]{ "GroupCreated", "E2EeSystem" }, new[]{ "Action" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.E2eeEnvelope), global::Botgram.Protocol.V1.E2eeEnvelope.Parser, new[]{ "ProtocolVersion", "ConversationId", "SenderUserId", "SenderDeviceId", "RecipientUserId", "RecipientDeviceId", "KeyEpoch", "RandomId", "Ciphertext", "MessageType" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.E2eeInner), global::Botgram.Protocol.V1.E2eeInner.Parser, new[]{ "ProtocolVersion", "ConversationId", "SenderUserId", "SenderDeviceId", "RecipientUserId", "RecipientDeviceId", "KeyEpoch", "RandomId", "TimestampMs", "Text" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.Message), global::Botgram.Protocol.V1.Message.Parser, new[]{ "MessageId", "Peer", "Sender", "CreatedAtMs", "Outgoing", "Unread", "Text", "Service", "E2Ee" }, new[]{ "Body" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.Message), global::Botgram.Protocol.V1.Message.Parser, new[]{ "MessageId", "Peer", "Sender", "CreatedAtMs", "Outgoing", "Unread", "Text", "Service", "E2Ee", "ForwardFrom", "ForwardFromDateMs", "Media", "GroupedId" }, new[]{ "Body", "ForwardFrom", "ForwardFromDateMs", "GroupedId" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.NotifySettings), global::Botgram.Protocol.V1.NotifySettings.Parser, new[]{ "ShowPreviews", "Silent", "MuteUntilMs" }, new[]{ "ShowPreviews", "Silent", "MuteUntilMs" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.PeerSettings), global::Botgram.Protocol.V1.PeerSettings.Parser, null, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.Dialog), global::Botgram.Protocol.V1.Dialog.Parser, new[]{ "Peer", "TopMessageId", "ReadInboxMaxId", "ReadOutboxMaxId", "UnreadCount", "NotifySettings" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.Dialog), global::Botgram.Protocol.V1.Dialog.Parser, new[]{ "Peer", "TopMessageId", "ReadInboxMaxId", "ReadOutboxMaxId", "UnreadCount", "NotifySettings", "Pinned", "UnreadMark", "Draft" }, new[]{ "Draft" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.SyncState), global::Botgram.Protocol.V1.SyncState.Parser, new[]{ "Pts", "Qts", "DateMs", "Seq", "UnreadCount" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ReadReceipt), global::Botgram.Protocol.V1.ReadReceipt.Parser, new[]{ "Peer", "MaxMessageId", "Pts", "PtsCount" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MessageIdMapping), global::Botgram.Protocol.V1.MessageIdMapping.Parser, new[]{ "RandomId", "MessageId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.NewMessage), global::Botgram.Protocol.V1.NewMessage.Parser, new[]{ "Message", "Pts", "PtsCount" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GidChanged), global::Botgram.Protocol.V1.GidChanged.Parser, new[]{ "User", "Gid" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.Update), global::Botgram.Protocol.V1.Update.Parser, new[]{ "NewMessage", "MessageId", "ReadInbox", "ReadOutbox", "GidChanged", "PeerWallpaperChanged", "PresenceChanged", "PhoneCall", "PhoneCallSignaling" }, new[]{ "Kind" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.Update), global::Botgram.Protocol.V1.Update.Parser, new[]{ "NewMessage", "MessageId", "ReadInbox", "ReadOutbox", "GidChanged", "PeerWallpaperChanged", "PresenceChanged", "PhoneCall", "PhoneCallSignaling", "MessagesDeleted", "MessageEdited", "MessagesPinned", "ContentsRead", "DraftChanged", "UserTyping" }, new[]{ "Kind" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.Updates), global::Botgram.Protocol.V1.Updates.Parser, new[]{ "Updates_", "Users", "Groups", "DateMs", "Seq" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.DifferenceEmpty), global::Botgram.Protocol.V1.DifferenceEmpty.Parser, new[]{ "DateMs", "Seq" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.DifferenceTooLong), global::Botgram.Protocol.V1.DifferenceTooLong.Parser, new[]{ "Pts" }, null, null, null, null),
@@ -875,7 +1101,59 @@ namespace Botgram.Protocol.V1 {
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.AuthSession), global::Botgram.Protocol.V1.AuthSession.Parser, new[]{ "Token", "ExpiresAtMs", "User" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.AuthPasswordInfo), global::Botgram.Protocol.V1.AuthPasswordInfo.Parser, new[]{ "PasswordInfo" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.PremiumStatus), global::Botgram.Protocol.V1.PremiumStatus.Parser, new[]{ "Active" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.TotpResult), global::Botgram.Protocol.V1.TotpResult.Parser, new[]{ "Enabled", "RecoveryCodesRemaining", "Secret", "Uri", "ExpiresAtMs", "RecoveryCodes" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.TotpResult), global::Botgram.Protocol.V1.TotpResult.Parser, new[]{ "Enabled", "RecoveryCodesRemaining", "Secret", "Uri", "ExpiresAtMs", "RecoveryCodes" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.DeleteMessagesRequest), global::Botgram.Protocol.V1.DeleteMessagesRequest.Parser, new[]{ "MessageIds", "Revoke" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.DeleteHistoryRequest), global::Botgram.Protocol.V1.DeleteHistoryRequest.Parser, new[]{ "Peer", "JustClear", "Revoke", "MaxMessageId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.DeleteSavedHistoryRequest), global::Botgram.Protocol.V1.DeleteSavedHistoryRequest.Parser, new[]{ "Peer", "MaxMessageId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.DeletePhoneCallHistoryRequest), global::Botgram.Protocol.V1.DeletePhoneCallHistoryRequest.Parser, new[]{ "Revoke" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.AffectedHistory), global::Botgram.Protocol.V1.AffectedHistory.Parser, new[]{ "Pts", "PtsCount", "Offset" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.AffectedFoundMessages), global::Botgram.Protocol.V1.AffectedFoundMessages.Parser, new[]{ "Pts", "PtsCount", "Offset", "Messages" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.EditMessageRequest), global::Botgram.Protocol.V1.EditMessageRequest.Parser, new[]{ "Peer", "MessageId", "Text", "Entities" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MessageEditData), global::Botgram.Protocol.V1.MessageEditData.Parser, new[]{ "Caption" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetMessageEditDataRequest), global::Botgram.Protocol.V1.GetMessageEditDataRequest.Parser, new[]{ "Peer", "MessageId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ForwardMessagesRequest), global::Botgram.Protocol.V1.ForwardMessagesRequest.Parser, new[]{ "FromPeer", "ToPeer", "MessageIds", "RandomIds", "Silent", "DropAuthor" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.SetTypingRequest), global::Botgram.Protocol.V1.SetTypingRequest.Parser, new[]{ "Peer", "Action" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.DraftState), global::Botgram.Protocol.V1.DraftState.Parser, new[]{ "Text", "Entities", "ReplyToMessageId", "UpdatedAtMs" }, new[]{ "ReplyToMessageId" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.SaveDraftRequest), global::Botgram.Protocol.V1.SaveDraftRequest.Parser, new[]{ "Peer", "Text", "Entities", "ReplyToMessageId" }, new[]{ "ReplyToMessageId" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ClearAllDraftsRequest), global::Botgram.Protocol.V1.ClearAllDraftsRequest.Parser, null, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetAllDraftsRequest), global::Botgram.Protocol.V1.GetAllDraftsRequest.Parser, null, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.UpdatePinnedMessageRequest), global::Botgram.Protocol.V1.UpdatePinnedMessageRequest.Parser, new[]{ "Peer", "MessageId", "Unpin", "Silent" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.UnpinAllMessagesRequest), global::Botgram.Protocol.V1.UnpinAllMessagesRequest.Parser, new[]{ "Peer" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ToggleDialogPinRequest), global::Botgram.Protocol.V1.ToggleDialogPinRequest.Parser, new[]{ "Peer", "Pinned" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ReorderPinnedDialogsRequest), global::Botgram.Protocol.V1.ReorderPinnedDialogsRequest.Parser, new[]{ "Order", "Force" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MarkDialogUnreadRequest), global::Botgram.Protocol.V1.MarkDialogUnreadRequest.Parser, new[]{ "Peer", "Unread" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetDialogUnreadMarksRequest), global::Botgram.Protocol.V1.GetDialogUnreadMarksRequest.Parser, null, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.PeerList), global::Botgram.Protocol.V1.PeerList.Parser, new[]{ "Peers" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ReadMessageContentsRequest), global::Botgram.Protocol.V1.ReadMessageContentsRequest.Parser, new[]{ "MessageIds" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetOnlinesRequest), global::Botgram.Protocol.V1.GetOnlinesRequest.Parser, new[]{ "Peer" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ChatOnlines), global::Botgram.Protocol.V1.ChatOnlines.Parser, new[]{ "Onlines" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetCommonChatsRequest), global::Botgram.Protocol.V1.GetCommonChatsRequest.Parser, new[]{ "User", "MaxChatId", "Limit" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.HidePeerSettingsBarRequest), global::Botgram.Protocol.V1.HidePeerSettingsBarRequest.Parser, new[]{ "Peer" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ReportSpamRequest), global::Botgram.Protocol.V1.ReportSpamRequest.Parser, new[]{ "Peer" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetMessagesViewsRequest), global::Botgram.Protocol.V1.GetMessagesViewsRequest.Parser, new[]{ "Peer", "MessageIds", "Increment" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MessageViewsList), global::Botgram.Protocol.V1.MessageViewsList.Parser, new[]{ "Views" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetOutboxReadDateRequest), global::Botgram.Protocol.V1.GetOutboxReadDateRequest.Parser, new[]{ "Peer", "MessageId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.OutboxReadDate), global::Botgram.Protocol.V1.OutboxReadDate.Parser, new[]{ "DateMs" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.SearchRequest), global::Botgram.Protocol.V1.SearchRequest.Parser, new[]{ "Peer", "Query", "Filter", "FromUser", "MinDateMs", "MaxDateMs", "OffsetMessageId", "AddOffset", "Limit", "MaxMessageId", "MinMessageId" }, new[]{ "FromUser" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.SearchPage), global::Botgram.Protocol.V1.SearchPage.Parser, new[]{ "Messages", "Users", "Groups", "Count" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetSearchCountersRequest), global::Botgram.Protocol.V1.GetSearchCountersRequest.Parser, new[]{ "Peer", "Filters" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.SearchCounter), global::Botgram.Protocol.V1.SearchCounter.Parser, new[]{ "Filter", "Count" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.SearchCounters), global::Botgram.Protocol.V1.SearchCounters.Parser, new[]{ "Counters" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MessagesDeleted), global::Botgram.Protocol.V1.MessagesDeleted.Parser, new[]{ "MessageIds", "Pts", "PtsCount" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MessageEdited), global::Botgram.Protocol.V1.MessageEdited.Parser, new[]{ "Message", "Pts", "PtsCount" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MessagesPinned), global::Botgram.Protocol.V1.MessagesPinned.Parser, new[]{ "Peer", "MessageIds", "Pinned", "Pts", "PtsCount" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.ContentsRead), global::Botgram.Protocol.V1.ContentsRead.Parser, new[]{ "MessageIds", "Pts", "PtsCount" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.DraftChanged), global::Botgram.Protocol.V1.DraftChanged.Parser, new[]{ "Peer", "Draft" }, new[]{ "Draft" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.UserTyping), global::Botgram.Protocol.V1.UserTyping.Parser, new[]{ "Peer", "User", "Action" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MediaRef), global::Botgram.Protocol.V1.MediaRef.Parser, new[]{ "MediaId", "Kind", "Mime", "ByteSize", "Width", "Height", "Duration", "FileName", "TotalParts" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MediaSource), global::Botgram.Protocol.V1.MediaSource.Parser, new[]{ "ClientFileId", "MediaId", "Kind", "Mime", "FileName", "ByteSize", "Width", "Height", "Duration", "TotalParts" }, new[]{ "Origin" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.UploadMediaRequest), global::Botgram.Protocol.V1.UploadMediaRequest.Parser, new[]{ "Peer", "Media" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.UploadMediaResult), global::Botgram.Protocol.V1.UploadMediaResult.Parser, new[]{ "Media" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MediaMessage), global::Botgram.Protocol.V1.MediaMessage.Parser, new[]{ "Media" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.SendMediaRequest), global::Botgram.Protocol.V1.SendMediaRequest.Parser, new[]{ "Peer", "RandomId", "Media", "Caption", "Entities", "ReplyToMessageId", "Silent" }, new[]{ "ReplyToMessageId" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.MediaItem), global::Botgram.Protocol.V1.MediaItem.Parser, new[]{ "RandomId", "Media", "Caption", "Entities", "ReplyToMessageId", "Silent" }, new[]{ "ReplyToMessageId" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.SendMultiMediaRequest), global::Botgram.Protocol.V1.SendMultiMediaRequest.Parser, new[]{ "Peer", "Items" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Botgram.Protocol.V1.GetExtendedMediaRequest), global::Botgram.Protocol.V1.GetExtendedMediaRequest.Parser, new[]{ "Peer", "MessageIds" }, null, null, null, null)
           }));
     }
     #endregion
@@ -951,6 +1229,43 @@ namespace Botgram.Protocol.V1 {
     [pbr::OriginalName("PHONE_CALL_DISCARD_REASON_MISSED")] Missed = 2,
     [pbr::OriginalName("PHONE_CALL_DISCARD_REASON_BUSY")] Busy = 3,
     [pbr::OriginalName("PHONE_CALL_DISCARD_REASON_DISCONNECT")] Disconnect = 4,
+  }
+
+  public enum TypingAction {
+    [pbr::OriginalName("TYPING_ACTION_UNSPECIFIED")] Unspecified = 0,
+    [pbr::OriginalName("TYPING")] Typing = 1,
+    [pbr::OriginalName("CANCEL")] Cancel = 2,
+    [pbr::OriginalName("RECORD_AUDIO")] RecordAudio = 3,
+    [pbr::OriginalName("RECORD_VIDEO")] RecordVideo = 4,
+    [pbr::OriginalName("RECORD_ROUND")] RecordRound = 5,
+    [pbr::OriginalName("UPLOAD_PHOTO")] UploadPhoto = 6,
+    [pbr::OriginalName("UPLOAD_VIDEO")] UploadVideo = 7,
+    [pbr::OriginalName("UPLOAD_AUDIO")] UploadAudio = 8,
+    [pbr::OriginalName("UPLOAD_DOCUMENT")] UploadDocument = 9,
+    [pbr::OriginalName("UPLOAD_ROUND")] UploadRound = 10,
+    [pbr::OriginalName("CHOOSE_STICKER")] ChooseSticker = 11,
+    [pbr::OriginalName("CHOOSE_CONTACT")] ChooseContact = 12,
+    [pbr::OriginalName("GEO_LOCATION")] GeoLocation = 13,
+    [pbr::OriginalName("GAME_PLAY")] GamePlay = 14,
+  }
+
+  public enum SearchFilter {
+    [pbr::OriginalName("SEARCH_FILTER_UNSPECIFIED")] Unspecified = 0,
+    [pbr::OriginalName("EMPTY")] Empty = 1,
+    [pbr::OriginalName("PINNED")] Pinned = 2,
+  }
+
+  /// <summary>
+  /// --- Batch I: media messages (tags 170..173) ---
+  /// Bytes never enter the RPC envelope: the client uploads parts to
+  /// PUT /api/v1/media/{client_file_id}/{part} and downloads with
+  /// GET /api/v1/media/{media_id}?offset=&amp;limit=. Both endpoints require the same Bearer
+  /// session and enforce part counts, size limits and conversation membership.
+  /// </summary>
+  public enum MediaKind {
+    [pbr::OriginalName("MEDIA_KIND_UNSPECIFIED")] Unspecified = 0,
+    [pbr::OriginalName("PHOTO")] Photo = 1,
+    [pbr::OriginalName("DOCUMENT")] Document = 2,
   }
 
   #endregion
@@ -1132,6 +1447,96 @@ namespace Botgram.Protocol.V1 {
           break;
         case OperationOneofCase.E2EeGetPeerBundle:
           E2EeGetPeerBundle = other.E2EeGetPeerBundle.Clone();
+          break;
+        case OperationOneofCase.DeleteMessages:
+          DeleteMessages = other.DeleteMessages.Clone();
+          break;
+        case OperationOneofCase.DeleteHistory:
+          DeleteHistory = other.DeleteHistory.Clone();
+          break;
+        case OperationOneofCase.DeleteSavedHistory:
+          DeleteSavedHistory = other.DeleteSavedHistory.Clone();
+          break;
+        case OperationOneofCase.DeletePhoneCallHistory:
+          DeletePhoneCallHistory = other.DeletePhoneCallHistory.Clone();
+          break;
+        case OperationOneofCase.EditMessage:
+          EditMessage = other.EditMessage.Clone();
+          break;
+        case OperationOneofCase.GetMessageEditData:
+          GetMessageEditData = other.GetMessageEditData.Clone();
+          break;
+        case OperationOneofCase.ForwardMessages:
+          ForwardMessages = other.ForwardMessages.Clone();
+          break;
+        case OperationOneofCase.SetTyping:
+          SetTyping = other.SetTyping.Clone();
+          break;
+        case OperationOneofCase.SaveDraft:
+          SaveDraft = other.SaveDraft.Clone();
+          break;
+        case OperationOneofCase.ClearAllDrafts:
+          ClearAllDrafts = other.ClearAllDrafts.Clone();
+          break;
+        case OperationOneofCase.GetAllDrafts:
+          GetAllDrafts = other.GetAllDrafts.Clone();
+          break;
+        case OperationOneofCase.UpdatePinnedMessage:
+          UpdatePinnedMessage = other.UpdatePinnedMessage.Clone();
+          break;
+        case OperationOneofCase.UnpinAllMessages:
+          UnpinAllMessages = other.UnpinAllMessages.Clone();
+          break;
+        case OperationOneofCase.ToggleDialogPin:
+          ToggleDialogPin = other.ToggleDialogPin.Clone();
+          break;
+        case OperationOneofCase.ReorderPinnedDialogs:
+          ReorderPinnedDialogs = other.ReorderPinnedDialogs.Clone();
+          break;
+        case OperationOneofCase.MarkDialogUnread:
+          MarkDialogUnread = other.MarkDialogUnread.Clone();
+          break;
+        case OperationOneofCase.GetDialogUnreadMarks:
+          GetDialogUnreadMarks = other.GetDialogUnreadMarks.Clone();
+          break;
+        case OperationOneofCase.ReadMessageContents:
+          ReadMessageContents = other.ReadMessageContents.Clone();
+          break;
+        case OperationOneofCase.GetOnlines:
+          GetOnlines = other.GetOnlines.Clone();
+          break;
+        case OperationOneofCase.GetCommonChats:
+          GetCommonChats = other.GetCommonChats.Clone();
+          break;
+        case OperationOneofCase.HidePeerSettingsBar:
+          HidePeerSettingsBar = other.HidePeerSettingsBar.Clone();
+          break;
+        case OperationOneofCase.ReportSpam:
+          ReportSpam = other.ReportSpam.Clone();
+          break;
+        case OperationOneofCase.GetMessagesViews:
+          GetMessagesViews = other.GetMessagesViews.Clone();
+          break;
+        case OperationOneofCase.GetOutboxReadDate:
+          GetOutboxReadDate = other.GetOutboxReadDate.Clone();
+          break;
+        case OperationOneofCase.Search:
+          Search = other.Search.Clone();
+          break;
+        case OperationOneofCase.GetSearchCounters:
+          GetSearchCounters = other.GetSearchCounters.Clone();
+          break;
+        case OperationOneofCase.UploadMedia:
+          UploadMedia = other.UploadMedia.Clone();
+          break;
+        case OperationOneofCase.SendMedia:
+          SendMedia = other.SendMedia.Clone();
+          break;
+        case OperationOneofCase.SendMultiMedia:
+          SendMultiMedia = other.SendMultiMedia.Clone();
+          break;
+        case OperationOneofCase.GetExtendedMedia:
+          GetExtendedMedia = other.GetExtendedMedia.Clone();
           break;
         case OperationOneofCase.AuthCapabilities:
           AuthCapabilities = other.AuthCapabilities.Clone();
@@ -1756,6 +2161,374 @@ namespace Botgram.Protocol.V1 {
       }
     }
 
+    /// <summary>Field number for the "delete_messages" field.</summary>
+    public const int DeleteMessagesFieldNumber = 144;
+    /// <summary>
+    /// Batch A: core message lifecycle and per-account dialog state (messages.*).
+    /// Tags 144..169 are permanently allocated to these operations.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.DeleteMessagesRequest DeleteMessages {
+      get { return operationCase_ == OperationOneofCase.DeleteMessages ? (global::Botgram.Protocol.V1.DeleteMessagesRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.DeleteMessages;
+      }
+    }
+
+    /// <summary>Field number for the "delete_history" field.</summary>
+    public const int DeleteHistoryFieldNumber = 145;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.DeleteHistoryRequest DeleteHistory {
+      get { return operationCase_ == OperationOneofCase.DeleteHistory ? (global::Botgram.Protocol.V1.DeleteHistoryRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.DeleteHistory;
+      }
+    }
+
+    /// <summary>Field number for the "delete_saved_history" field.</summary>
+    public const int DeleteSavedHistoryFieldNumber = 146;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.DeleteSavedHistoryRequest DeleteSavedHistory {
+      get { return operationCase_ == OperationOneofCase.DeleteSavedHistory ? (global::Botgram.Protocol.V1.DeleteSavedHistoryRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.DeleteSavedHistory;
+      }
+    }
+
+    /// <summary>Field number for the "delete_phone_call_history" field.</summary>
+    public const int DeletePhoneCallHistoryFieldNumber = 147;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.DeletePhoneCallHistoryRequest DeletePhoneCallHistory {
+      get { return operationCase_ == OperationOneofCase.DeletePhoneCallHistory ? (global::Botgram.Protocol.V1.DeletePhoneCallHistoryRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.DeletePhoneCallHistory;
+      }
+    }
+
+    /// <summary>Field number for the "edit_message" field.</summary>
+    public const int EditMessageFieldNumber = 148;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.EditMessageRequest EditMessage {
+      get { return operationCase_ == OperationOneofCase.EditMessage ? (global::Botgram.Protocol.V1.EditMessageRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.EditMessage;
+      }
+    }
+
+    /// <summary>Field number for the "get_message_edit_data" field.</summary>
+    public const int GetMessageEditDataFieldNumber = 149;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GetMessageEditDataRequest GetMessageEditData {
+      get { return operationCase_ == OperationOneofCase.GetMessageEditData ? (global::Botgram.Protocol.V1.GetMessageEditDataRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.GetMessageEditData;
+      }
+    }
+
+    /// <summary>Field number for the "forward_messages" field.</summary>
+    public const int ForwardMessagesFieldNumber = 150;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.ForwardMessagesRequest ForwardMessages {
+      get { return operationCase_ == OperationOneofCase.ForwardMessages ? (global::Botgram.Protocol.V1.ForwardMessagesRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.ForwardMessages;
+      }
+    }
+
+    /// <summary>Field number for the "set_typing" field.</summary>
+    public const int SetTypingFieldNumber = 151;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.SetTypingRequest SetTyping {
+      get { return operationCase_ == OperationOneofCase.SetTyping ? (global::Botgram.Protocol.V1.SetTypingRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.SetTyping;
+      }
+    }
+
+    /// <summary>Field number for the "save_draft" field.</summary>
+    public const int SaveDraftFieldNumber = 152;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.SaveDraftRequest SaveDraft {
+      get { return operationCase_ == OperationOneofCase.SaveDraft ? (global::Botgram.Protocol.V1.SaveDraftRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.SaveDraft;
+      }
+    }
+
+    /// <summary>Field number for the "clear_all_drafts" field.</summary>
+    public const int ClearAllDraftsFieldNumber = 153;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.ClearAllDraftsRequest ClearAllDrafts {
+      get { return operationCase_ == OperationOneofCase.ClearAllDrafts ? (global::Botgram.Protocol.V1.ClearAllDraftsRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.ClearAllDrafts;
+      }
+    }
+
+    /// <summary>Field number for the "get_all_drafts" field.</summary>
+    public const int GetAllDraftsFieldNumber = 154;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GetAllDraftsRequest GetAllDrafts {
+      get { return operationCase_ == OperationOneofCase.GetAllDrafts ? (global::Botgram.Protocol.V1.GetAllDraftsRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.GetAllDrafts;
+      }
+    }
+
+    /// <summary>Field number for the "update_pinned_message" field.</summary>
+    public const int UpdatePinnedMessageFieldNumber = 155;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.UpdatePinnedMessageRequest UpdatePinnedMessage {
+      get { return operationCase_ == OperationOneofCase.UpdatePinnedMessage ? (global::Botgram.Protocol.V1.UpdatePinnedMessageRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.UpdatePinnedMessage;
+      }
+    }
+
+    /// <summary>Field number for the "unpin_all_messages" field.</summary>
+    public const int UnpinAllMessagesFieldNumber = 156;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.UnpinAllMessagesRequest UnpinAllMessages {
+      get { return operationCase_ == OperationOneofCase.UnpinAllMessages ? (global::Botgram.Protocol.V1.UnpinAllMessagesRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.UnpinAllMessages;
+      }
+    }
+
+    /// <summary>Field number for the "toggle_dialog_pin" field.</summary>
+    public const int ToggleDialogPinFieldNumber = 157;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.ToggleDialogPinRequest ToggleDialogPin {
+      get { return operationCase_ == OperationOneofCase.ToggleDialogPin ? (global::Botgram.Protocol.V1.ToggleDialogPinRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.ToggleDialogPin;
+      }
+    }
+
+    /// <summary>Field number for the "reorder_pinned_dialogs" field.</summary>
+    public const int ReorderPinnedDialogsFieldNumber = 158;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.ReorderPinnedDialogsRequest ReorderPinnedDialogs {
+      get { return operationCase_ == OperationOneofCase.ReorderPinnedDialogs ? (global::Botgram.Protocol.V1.ReorderPinnedDialogsRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.ReorderPinnedDialogs;
+      }
+    }
+
+    /// <summary>Field number for the "mark_dialog_unread" field.</summary>
+    public const int MarkDialogUnreadFieldNumber = 159;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MarkDialogUnreadRequest MarkDialogUnread {
+      get { return operationCase_ == OperationOneofCase.MarkDialogUnread ? (global::Botgram.Protocol.V1.MarkDialogUnreadRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.MarkDialogUnread;
+      }
+    }
+
+    /// <summary>Field number for the "get_dialog_unread_marks" field.</summary>
+    public const int GetDialogUnreadMarksFieldNumber = 160;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GetDialogUnreadMarksRequest GetDialogUnreadMarks {
+      get { return operationCase_ == OperationOneofCase.GetDialogUnreadMarks ? (global::Botgram.Protocol.V1.GetDialogUnreadMarksRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.GetDialogUnreadMarks;
+      }
+    }
+
+    /// <summary>Field number for the "read_message_contents" field.</summary>
+    public const int ReadMessageContentsFieldNumber = 161;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.ReadMessageContentsRequest ReadMessageContents {
+      get { return operationCase_ == OperationOneofCase.ReadMessageContents ? (global::Botgram.Protocol.V1.ReadMessageContentsRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.ReadMessageContents;
+      }
+    }
+
+    /// <summary>Field number for the "get_onlines" field.</summary>
+    public const int GetOnlinesFieldNumber = 162;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GetOnlinesRequest GetOnlines {
+      get { return operationCase_ == OperationOneofCase.GetOnlines ? (global::Botgram.Protocol.V1.GetOnlinesRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.GetOnlines;
+      }
+    }
+
+    /// <summary>Field number for the "get_common_chats" field.</summary>
+    public const int GetCommonChatsFieldNumber = 163;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GetCommonChatsRequest GetCommonChats {
+      get { return operationCase_ == OperationOneofCase.GetCommonChats ? (global::Botgram.Protocol.V1.GetCommonChatsRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.GetCommonChats;
+      }
+    }
+
+    /// <summary>Field number for the "hide_peer_settings_bar" field.</summary>
+    public const int HidePeerSettingsBarFieldNumber = 164;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.HidePeerSettingsBarRequest HidePeerSettingsBar {
+      get { return operationCase_ == OperationOneofCase.HidePeerSettingsBar ? (global::Botgram.Protocol.V1.HidePeerSettingsBarRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.HidePeerSettingsBar;
+      }
+    }
+
+    /// <summary>Field number for the "report_spam" field.</summary>
+    public const int ReportSpamFieldNumber = 165;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.ReportSpamRequest ReportSpam {
+      get { return operationCase_ == OperationOneofCase.ReportSpam ? (global::Botgram.Protocol.V1.ReportSpamRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.ReportSpam;
+      }
+    }
+
+    /// <summary>Field number for the "get_messages_views" field.</summary>
+    public const int GetMessagesViewsFieldNumber = 166;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GetMessagesViewsRequest GetMessagesViews {
+      get { return operationCase_ == OperationOneofCase.GetMessagesViews ? (global::Botgram.Protocol.V1.GetMessagesViewsRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.GetMessagesViews;
+      }
+    }
+
+    /// <summary>Field number for the "get_outbox_read_date" field.</summary>
+    public const int GetOutboxReadDateFieldNumber = 167;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GetOutboxReadDateRequest GetOutboxReadDate {
+      get { return operationCase_ == OperationOneofCase.GetOutboxReadDate ? (global::Botgram.Protocol.V1.GetOutboxReadDateRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.GetOutboxReadDate;
+      }
+    }
+
+    /// <summary>Field number for the "search" field.</summary>
+    public const int SearchFieldNumber = 168;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.SearchRequest Search {
+      get { return operationCase_ == OperationOneofCase.Search ? (global::Botgram.Protocol.V1.SearchRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.Search;
+      }
+    }
+
+    /// <summary>Field number for the "get_search_counters" field.</summary>
+    public const int GetSearchCountersFieldNumber = 169;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GetSearchCountersRequest GetSearchCounters {
+      get { return operationCase_ == OperationOneofCase.GetSearchCounters ? (global::Botgram.Protocol.V1.GetSearchCountersRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.GetSearchCounters;
+      }
+    }
+
+    /// <summary>Field number for the "upload_media" field.</summary>
+    public const int UploadMediaFieldNumber = 170;
+    /// <summary>
+    /// Batch I: media messages (tags 170..173). File bytes travel only on the dedicated
+    /// binary media endpoints below, never inside this RPC envelope.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.UploadMediaRequest UploadMedia {
+      get { return operationCase_ == OperationOneofCase.UploadMedia ? (global::Botgram.Protocol.V1.UploadMediaRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.UploadMedia;
+      }
+    }
+
+    /// <summary>Field number for the "send_media" field.</summary>
+    public const int SendMediaFieldNumber = 171;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.SendMediaRequest SendMedia {
+      get { return operationCase_ == OperationOneofCase.SendMedia ? (global::Botgram.Protocol.V1.SendMediaRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.SendMedia;
+      }
+    }
+
+    /// <summary>Field number for the "send_multi_media" field.</summary>
+    public const int SendMultiMediaFieldNumber = 172;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.SendMultiMediaRequest SendMultiMedia {
+      get { return operationCase_ == OperationOneofCase.SendMultiMedia ? (global::Botgram.Protocol.V1.SendMultiMediaRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.SendMultiMedia;
+      }
+    }
+
+    /// <summary>Field number for the "get_extended_media" field.</summary>
+    public const int GetExtendedMediaFieldNumber = 173;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GetExtendedMediaRequest GetExtendedMedia {
+      get { return operationCase_ == OperationOneofCase.GetExtendedMedia ? (global::Botgram.Protocol.V1.GetExtendedMediaRequest) operation_ : null; }
+      set {
+        operation_ = value;
+        operationCase_ = value == null ? OperationOneofCase.None : OperationOneofCase.GetExtendedMedia;
+      }
+    }
+
     /// <summary>Field number for the "auth_capabilities" field.</summary>
     public const int AuthCapabilitiesFieldNumber = 200;
     /// <summary>
@@ -1930,6 +2703,36 @@ namespace Botgram.Protocol.V1 {
       E2EeGetStatus = 141,
       E2EeList = 142,
       E2EeGetPeerBundle = 143,
+      DeleteMessages = 144,
+      DeleteHistory = 145,
+      DeleteSavedHistory = 146,
+      DeletePhoneCallHistory = 147,
+      EditMessage = 148,
+      GetMessageEditData = 149,
+      ForwardMessages = 150,
+      SetTyping = 151,
+      SaveDraft = 152,
+      ClearAllDrafts = 153,
+      GetAllDrafts = 154,
+      UpdatePinnedMessage = 155,
+      UnpinAllMessages = 156,
+      ToggleDialogPin = 157,
+      ReorderPinnedDialogs = 158,
+      MarkDialogUnread = 159,
+      GetDialogUnreadMarks = 160,
+      ReadMessageContents = 161,
+      GetOnlines = 162,
+      GetCommonChats = 163,
+      HidePeerSettingsBar = 164,
+      ReportSpam = 165,
+      GetMessagesViews = 166,
+      GetOutboxReadDate = 167,
+      Search = 168,
+      GetSearchCounters = 169,
+      UploadMedia = 170,
+      SendMedia = 171,
+      SendMultiMedia = 172,
+      GetExtendedMedia = 173,
       AuthCapabilities = 200,
       AuthRegister = 201,
       AuthLogin = 202,
@@ -2017,6 +2820,36 @@ namespace Botgram.Protocol.V1 {
       if (!object.Equals(E2EeGetStatus, other.E2EeGetStatus)) return false;
       if (!object.Equals(E2EeList, other.E2EeList)) return false;
       if (!object.Equals(E2EeGetPeerBundle, other.E2EeGetPeerBundle)) return false;
+      if (!object.Equals(DeleteMessages, other.DeleteMessages)) return false;
+      if (!object.Equals(DeleteHistory, other.DeleteHistory)) return false;
+      if (!object.Equals(DeleteSavedHistory, other.DeleteSavedHistory)) return false;
+      if (!object.Equals(DeletePhoneCallHistory, other.DeletePhoneCallHistory)) return false;
+      if (!object.Equals(EditMessage, other.EditMessage)) return false;
+      if (!object.Equals(GetMessageEditData, other.GetMessageEditData)) return false;
+      if (!object.Equals(ForwardMessages, other.ForwardMessages)) return false;
+      if (!object.Equals(SetTyping, other.SetTyping)) return false;
+      if (!object.Equals(SaveDraft, other.SaveDraft)) return false;
+      if (!object.Equals(ClearAllDrafts, other.ClearAllDrafts)) return false;
+      if (!object.Equals(GetAllDrafts, other.GetAllDrafts)) return false;
+      if (!object.Equals(UpdatePinnedMessage, other.UpdatePinnedMessage)) return false;
+      if (!object.Equals(UnpinAllMessages, other.UnpinAllMessages)) return false;
+      if (!object.Equals(ToggleDialogPin, other.ToggleDialogPin)) return false;
+      if (!object.Equals(ReorderPinnedDialogs, other.ReorderPinnedDialogs)) return false;
+      if (!object.Equals(MarkDialogUnread, other.MarkDialogUnread)) return false;
+      if (!object.Equals(GetDialogUnreadMarks, other.GetDialogUnreadMarks)) return false;
+      if (!object.Equals(ReadMessageContents, other.ReadMessageContents)) return false;
+      if (!object.Equals(GetOnlines, other.GetOnlines)) return false;
+      if (!object.Equals(GetCommonChats, other.GetCommonChats)) return false;
+      if (!object.Equals(HidePeerSettingsBar, other.HidePeerSettingsBar)) return false;
+      if (!object.Equals(ReportSpam, other.ReportSpam)) return false;
+      if (!object.Equals(GetMessagesViews, other.GetMessagesViews)) return false;
+      if (!object.Equals(GetOutboxReadDate, other.GetOutboxReadDate)) return false;
+      if (!object.Equals(Search, other.Search)) return false;
+      if (!object.Equals(GetSearchCounters, other.GetSearchCounters)) return false;
+      if (!object.Equals(UploadMedia, other.UploadMedia)) return false;
+      if (!object.Equals(SendMedia, other.SendMedia)) return false;
+      if (!object.Equals(SendMultiMedia, other.SendMultiMedia)) return false;
+      if (!object.Equals(GetExtendedMedia, other.GetExtendedMedia)) return false;
       if (!object.Equals(AuthCapabilities, other.AuthCapabilities)) return false;
       if (!object.Equals(AuthRegister, other.AuthRegister)) return false;
       if (!object.Equals(AuthLogin, other.AuthLogin)) return false;
@@ -2082,6 +2915,36 @@ namespace Botgram.Protocol.V1 {
       if (operationCase_ == OperationOneofCase.E2EeGetStatus) hash ^= E2EeGetStatus.GetHashCode();
       if (operationCase_ == OperationOneofCase.E2EeList) hash ^= E2EeList.GetHashCode();
       if (operationCase_ == OperationOneofCase.E2EeGetPeerBundle) hash ^= E2EeGetPeerBundle.GetHashCode();
+      if (operationCase_ == OperationOneofCase.DeleteMessages) hash ^= DeleteMessages.GetHashCode();
+      if (operationCase_ == OperationOneofCase.DeleteHistory) hash ^= DeleteHistory.GetHashCode();
+      if (operationCase_ == OperationOneofCase.DeleteSavedHistory) hash ^= DeleteSavedHistory.GetHashCode();
+      if (operationCase_ == OperationOneofCase.DeletePhoneCallHistory) hash ^= DeletePhoneCallHistory.GetHashCode();
+      if (operationCase_ == OperationOneofCase.EditMessage) hash ^= EditMessage.GetHashCode();
+      if (operationCase_ == OperationOneofCase.GetMessageEditData) hash ^= GetMessageEditData.GetHashCode();
+      if (operationCase_ == OperationOneofCase.ForwardMessages) hash ^= ForwardMessages.GetHashCode();
+      if (operationCase_ == OperationOneofCase.SetTyping) hash ^= SetTyping.GetHashCode();
+      if (operationCase_ == OperationOneofCase.SaveDraft) hash ^= SaveDraft.GetHashCode();
+      if (operationCase_ == OperationOneofCase.ClearAllDrafts) hash ^= ClearAllDrafts.GetHashCode();
+      if (operationCase_ == OperationOneofCase.GetAllDrafts) hash ^= GetAllDrafts.GetHashCode();
+      if (operationCase_ == OperationOneofCase.UpdatePinnedMessage) hash ^= UpdatePinnedMessage.GetHashCode();
+      if (operationCase_ == OperationOneofCase.UnpinAllMessages) hash ^= UnpinAllMessages.GetHashCode();
+      if (operationCase_ == OperationOneofCase.ToggleDialogPin) hash ^= ToggleDialogPin.GetHashCode();
+      if (operationCase_ == OperationOneofCase.ReorderPinnedDialogs) hash ^= ReorderPinnedDialogs.GetHashCode();
+      if (operationCase_ == OperationOneofCase.MarkDialogUnread) hash ^= MarkDialogUnread.GetHashCode();
+      if (operationCase_ == OperationOneofCase.GetDialogUnreadMarks) hash ^= GetDialogUnreadMarks.GetHashCode();
+      if (operationCase_ == OperationOneofCase.ReadMessageContents) hash ^= ReadMessageContents.GetHashCode();
+      if (operationCase_ == OperationOneofCase.GetOnlines) hash ^= GetOnlines.GetHashCode();
+      if (operationCase_ == OperationOneofCase.GetCommonChats) hash ^= GetCommonChats.GetHashCode();
+      if (operationCase_ == OperationOneofCase.HidePeerSettingsBar) hash ^= HidePeerSettingsBar.GetHashCode();
+      if (operationCase_ == OperationOneofCase.ReportSpam) hash ^= ReportSpam.GetHashCode();
+      if (operationCase_ == OperationOneofCase.GetMessagesViews) hash ^= GetMessagesViews.GetHashCode();
+      if (operationCase_ == OperationOneofCase.GetOutboxReadDate) hash ^= GetOutboxReadDate.GetHashCode();
+      if (operationCase_ == OperationOneofCase.Search) hash ^= Search.GetHashCode();
+      if (operationCase_ == OperationOneofCase.GetSearchCounters) hash ^= GetSearchCounters.GetHashCode();
+      if (operationCase_ == OperationOneofCase.UploadMedia) hash ^= UploadMedia.GetHashCode();
+      if (operationCase_ == OperationOneofCase.SendMedia) hash ^= SendMedia.GetHashCode();
+      if (operationCase_ == OperationOneofCase.SendMultiMedia) hash ^= SendMultiMedia.GetHashCode();
+      if (operationCase_ == OperationOneofCase.GetExtendedMedia) hash ^= GetExtendedMedia.GetHashCode();
       if (operationCase_ == OperationOneofCase.AuthCapabilities) hash ^= AuthCapabilities.GetHashCode();
       if (operationCase_ == OperationOneofCase.AuthRegister) hash ^= AuthRegister.GetHashCode();
       if (operationCase_ == OperationOneofCase.AuthLogin) hash ^= AuthLogin.GetHashCode();
@@ -2298,6 +3161,126 @@ namespace Botgram.Protocol.V1 {
       if (operationCase_ == OperationOneofCase.E2EeGetPeerBundle) {
         output.WriteRawTag(250, 8);
         output.WriteMessage(E2EeGetPeerBundle);
+      }
+      if (operationCase_ == OperationOneofCase.DeleteMessages) {
+        output.WriteRawTag(130, 9);
+        output.WriteMessage(DeleteMessages);
+      }
+      if (operationCase_ == OperationOneofCase.DeleteHistory) {
+        output.WriteRawTag(138, 9);
+        output.WriteMessage(DeleteHistory);
+      }
+      if (operationCase_ == OperationOneofCase.DeleteSavedHistory) {
+        output.WriteRawTag(146, 9);
+        output.WriteMessage(DeleteSavedHistory);
+      }
+      if (operationCase_ == OperationOneofCase.DeletePhoneCallHistory) {
+        output.WriteRawTag(154, 9);
+        output.WriteMessage(DeletePhoneCallHistory);
+      }
+      if (operationCase_ == OperationOneofCase.EditMessage) {
+        output.WriteRawTag(162, 9);
+        output.WriteMessage(EditMessage);
+      }
+      if (operationCase_ == OperationOneofCase.GetMessageEditData) {
+        output.WriteRawTag(170, 9);
+        output.WriteMessage(GetMessageEditData);
+      }
+      if (operationCase_ == OperationOneofCase.ForwardMessages) {
+        output.WriteRawTag(178, 9);
+        output.WriteMessage(ForwardMessages);
+      }
+      if (operationCase_ == OperationOneofCase.SetTyping) {
+        output.WriteRawTag(186, 9);
+        output.WriteMessage(SetTyping);
+      }
+      if (operationCase_ == OperationOneofCase.SaveDraft) {
+        output.WriteRawTag(194, 9);
+        output.WriteMessage(SaveDraft);
+      }
+      if (operationCase_ == OperationOneofCase.ClearAllDrafts) {
+        output.WriteRawTag(202, 9);
+        output.WriteMessage(ClearAllDrafts);
+      }
+      if (operationCase_ == OperationOneofCase.GetAllDrafts) {
+        output.WriteRawTag(210, 9);
+        output.WriteMessage(GetAllDrafts);
+      }
+      if (operationCase_ == OperationOneofCase.UpdatePinnedMessage) {
+        output.WriteRawTag(218, 9);
+        output.WriteMessage(UpdatePinnedMessage);
+      }
+      if (operationCase_ == OperationOneofCase.UnpinAllMessages) {
+        output.WriteRawTag(226, 9);
+        output.WriteMessage(UnpinAllMessages);
+      }
+      if (operationCase_ == OperationOneofCase.ToggleDialogPin) {
+        output.WriteRawTag(234, 9);
+        output.WriteMessage(ToggleDialogPin);
+      }
+      if (operationCase_ == OperationOneofCase.ReorderPinnedDialogs) {
+        output.WriteRawTag(242, 9);
+        output.WriteMessage(ReorderPinnedDialogs);
+      }
+      if (operationCase_ == OperationOneofCase.MarkDialogUnread) {
+        output.WriteRawTag(250, 9);
+        output.WriteMessage(MarkDialogUnread);
+      }
+      if (operationCase_ == OperationOneofCase.GetDialogUnreadMarks) {
+        output.WriteRawTag(130, 10);
+        output.WriteMessage(GetDialogUnreadMarks);
+      }
+      if (operationCase_ == OperationOneofCase.ReadMessageContents) {
+        output.WriteRawTag(138, 10);
+        output.WriteMessage(ReadMessageContents);
+      }
+      if (operationCase_ == OperationOneofCase.GetOnlines) {
+        output.WriteRawTag(146, 10);
+        output.WriteMessage(GetOnlines);
+      }
+      if (operationCase_ == OperationOneofCase.GetCommonChats) {
+        output.WriteRawTag(154, 10);
+        output.WriteMessage(GetCommonChats);
+      }
+      if (operationCase_ == OperationOneofCase.HidePeerSettingsBar) {
+        output.WriteRawTag(162, 10);
+        output.WriteMessage(HidePeerSettingsBar);
+      }
+      if (operationCase_ == OperationOneofCase.ReportSpam) {
+        output.WriteRawTag(170, 10);
+        output.WriteMessage(ReportSpam);
+      }
+      if (operationCase_ == OperationOneofCase.GetMessagesViews) {
+        output.WriteRawTag(178, 10);
+        output.WriteMessage(GetMessagesViews);
+      }
+      if (operationCase_ == OperationOneofCase.GetOutboxReadDate) {
+        output.WriteRawTag(186, 10);
+        output.WriteMessage(GetOutboxReadDate);
+      }
+      if (operationCase_ == OperationOneofCase.Search) {
+        output.WriteRawTag(194, 10);
+        output.WriteMessage(Search);
+      }
+      if (operationCase_ == OperationOneofCase.GetSearchCounters) {
+        output.WriteRawTag(202, 10);
+        output.WriteMessage(GetSearchCounters);
+      }
+      if (operationCase_ == OperationOneofCase.UploadMedia) {
+        output.WriteRawTag(210, 10);
+        output.WriteMessage(UploadMedia);
+      }
+      if (operationCase_ == OperationOneofCase.SendMedia) {
+        output.WriteRawTag(218, 10);
+        output.WriteMessage(SendMedia);
+      }
+      if (operationCase_ == OperationOneofCase.SendMultiMedia) {
+        output.WriteRawTag(226, 10);
+        output.WriteMessage(SendMultiMedia);
+      }
+      if (operationCase_ == OperationOneofCase.GetExtendedMedia) {
+        output.WriteRawTag(234, 10);
+        output.WriteMessage(GetExtendedMedia);
       }
       if (operationCase_ == OperationOneofCase.AuthCapabilities) {
         output.WriteRawTag(194, 12);
@@ -2537,6 +3520,126 @@ namespace Botgram.Protocol.V1 {
         output.WriteRawTag(250, 8);
         output.WriteMessage(E2EeGetPeerBundle);
       }
+      if (operationCase_ == OperationOneofCase.DeleteMessages) {
+        output.WriteRawTag(130, 9);
+        output.WriteMessage(DeleteMessages);
+      }
+      if (operationCase_ == OperationOneofCase.DeleteHistory) {
+        output.WriteRawTag(138, 9);
+        output.WriteMessage(DeleteHistory);
+      }
+      if (operationCase_ == OperationOneofCase.DeleteSavedHistory) {
+        output.WriteRawTag(146, 9);
+        output.WriteMessage(DeleteSavedHistory);
+      }
+      if (operationCase_ == OperationOneofCase.DeletePhoneCallHistory) {
+        output.WriteRawTag(154, 9);
+        output.WriteMessage(DeletePhoneCallHistory);
+      }
+      if (operationCase_ == OperationOneofCase.EditMessage) {
+        output.WriteRawTag(162, 9);
+        output.WriteMessage(EditMessage);
+      }
+      if (operationCase_ == OperationOneofCase.GetMessageEditData) {
+        output.WriteRawTag(170, 9);
+        output.WriteMessage(GetMessageEditData);
+      }
+      if (operationCase_ == OperationOneofCase.ForwardMessages) {
+        output.WriteRawTag(178, 9);
+        output.WriteMessage(ForwardMessages);
+      }
+      if (operationCase_ == OperationOneofCase.SetTyping) {
+        output.WriteRawTag(186, 9);
+        output.WriteMessage(SetTyping);
+      }
+      if (operationCase_ == OperationOneofCase.SaveDraft) {
+        output.WriteRawTag(194, 9);
+        output.WriteMessage(SaveDraft);
+      }
+      if (operationCase_ == OperationOneofCase.ClearAllDrafts) {
+        output.WriteRawTag(202, 9);
+        output.WriteMessage(ClearAllDrafts);
+      }
+      if (operationCase_ == OperationOneofCase.GetAllDrafts) {
+        output.WriteRawTag(210, 9);
+        output.WriteMessage(GetAllDrafts);
+      }
+      if (operationCase_ == OperationOneofCase.UpdatePinnedMessage) {
+        output.WriteRawTag(218, 9);
+        output.WriteMessage(UpdatePinnedMessage);
+      }
+      if (operationCase_ == OperationOneofCase.UnpinAllMessages) {
+        output.WriteRawTag(226, 9);
+        output.WriteMessage(UnpinAllMessages);
+      }
+      if (operationCase_ == OperationOneofCase.ToggleDialogPin) {
+        output.WriteRawTag(234, 9);
+        output.WriteMessage(ToggleDialogPin);
+      }
+      if (operationCase_ == OperationOneofCase.ReorderPinnedDialogs) {
+        output.WriteRawTag(242, 9);
+        output.WriteMessage(ReorderPinnedDialogs);
+      }
+      if (operationCase_ == OperationOneofCase.MarkDialogUnread) {
+        output.WriteRawTag(250, 9);
+        output.WriteMessage(MarkDialogUnread);
+      }
+      if (operationCase_ == OperationOneofCase.GetDialogUnreadMarks) {
+        output.WriteRawTag(130, 10);
+        output.WriteMessage(GetDialogUnreadMarks);
+      }
+      if (operationCase_ == OperationOneofCase.ReadMessageContents) {
+        output.WriteRawTag(138, 10);
+        output.WriteMessage(ReadMessageContents);
+      }
+      if (operationCase_ == OperationOneofCase.GetOnlines) {
+        output.WriteRawTag(146, 10);
+        output.WriteMessage(GetOnlines);
+      }
+      if (operationCase_ == OperationOneofCase.GetCommonChats) {
+        output.WriteRawTag(154, 10);
+        output.WriteMessage(GetCommonChats);
+      }
+      if (operationCase_ == OperationOneofCase.HidePeerSettingsBar) {
+        output.WriteRawTag(162, 10);
+        output.WriteMessage(HidePeerSettingsBar);
+      }
+      if (operationCase_ == OperationOneofCase.ReportSpam) {
+        output.WriteRawTag(170, 10);
+        output.WriteMessage(ReportSpam);
+      }
+      if (operationCase_ == OperationOneofCase.GetMessagesViews) {
+        output.WriteRawTag(178, 10);
+        output.WriteMessage(GetMessagesViews);
+      }
+      if (operationCase_ == OperationOneofCase.GetOutboxReadDate) {
+        output.WriteRawTag(186, 10);
+        output.WriteMessage(GetOutboxReadDate);
+      }
+      if (operationCase_ == OperationOneofCase.Search) {
+        output.WriteRawTag(194, 10);
+        output.WriteMessage(Search);
+      }
+      if (operationCase_ == OperationOneofCase.GetSearchCounters) {
+        output.WriteRawTag(202, 10);
+        output.WriteMessage(GetSearchCounters);
+      }
+      if (operationCase_ == OperationOneofCase.UploadMedia) {
+        output.WriteRawTag(210, 10);
+        output.WriteMessage(UploadMedia);
+      }
+      if (operationCase_ == OperationOneofCase.SendMedia) {
+        output.WriteRawTag(218, 10);
+        output.WriteMessage(SendMedia);
+      }
+      if (operationCase_ == OperationOneofCase.SendMultiMedia) {
+        output.WriteRawTag(226, 10);
+        output.WriteMessage(SendMultiMedia);
+      }
+      if (operationCase_ == OperationOneofCase.GetExtendedMedia) {
+        output.WriteRawTag(234, 10);
+        output.WriteMessage(GetExtendedMedia);
+      }
       if (operationCase_ == OperationOneofCase.AuthCapabilities) {
         output.WriteRawTag(194, 12);
         output.WriteMessage(AuthCapabilities);
@@ -2727,6 +3830,96 @@ namespace Botgram.Protocol.V1 {
       }
       if (operationCase_ == OperationOneofCase.E2EeGetPeerBundle) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(E2EeGetPeerBundle);
+      }
+      if (operationCase_ == OperationOneofCase.DeleteMessages) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(DeleteMessages);
+      }
+      if (operationCase_ == OperationOneofCase.DeleteHistory) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(DeleteHistory);
+      }
+      if (operationCase_ == OperationOneofCase.DeleteSavedHistory) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(DeleteSavedHistory);
+      }
+      if (operationCase_ == OperationOneofCase.DeletePhoneCallHistory) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(DeletePhoneCallHistory);
+      }
+      if (operationCase_ == OperationOneofCase.EditMessage) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(EditMessage);
+      }
+      if (operationCase_ == OperationOneofCase.GetMessageEditData) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetMessageEditData);
+      }
+      if (operationCase_ == OperationOneofCase.ForwardMessages) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ForwardMessages);
+      }
+      if (operationCase_ == OperationOneofCase.SetTyping) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SetTyping);
+      }
+      if (operationCase_ == OperationOneofCase.SaveDraft) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SaveDraft);
+      }
+      if (operationCase_ == OperationOneofCase.ClearAllDrafts) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ClearAllDrafts);
+      }
+      if (operationCase_ == OperationOneofCase.GetAllDrafts) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetAllDrafts);
+      }
+      if (operationCase_ == OperationOneofCase.UpdatePinnedMessage) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(UpdatePinnedMessage);
+      }
+      if (operationCase_ == OperationOneofCase.UnpinAllMessages) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(UnpinAllMessages);
+      }
+      if (operationCase_ == OperationOneofCase.ToggleDialogPin) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ToggleDialogPin);
+      }
+      if (operationCase_ == OperationOneofCase.ReorderPinnedDialogs) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ReorderPinnedDialogs);
+      }
+      if (operationCase_ == OperationOneofCase.MarkDialogUnread) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(MarkDialogUnread);
+      }
+      if (operationCase_ == OperationOneofCase.GetDialogUnreadMarks) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetDialogUnreadMarks);
+      }
+      if (operationCase_ == OperationOneofCase.ReadMessageContents) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ReadMessageContents);
+      }
+      if (operationCase_ == OperationOneofCase.GetOnlines) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetOnlines);
+      }
+      if (operationCase_ == OperationOneofCase.GetCommonChats) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetCommonChats);
+      }
+      if (operationCase_ == OperationOneofCase.HidePeerSettingsBar) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(HidePeerSettingsBar);
+      }
+      if (operationCase_ == OperationOneofCase.ReportSpam) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ReportSpam);
+      }
+      if (operationCase_ == OperationOneofCase.GetMessagesViews) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetMessagesViews);
+      }
+      if (operationCase_ == OperationOneofCase.GetOutboxReadDate) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetOutboxReadDate);
+      }
+      if (operationCase_ == OperationOneofCase.Search) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(Search);
+      }
+      if (operationCase_ == OperationOneofCase.GetSearchCounters) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetSearchCounters);
+      }
+      if (operationCase_ == OperationOneofCase.UploadMedia) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(UploadMedia);
+      }
+      if (operationCase_ == OperationOneofCase.SendMedia) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SendMedia);
+      }
+      if (operationCase_ == OperationOneofCase.SendMultiMedia) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SendMultiMedia);
+      }
+      if (operationCase_ == OperationOneofCase.GetExtendedMedia) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetExtendedMedia);
       }
       if (operationCase_ == OperationOneofCase.AuthCapabilities) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(AuthCapabilities);
@@ -3043,6 +4236,186 @@ namespace Botgram.Protocol.V1 {
             E2EeGetPeerBundle = new global::Botgram.Protocol.V1.E2eeGetPeerBundleRequest();
           }
           E2EeGetPeerBundle.MergeFrom(other.E2EeGetPeerBundle);
+          break;
+        case OperationOneofCase.DeleteMessages:
+          if (DeleteMessages == null) {
+            DeleteMessages = new global::Botgram.Protocol.V1.DeleteMessagesRequest();
+          }
+          DeleteMessages.MergeFrom(other.DeleteMessages);
+          break;
+        case OperationOneofCase.DeleteHistory:
+          if (DeleteHistory == null) {
+            DeleteHistory = new global::Botgram.Protocol.V1.DeleteHistoryRequest();
+          }
+          DeleteHistory.MergeFrom(other.DeleteHistory);
+          break;
+        case OperationOneofCase.DeleteSavedHistory:
+          if (DeleteSavedHistory == null) {
+            DeleteSavedHistory = new global::Botgram.Protocol.V1.DeleteSavedHistoryRequest();
+          }
+          DeleteSavedHistory.MergeFrom(other.DeleteSavedHistory);
+          break;
+        case OperationOneofCase.DeletePhoneCallHistory:
+          if (DeletePhoneCallHistory == null) {
+            DeletePhoneCallHistory = new global::Botgram.Protocol.V1.DeletePhoneCallHistoryRequest();
+          }
+          DeletePhoneCallHistory.MergeFrom(other.DeletePhoneCallHistory);
+          break;
+        case OperationOneofCase.EditMessage:
+          if (EditMessage == null) {
+            EditMessage = new global::Botgram.Protocol.V1.EditMessageRequest();
+          }
+          EditMessage.MergeFrom(other.EditMessage);
+          break;
+        case OperationOneofCase.GetMessageEditData:
+          if (GetMessageEditData == null) {
+            GetMessageEditData = new global::Botgram.Protocol.V1.GetMessageEditDataRequest();
+          }
+          GetMessageEditData.MergeFrom(other.GetMessageEditData);
+          break;
+        case OperationOneofCase.ForwardMessages:
+          if (ForwardMessages == null) {
+            ForwardMessages = new global::Botgram.Protocol.V1.ForwardMessagesRequest();
+          }
+          ForwardMessages.MergeFrom(other.ForwardMessages);
+          break;
+        case OperationOneofCase.SetTyping:
+          if (SetTyping == null) {
+            SetTyping = new global::Botgram.Protocol.V1.SetTypingRequest();
+          }
+          SetTyping.MergeFrom(other.SetTyping);
+          break;
+        case OperationOneofCase.SaveDraft:
+          if (SaveDraft == null) {
+            SaveDraft = new global::Botgram.Protocol.V1.SaveDraftRequest();
+          }
+          SaveDraft.MergeFrom(other.SaveDraft);
+          break;
+        case OperationOneofCase.ClearAllDrafts:
+          if (ClearAllDrafts == null) {
+            ClearAllDrafts = new global::Botgram.Protocol.V1.ClearAllDraftsRequest();
+          }
+          ClearAllDrafts.MergeFrom(other.ClearAllDrafts);
+          break;
+        case OperationOneofCase.GetAllDrafts:
+          if (GetAllDrafts == null) {
+            GetAllDrafts = new global::Botgram.Protocol.V1.GetAllDraftsRequest();
+          }
+          GetAllDrafts.MergeFrom(other.GetAllDrafts);
+          break;
+        case OperationOneofCase.UpdatePinnedMessage:
+          if (UpdatePinnedMessage == null) {
+            UpdatePinnedMessage = new global::Botgram.Protocol.V1.UpdatePinnedMessageRequest();
+          }
+          UpdatePinnedMessage.MergeFrom(other.UpdatePinnedMessage);
+          break;
+        case OperationOneofCase.UnpinAllMessages:
+          if (UnpinAllMessages == null) {
+            UnpinAllMessages = new global::Botgram.Protocol.V1.UnpinAllMessagesRequest();
+          }
+          UnpinAllMessages.MergeFrom(other.UnpinAllMessages);
+          break;
+        case OperationOneofCase.ToggleDialogPin:
+          if (ToggleDialogPin == null) {
+            ToggleDialogPin = new global::Botgram.Protocol.V1.ToggleDialogPinRequest();
+          }
+          ToggleDialogPin.MergeFrom(other.ToggleDialogPin);
+          break;
+        case OperationOneofCase.ReorderPinnedDialogs:
+          if (ReorderPinnedDialogs == null) {
+            ReorderPinnedDialogs = new global::Botgram.Protocol.V1.ReorderPinnedDialogsRequest();
+          }
+          ReorderPinnedDialogs.MergeFrom(other.ReorderPinnedDialogs);
+          break;
+        case OperationOneofCase.MarkDialogUnread:
+          if (MarkDialogUnread == null) {
+            MarkDialogUnread = new global::Botgram.Protocol.V1.MarkDialogUnreadRequest();
+          }
+          MarkDialogUnread.MergeFrom(other.MarkDialogUnread);
+          break;
+        case OperationOneofCase.GetDialogUnreadMarks:
+          if (GetDialogUnreadMarks == null) {
+            GetDialogUnreadMarks = new global::Botgram.Protocol.V1.GetDialogUnreadMarksRequest();
+          }
+          GetDialogUnreadMarks.MergeFrom(other.GetDialogUnreadMarks);
+          break;
+        case OperationOneofCase.ReadMessageContents:
+          if (ReadMessageContents == null) {
+            ReadMessageContents = new global::Botgram.Protocol.V1.ReadMessageContentsRequest();
+          }
+          ReadMessageContents.MergeFrom(other.ReadMessageContents);
+          break;
+        case OperationOneofCase.GetOnlines:
+          if (GetOnlines == null) {
+            GetOnlines = new global::Botgram.Protocol.V1.GetOnlinesRequest();
+          }
+          GetOnlines.MergeFrom(other.GetOnlines);
+          break;
+        case OperationOneofCase.GetCommonChats:
+          if (GetCommonChats == null) {
+            GetCommonChats = new global::Botgram.Protocol.V1.GetCommonChatsRequest();
+          }
+          GetCommonChats.MergeFrom(other.GetCommonChats);
+          break;
+        case OperationOneofCase.HidePeerSettingsBar:
+          if (HidePeerSettingsBar == null) {
+            HidePeerSettingsBar = new global::Botgram.Protocol.V1.HidePeerSettingsBarRequest();
+          }
+          HidePeerSettingsBar.MergeFrom(other.HidePeerSettingsBar);
+          break;
+        case OperationOneofCase.ReportSpam:
+          if (ReportSpam == null) {
+            ReportSpam = new global::Botgram.Protocol.V1.ReportSpamRequest();
+          }
+          ReportSpam.MergeFrom(other.ReportSpam);
+          break;
+        case OperationOneofCase.GetMessagesViews:
+          if (GetMessagesViews == null) {
+            GetMessagesViews = new global::Botgram.Protocol.V1.GetMessagesViewsRequest();
+          }
+          GetMessagesViews.MergeFrom(other.GetMessagesViews);
+          break;
+        case OperationOneofCase.GetOutboxReadDate:
+          if (GetOutboxReadDate == null) {
+            GetOutboxReadDate = new global::Botgram.Protocol.V1.GetOutboxReadDateRequest();
+          }
+          GetOutboxReadDate.MergeFrom(other.GetOutboxReadDate);
+          break;
+        case OperationOneofCase.Search:
+          if (Search == null) {
+            Search = new global::Botgram.Protocol.V1.SearchRequest();
+          }
+          Search.MergeFrom(other.Search);
+          break;
+        case OperationOneofCase.GetSearchCounters:
+          if (GetSearchCounters == null) {
+            GetSearchCounters = new global::Botgram.Protocol.V1.GetSearchCountersRequest();
+          }
+          GetSearchCounters.MergeFrom(other.GetSearchCounters);
+          break;
+        case OperationOneofCase.UploadMedia:
+          if (UploadMedia == null) {
+            UploadMedia = new global::Botgram.Protocol.V1.UploadMediaRequest();
+          }
+          UploadMedia.MergeFrom(other.UploadMedia);
+          break;
+        case OperationOneofCase.SendMedia:
+          if (SendMedia == null) {
+            SendMedia = new global::Botgram.Protocol.V1.SendMediaRequest();
+          }
+          SendMedia.MergeFrom(other.SendMedia);
+          break;
+        case OperationOneofCase.SendMultiMedia:
+          if (SendMultiMedia == null) {
+            SendMultiMedia = new global::Botgram.Protocol.V1.SendMultiMediaRequest();
+          }
+          SendMultiMedia.MergeFrom(other.SendMultiMedia);
+          break;
+        case OperationOneofCase.GetExtendedMedia:
+          if (GetExtendedMedia == null) {
+            GetExtendedMedia = new global::Botgram.Protocol.V1.GetExtendedMediaRequest();
+          }
+          GetExtendedMedia.MergeFrom(other.GetExtendedMedia);
           break;
         case OperationOneofCase.AuthCapabilities:
           if (AuthCapabilities == null) {
@@ -3527,6 +4900,276 @@ namespace Botgram.Protocol.V1 {
             }
             input.ReadMessage(subBuilder);
             E2EeGetPeerBundle = subBuilder;
+            break;
+          }
+          case 1154: {
+            global::Botgram.Protocol.V1.DeleteMessagesRequest subBuilder = new global::Botgram.Protocol.V1.DeleteMessagesRequest();
+            if (operationCase_ == OperationOneofCase.DeleteMessages) {
+              subBuilder.MergeFrom(DeleteMessages);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteMessages = subBuilder;
+            break;
+          }
+          case 1162: {
+            global::Botgram.Protocol.V1.DeleteHistoryRequest subBuilder = new global::Botgram.Protocol.V1.DeleteHistoryRequest();
+            if (operationCase_ == OperationOneofCase.DeleteHistory) {
+              subBuilder.MergeFrom(DeleteHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteHistory = subBuilder;
+            break;
+          }
+          case 1170: {
+            global::Botgram.Protocol.V1.DeleteSavedHistoryRequest subBuilder = new global::Botgram.Protocol.V1.DeleteSavedHistoryRequest();
+            if (operationCase_ == OperationOneofCase.DeleteSavedHistory) {
+              subBuilder.MergeFrom(DeleteSavedHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteSavedHistory = subBuilder;
+            break;
+          }
+          case 1178: {
+            global::Botgram.Protocol.V1.DeletePhoneCallHistoryRequest subBuilder = new global::Botgram.Protocol.V1.DeletePhoneCallHistoryRequest();
+            if (operationCase_ == OperationOneofCase.DeletePhoneCallHistory) {
+              subBuilder.MergeFrom(DeletePhoneCallHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeletePhoneCallHistory = subBuilder;
+            break;
+          }
+          case 1186: {
+            global::Botgram.Protocol.V1.EditMessageRequest subBuilder = new global::Botgram.Protocol.V1.EditMessageRequest();
+            if (operationCase_ == OperationOneofCase.EditMessage) {
+              subBuilder.MergeFrom(EditMessage);
+            }
+            input.ReadMessage(subBuilder);
+            EditMessage = subBuilder;
+            break;
+          }
+          case 1194: {
+            global::Botgram.Protocol.V1.GetMessageEditDataRequest subBuilder = new global::Botgram.Protocol.V1.GetMessageEditDataRequest();
+            if (operationCase_ == OperationOneofCase.GetMessageEditData) {
+              subBuilder.MergeFrom(GetMessageEditData);
+            }
+            input.ReadMessage(subBuilder);
+            GetMessageEditData = subBuilder;
+            break;
+          }
+          case 1202: {
+            global::Botgram.Protocol.V1.ForwardMessagesRequest subBuilder = new global::Botgram.Protocol.V1.ForwardMessagesRequest();
+            if (operationCase_ == OperationOneofCase.ForwardMessages) {
+              subBuilder.MergeFrom(ForwardMessages);
+            }
+            input.ReadMessage(subBuilder);
+            ForwardMessages = subBuilder;
+            break;
+          }
+          case 1210: {
+            global::Botgram.Protocol.V1.SetTypingRequest subBuilder = new global::Botgram.Protocol.V1.SetTypingRequest();
+            if (operationCase_ == OperationOneofCase.SetTyping) {
+              subBuilder.MergeFrom(SetTyping);
+            }
+            input.ReadMessage(subBuilder);
+            SetTyping = subBuilder;
+            break;
+          }
+          case 1218: {
+            global::Botgram.Protocol.V1.SaveDraftRequest subBuilder = new global::Botgram.Protocol.V1.SaveDraftRequest();
+            if (operationCase_ == OperationOneofCase.SaveDraft) {
+              subBuilder.MergeFrom(SaveDraft);
+            }
+            input.ReadMessage(subBuilder);
+            SaveDraft = subBuilder;
+            break;
+          }
+          case 1226: {
+            global::Botgram.Protocol.V1.ClearAllDraftsRequest subBuilder = new global::Botgram.Protocol.V1.ClearAllDraftsRequest();
+            if (operationCase_ == OperationOneofCase.ClearAllDrafts) {
+              subBuilder.MergeFrom(ClearAllDrafts);
+            }
+            input.ReadMessage(subBuilder);
+            ClearAllDrafts = subBuilder;
+            break;
+          }
+          case 1234: {
+            global::Botgram.Protocol.V1.GetAllDraftsRequest subBuilder = new global::Botgram.Protocol.V1.GetAllDraftsRequest();
+            if (operationCase_ == OperationOneofCase.GetAllDrafts) {
+              subBuilder.MergeFrom(GetAllDrafts);
+            }
+            input.ReadMessage(subBuilder);
+            GetAllDrafts = subBuilder;
+            break;
+          }
+          case 1242: {
+            global::Botgram.Protocol.V1.UpdatePinnedMessageRequest subBuilder = new global::Botgram.Protocol.V1.UpdatePinnedMessageRequest();
+            if (operationCase_ == OperationOneofCase.UpdatePinnedMessage) {
+              subBuilder.MergeFrom(UpdatePinnedMessage);
+            }
+            input.ReadMessage(subBuilder);
+            UpdatePinnedMessage = subBuilder;
+            break;
+          }
+          case 1250: {
+            global::Botgram.Protocol.V1.UnpinAllMessagesRequest subBuilder = new global::Botgram.Protocol.V1.UnpinAllMessagesRequest();
+            if (operationCase_ == OperationOneofCase.UnpinAllMessages) {
+              subBuilder.MergeFrom(UnpinAllMessages);
+            }
+            input.ReadMessage(subBuilder);
+            UnpinAllMessages = subBuilder;
+            break;
+          }
+          case 1258: {
+            global::Botgram.Protocol.V1.ToggleDialogPinRequest subBuilder = new global::Botgram.Protocol.V1.ToggleDialogPinRequest();
+            if (operationCase_ == OperationOneofCase.ToggleDialogPin) {
+              subBuilder.MergeFrom(ToggleDialogPin);
+            }
+            input.ReadMessage(subBuilder);
+            ToggleDialogPin = subBuilder;
+            break;
+          }
+          case 1266: {
+            global::Botgram.Protocol.V1.ReorderPinnedDialogsRequest subBuilder = new global::Botgram.Protocol.V1.ReorderPinnedDialogsRequest();
+            if (operationCase_ == OperationOneofCase.ReorderPinnedDialogs) {
+              subBuilder.MergeFrom(ReorderPinnedDialogs);
+            }
+            input.ReadMessage(subBuilder);
+            ReorderPinnedDialogs = subBuilder;
+            break;
+          }
+          case 1274: {
+            global::Botgram.Protocol.V1.MarkDialogUnreadRequest subBuilder = new global::Botgram.Protocol.V1.MarkDialogUnreadRequest();
+            if (operationCase_ == OperationOneofCase.MarkDialogUnread) {
+              subBuilder.MergeFrom(MarkDialogUnread);
+            }
+            input.ReadMessage(subBuilder);
+            MarkDialogUnread = subBuilder;
+            break;
+          }
+          case 1282: {
+            global::Botgram.Protocol.V1.GetDialogUnreadMarksRequest subBuilder = new global::Botgram.Protocol.V1.GetDialogUnreadMarksRequest();
+            if (operationCase_ == OperationOneofCase.GetDialogUnreadMarks) {
+              subBuilder.MergeFrom(GetDialogUnreadMarks);
+            }
+            input.ReadMessage(subBuilder);
+            GetDialogUnreadMarks = subBuilder;
+            break;
+          }
+          case 1290: {
+            global::Botgram.Protocol.V1.ReadMessageContentsRequest subBuilder = new global::Botgram.Protocol.V1.ReadMessageContentsRequest();
+            if (operationCase_ == OperationOneofCase.ReadMessageContents) {
+              subBuilder.MergeFrom(ReadMessageContents);
+            }
+            input.ReadMessage(subBuilder);
+            ReadMessageContents = subBuilder;
+            break;
+          }
+          case 1298: {
+            global::Botgram.Protocol.V1.GetOnlinesRequest subBuilder = new global::Botgram.Protocol.V1.GetOnlinesRequest();
+            if (operationCase_ == OperationOneofCase.GetOnlines) {
+              subBuilder.MergeFrom(GetOnlines);
+            }
+            input.ReadMessage(subBuilder);
+            GetOnlines = subBuilder;
+            break;
+          }
+          case 1306: {
+            global::Botgram.Protocol.V1.GetCommonChatsRequest subBuilder = new global::Botgram.Protocol.V1.GetCommonChatsRequest();
+            if (operationCase_ == OperationOneofCase.GetCommonChats) {
+              subBuilder.MergeFrom(GetCommonChats);
+            }
+            input.ReadMessage(subBuilder);
+            GetCommonChats = subBuilder;
+            break;
+          }
+          case 1314: {
+            global::Botgram.Protocol.V1.HidePeerSettingsBarRequest subBuilder = new global::Botgram.Protocol.V1.HidePeerSettingsBarRequest();
+            if (operationCase_ == OperationOneofCase.HidePeerSettingsBar) {
+              subBuilder.MergeFrom(HidePeerSettingsBar);
+            }
+            input.ReadMessage(subBuilder);
+            HidePeerSettingsBar = subBuilder;
+            break;
+          }
+          case 1322: {
+            global::Botgram.Protocol.V1.ReportSpamRequest subBuilder = new global::Botgram.Protocol.V1.ReportSpamRequest();
+            if (operationCase_ == OperationOneofCase.ReportSpam) {
+              subBuilder.MergeFrom(ReportSpam);
+            }
+            input.ReadMessage(subBuilder);
+            ReportSpam = subBuilder;
+            break;
+          }
+          case 1330: {
+            global::Botgram.Protocol.V1.GetMessagesViewsRequest subBuilder = new global::Botgram.Protocol.V1.GetMessagesViewsRequest();
+            if (operationCase_ == OperationOneofCase.GetMessagesViews) {
+              subBuilder.MergeFrom(GetMessagesViews);
+            }
+            input.ReadMessage(subBuilder);
+            GetMessagesViews = subBuilder;
+            break;
+          }
+          case 1338: {
+            global::Botgram.Protocol.V1.GetOutboxReadDateRequest subBuilder = new global::Botgram.Protocol.V1.GetOutboxReadDateRequest();
+            if (operationCase_ == OperationOneofCase.GetOutboxReadDate) {
+              subBuilder.MergeFrom(GetOutboxReadDate);
+            }
+            input.ReadMessage(subBuilder);
+            GetOutboxReadDate = subBuilder;
+            break;
+          }
+          case 1346: {
+            global::Botgram.Protocol.V1.SearchRequest subBuilder = new global::Botgram.Protocol.V1.SearchRequest();
+            if (operationCase_ == OperationOneofCase.Search) {
+              subBuilder.MergeFrom(Search);
+            }
+            input.ReadMessage(subBuilder);
+            Search = subBuilder;
+            break;
+          }
+          case 1354: {
+            global::Botgram.Protocol.V1.GetSearchCountersRequest subBuilder = new global::Botgram.Protocol.V1.GetSearchCountersRequest();
+            if (operationCase_ == OperationOneofCase.GetSearchCounters) {
+              subBuilder.MergeFrom(GetSearchCounters);
+            }
+            input.ReadMessage(subBuilder);
+            GetSearchCounters = subBuilder;
+            break;
+          }
+          case 1362: {
+            global::Botgram.Protocol.V1.UploadMediaRequest subBuilder = new global::Botgram.Protocol.V1.UploadMediaRequest();
+            if (operationCase_ == OperationOneofCase.UploadMedia) {
+              subBuilder.MergeFrom(UploadMedia);
+            }
+            input.ReadMessage(subBuilder);
+            UploadMedia = subBuilder;
+            break;
+          }
+          case 1370: {
+            global::Botgram.Protocol.V1.SendMediaRequest subBuilder = new global::Botgram.Protocol.V1.SendMediaRequest();
+            if (operationCase_ == OperationOneofCase.SendMedia) {
+              subBuilder.MergeFrom(SendMedia);
+            }
+            input.ReadMessage(subBuilder);
+            SendMedia = subBuilder;
+            break;
+          }
+          case 1378: {
+            global::Botgram.Protocol.V1.SendMultiMediaRequest subBuilder = new global::Botgram.Protocol.V1.SendMultiMediaRequest();
+            if (operationCase_ == OperationOneofCase.SendMultiMedia) {
+              subBuilder.MergeFrom(SendMultiMedia);
+            }
+            input.ReadMessage(subBuilder);
+            SendMultiMedia = subBuilder;
+            break;
+          }
+          case 1386: {
+            global::Botgram.Protocol.V1.GetExtendedMediaRequest subBuilder = new global::Botgram.Protocol.V1.GetExtendedMediaRequest();
+            if (operationCase_ == OperationOneofCase.GetExtendedMedia) {
+              subBuilder.MergeFrom(GetExtendedMedia);
+            }
+            input.ReadMessage(subBuilder);
+            GetExtendedMedia = subBuilder;
             break;
           }
           case 1602: {
@@ -4042,6 +5685,276 @@ namespace Botgram.Protocol.V1 {
             E2EeGetPeerBundle = subBuilder;
             break;
           }
+          case 1154: {
+            global::Botgram.Protocol.V1.DeleteMessagesRequest subBuilder = new global::Botgram.Protocol.V1.DeleteMessagesRequest();
+            if (operationCase_ == OperationOneofCase.DeleteMessages) {
+              subBuilder.MergeFrom(DeleteMessages);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteMessages = subBuilder;
+            break;
+          }
+          case 1162: {
+            global::Botgram.Protocol.V1.DeleteHistoryRequest subBuilder = new global::Botgram.Protocol.V1.DeleteHistoryRequest();
+            if (operationCase_ == OperationOneofCase.DeleteHistory) {
+              subBuilder.MergeFrom(DeleteHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteHistory = subBuilder;
+            break;
+          }
+          case 1170: {
+            global::Botgram.Protocol.V1.DeleteSavedHistoryRequest subBuilder = new global::Botgram.Protocol.V1.DeleteSavedHistoryRequest();
+            if (operationCase_ == OperationOneofCase.DeleteSavedHistory) {
+              subBuilder.MergeFrom(DeleteSavedHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteSavedHistory = subBuilder;
+            break;
+          }
+          case 1178: {
+            global::Botgram.Protocol.V1.DeletePhoneCallHistoryRequest subBuilder = new global::Botgram.Protocol.V1.DeletePhoneCallHistoryRequest();
+            if (operationCase_ == OperationOneofCase.DeletePhoneCallHistory) {
+              subBuilder.MergeFrom(DeletePhoneCallHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeletePhoneCallHistory = subBuilder;
+            break;
+          }
+          case 1186: {
+            global::Botgram.Protocol.V1.EditMessageRequest subBuilder = new global::Botgram.Protocol.V1.EditMessageRequest();
+            if (operationCase_ == OperationOneofCase.EditMessage) {
+              subBuilder.MergeFrom(EditMessage);
+            }
+            input.ReadMessage(subBuilder);
+            EditMessage = subBuilder;
+            break;
+          }
+          case 1194: {
+            global::Botgram.Protocol.V1.GetMessageEditDataRequest subBuilder = new global::Botgram.Protocol.V1.GetMessageEditDataRequest();
+            if (operationCase_ == OperationOneofCase.GetMessageEditData) {
+              subBuilder.MergeFrom(GetMessageEditData);
+            }
+            input.ReadMessage(subBuilder);
+            GetMessageEditData = subBuilder;
+            break;
+          }
+          case 1202: {
+            global::Botgram.Protocol.V1.ForwardMessagesRequest subBuilder = new global::Botgram.Protocol.V1.ForwardMessagesRequest();
+            if (operationCase_ == OperationOneofCase.ForwardMessages) {
+              subBuilder.MergeFrom(ForwardMessages);
+            }
+            input.ReadMessage(subBuilder);
+            ForwardMessages = subBuilder;
+            break;
+          }
+          case 1210: {
+            global::Botgram.Protocol.V1.SetTypingRequest subBuilder = new global::Botgram.Protocol.V1.SetTypingRequest();
+            if (operationCase_ == OperationOneofCase.SetTyping) {
+              subBuilder.MergeFrom(SetTyping);
+            }
+            input.ReadMessage(subBuilder);
+            SetTyping = subBuilder;
+            break;
+          }
+          case 1218: {
+            global::Botgram.Protocol.V1.SaveDraftRequest subBuilder = new global::Botgram.Protocol.V1.SaveDraftRequest();
+            if (operationCase_ == OperationOneofCase.SaveDraft) {
+              subBuilder.MergeFrom(SaveDraft);
+            }
+            input.ReadMessage(subBuilder);
+            SaveDraft = subBuilder;
+            break;
+          }
+          case 1226: {
+            global::Botgram.Protocol.V1.ClearAllDraftsRequest subBuilder = new global::Botgram.Protocol.V1.ClearAllDraftsRequest();
+            if (operationCase_ == OperationOneofCase.ClearAllDrafts) {
+              subBuilder.MergeFrom(ClearAllDrafts);
+            }
+            input.ReadMessage(subBuilder);
+            ClearAllDrafts = subBuilder;
+            break;
+          }
+          case 1234: {
+            global::Botgram.Protocol.V1.GetAllDraftsRequest subBuilder = new global::Botgram.Protocol.V1.GetAllDraftsRequest();
+            if (operationCase_ == OperationOneofCase.GetAllDrafts) {
+              subBuilder.MergeFrom(GetAllDrafts);
+            }
+            input.ReadMessage(subBuilder);
+            GetAllDrafts = subBuilder;
+            break;
+          }
+          case 1242: {
+            global::Botgram.Protocol.V1.UpdatePinnedMessageRequest subBuilder = new global::Botgram.Protocol.V1.UpdatePinnedMessageRequest();
+            if (operationCase_ == OperationOneofCase.UpdatePinnedMessage) {
+              subBuilder.MergeFrom(UpdatePinnedMessage);
+            }
+            input.ReadMessage(subBuilder);
+            UpdatePinnedMessage = subBuilder;
+            break;
+          }
+          case 1250: {
+            global::Botgram.Protocol.V1.UnpinAllMessagesRequest subBuilder = new global::Botgram.Protocol.V1.UnpinAllMessagesRequest();
+            if (operationCase_ == OperationOneofCase.UnpinAllMessages) {
+              subBuilder.MergeFrom(UnpinAllMessages);
+            }
+            input.ReadMessage(subBuilder);
+            UnpinAllMessages = subBuilder;
+            break;
+          }
+          case 1258: {
+            global::Botgram.Protocol.V1.ToggleDialogPinRequest subBuilder = new global::Botgram.Protocol.V1.ToggleDialogPinRequest();
+            if (operationCase_ == OperationOneofCase.ToggleDialogPin) {
+              subBuilder.MergeFrom(ToggleDialogPin);
+            }
+            input.ReadMessage(subBuilder);
+            ToggleDialogPin = subBuilder;
+            break;
+          }
+          case 1266: {
+            global::Botgram.Protocol.V1.ReorderPinnedDialogsRequest subBuilder = new global::Botgram.Protocol.V1.ReorderPinnedDialogsRequest();
+            if (operationCase_ == OperationOneofCase.ReorderPinnedDialogs) {
+              subBuilder.MergeFrom(ReorderPinnedDialogs);
+            }
+            input.ReadMessage(subBuilder);
+            ReorderPinnedDialogs = subBuilder;
+            break;
+          }
+          case 1274: {
+            global::Botgram.Protocol.V1.MarkDialogUnreadRequest subBuilder = new global::Botgram.Protocol.V1.MarkDialogUnreadRequest();
+            if (operationCase_ == OperationOneofCase.MarkDialogUnread) {
+              subBuilder.MergeFrom(MarkDialogUnread);
+            }
+            input.ReadMessage(subBuilder);
+            MarkDialogUnread = subBuilder;
+            break;
+          }
+          case 1282: {
+            global::Botgram.Protocol.V1.GetDialogUnreadMarksRequest subBuilder = new global::Botgram.Protocol.V1.GetDialogUnreadMarksRequest();
+            if (operationCase_ == OperationOneofCase.GetDialogUnreadMarks) {
+              subBuilder.MergeFrom(GetDialogUnreadMarks);
+            }
+            input.ReadMessage(subBuilder);
+            GetDialogUnreadMarks = subBuilder;
+            break;
+          }
+          case 1290: {
+            global::Botgram.Protocol.V1.ReadMessageContentsRequest subBuilder = new global::Botgram.Protocol.V1.ReadMessageContentsRequest();
+            if (operationCase_ == OperationOneofCase.ReadMessageContents) {
+              subBuilder.MergeFrom(ReadMessageContents);
+            }
+            input.ReadMessage(subBuilder);
+            ReadMessageContents = subBuilder;
+            break;
+          }
+          case 1298: {
+            global::Botgram.Protocol.V1.GetOnlinesRequest subBuilder = new global::Botgram.Protocol.V1.GetOnlinesRequest();
+            if (operationCase_ == OperationOneofCase.GetOnlines) {
+              subBuilder.MergeFrom(GetOnlines);
+            }
+            input.ReadMessage(subBuilder);
+            GetOnlines = subBuilder;
+            break;
+          }
+          case 1306: {
+            global::Botgram.Protocol.V1.GetCommonChatsRequest subBuilder = new global::Botgram.Protocol.V1.GetCommonChatsRequest();
+            if (operationCase_ == OperationOneofCase.GetCommonChats) {
+              subBuilder.MergeFrom(GetCommonChats);
+            }
+            input.ReadMessage(subBuilder);
+            GetCommonChats = subBuilder;
+            break;
+          }
+          case 1314: {
+            global::Botgram.Protocol.V1.HidePeerSettingsBarRequest subBuilder = new global::Botgram.Protocol.V1.HidePeerSettingsBarRequest();
+            if (operationCase_ == OperationOneofCase.HidePeerSettingsBar) {
+              subBuilder.MergeFrom(HidePeerSettingsBar);
+            }
+            input.ReadMessage(subBuilder);
+            HidePeerSettingsBar = subBuilder;
+            break;
+          }
+          case 1322: {
+            global::Botgram.Protocol.V1.ReportSpamRequest subBuilder = new global::Botgram.Protocol.V1.ReportSpamRequest();
+            if (operationCase_ == OperationOneofCase.ReportSpam) {
+              subBuilder.MergeFrom(ReportSpam);
+            }
+            input.ReadMessage(subBuilder);
+            ReportSpam = subBuilder;
+            break;
+          }
+          case 1330: {
+            global::Botgram.Protocol.V1.GetMessagesViewsRequest subBuilder = new global::Botgram.Protocol.V1.GetMessagesViewsRequest();
+            if (operationCase_ == OperationOneofCase.GetMessagesViews) {
+              subBuilder.MergeFrom(GetMessagesViews);
+            }
+            input.ReadMessage(subBuilder);
+            GetMessagesViews = subBuilder;
+            break;
+          }
+          case 1338: {
+            global::Botgram.Protocol.V1.GetOutboxReadDateRequest subBuilder = new global::Botgram.Protocol.V1.GetOutboxReadDateRequest();
+            if (operationCase_ == OperationOneofCase.GetOutboxReadDate) {
+              subBuilder.MergeFrom(GetOutboxReadDate);
+            }
+            input.ReadMessage(subBuilder);
+            GetOutboxReadDate = subBuilder;
+            break;
+          }
+          case 1346: {
+            global::Botgram.Protocol.V1.SearchRequest subBuilder = new global::Botgram.Protocol.V1.SearchRequest();
+            if (operationCase_ == OperationOneofCase.Search) {
+              subBuilder.MergeFrom(Search);
+            }
+            input.ReadMessage(subBuilder);
+            Search = subBuilder;
+            break;
+          }
+          case 1354: {
+            global::Botgram.Protocol.V1.GetSearchCountersRequest subBuilder = new global::Botgram.Protocol.V1.GetSearchCountersRequest();
+            if (operationCase_ == OperationOneofCase.GetSearchCounters) {
+              subBuilder.MergeFrom(GetSearchCounters);
+            }
+            input.ReadMessage(subBuilder);
+            GetSearchCounters = subBuilder;
+            break;
+          }
+          case 1362: {
+            global::Botgram.Protocol.V1.UploadMediaRequest subBuilder = new global::Botgram.Protocol.V1.UploadMediaRequest();
+            if (operationCase_ == OperationOneofCase.UploadMedia) {
+              subBuilder.MergeFrom(UploadMedia);
+            }
+            input.ReadMessage(subBuilder);
+            UploadMedia = subBuilder;
+            break;
+          }
+          case 1370: {
+            global::Botgram.Protocol.V1.SendMediaRequest subBuilder = new global::Botgram.Protocol.V1.SendMediaRequest();
+            if (operationCase_ == OperationOneofCase.SendMedia) {
+              subBuilder.MergeFrom(SendMedia);
+            }
+            input.ReadMessage(subBuilder);
+            SendMedia = subBuilder;
+            break;
+          }
+          case 1378: {
+            global::Botgram.Protocol.V1.SendMultiMediaRequest subBuilder = new global::Botgram.Protocol.V1.SendMultiMediaRequest();
+            if (operationCase_ == OperationOneofCase.SendMultiMedia) {
+              subBuilder.MergeFrom(SendMultiMedia);
+            }
+            input.ReadMessage(subBuilder);
+            SendMultiMedia = subBuilder;
+            break;
+          }
+          case 1386: {
+            global::Botgram.Protocol.V1.GetExtendedMediaRequest subBuilder = new global::Botgram.Protocol.V1.GetExtendedMediaRequest();
+            if (operationCase_ == OperationOneofCase.GetExtendedMedia) {
+              subBuilder.MergeFrom(GetExtendedMedia);
+            }
+            input.ReadMessage(subBuilder);
+            GetExtendedMedia = subBuilder;
+            break;
+          }
           case 1602: {
             global::Botgram.Protocol.V1.AuthCapabilitiesRequest subBuilder = new global::Botgram.Protocol.V1.AuthCapabilitiesRequest();
             if (operationCase_ == OperationOneofCase.AuthCapabilities) {
@@ -4311,6 +6224,96 @@ namespace Botgram.Protocol.V1 {
           break;
         case OutcomeOneofCase.E2EeGetPeerBundle:
           E2EeGetPeerBundle = other.E2EeGetPeerBundle.Clone();
+          break;
+        case OutcomeOneofCase.DeleteMessages:
+          DeleteMessages = other.DeleteMessages.Clone();
+          break;
+        case OutcomeOneofCase.DeleteHistory:
+          DeleteHistory = other.DeleteHistory.Clone();
+          break;
+        case OutcomeOneofCase.DeleteSavedHistory:
+          DeleteSavedHistory = other.DeleteSavedHistory.Clone();
+          break;
+        case OutcomeOneofCase.DeletePhoneCallHistory:
+          DeletePhoneCallHistory = other.DeletePhoneCallHistory.Clone();
+          break;
+        case OutcomeOneofCase.EditMessage:
+          EditMessage = other.EditMessage.Clone();
+          break;
+        case OutcomeOneofCase.GetMessageEditData:
+          GetMessageEditData = other.GetMessageEditData.Clone();
+          break;
+        case OutcomeOneofCase.ForwardMessages:
+          ForwardMessages = other.ForwardMessages.Clone();
+          break;
+        case OutcomeOneofCase.SetTyping:
+          SetTyping = other.SetTyping.Clone();
+          break;
+        case OutcomeOneofCase.SaveDraft:
+          SaveDraft = other.SaveDraft.Clone();
+          break;
+        case OutcomeOneofCase.ClearAllDrafts:
+          ClearAllDrafts = other.ClearAllDrafts.Clone();
+          break;
+        case OutcomeOneofCase.GetAllDrafts:
+          GetAllDrafts = other.GetAllDrafts.Clone();
+          break;
+        case OutcomeOneofCase.UpdatePinnedMessage:
+          UpdatePinnedMessage = other.UpdatePinnedMessage.Clone();
+          break;
+        case OutcomeOneofCase.UnpinAllMessages:
+          UnpinAllMessages = other.UnpinAllMessages.Clone();
+          break;
+        case OutcomeOneofCase.ToggleDialogPin:
+          ToggleDialogPin = other.ToggleDialogPin.Clone();
+          break;
+        case OutcomeOneofCase.ReorderPinnedDialogs:
+          ReorderPinnedDialogs = other.ReorderPinnedDialogs.Clone();
+          break;
+        case OutcomeOneofCase.MarkDialogUnread:
+          MarkDialogUnread = other.MarkDialogUnread.Clone();
+          break;
+        case OutcomeOneofCase.GetDialogUnreadMarks:
+          GetDialogUnreadMarks = other.GetDialogUnreadMarks.Clone();
+          break;
+        case OutcomeOneofCase.ReadMessageContents:
+          ReadMessageContents = other.ReadMessageContents.Clone();
+          break;
+        case OutcomeOneofCase.GetOnlines:
+          GetOnlines = other.GetOnlines.Clone();
+          break;
+        case OutcomeOneofCase.GetCommonChats:
+          GetCommonChats = other.GetCommonChats.Clone();
+          break;
+        case OutcomeOneofCase.HidePeerSettingsBar:
+          HidePeerSettingsBar = other.HidePeerSettingsBar.Clone();
+          break;
+        case OutcomeOneofCase.ReportSpam:
+          ReportSpam = other.ReportSpam.Clone();
+          break;
+        case OutcomeOneofCase.GetMessagesViews:
+          GetMessagesViews = other.GetMessagesViews.Clone();
+          break;
+        case OutcomeOneofCase.GetOutboxReadDate:
+          GetOutboxReadDate = other.GetOutboxReadDate.Clone();
+          break;
+        case OutcomeOneofCase.Search:
+          Search = other.Search.Clone();
+          break;
+        case OutcomeOneofCase.GetSearchCounters:
+          GetSearchCounters = other.GetSearchCounters.Clone();
+          break;
+        case OutcomeOneofCase.UploadMedia:
+          UploadMedia = other.UploadMedia.Clone();
+          break;
+        case OutcomeOneofCase.SendMedia:
+          SendMedia = other.SendMedia.Clone();
+          break;
+        case OutcomeOneofCase.SendMultiMedia:
+          SendMultiMedia = other.SendMultiMedia.Clone();
+          break;
+        case OutcomeOneofCase.GetExtendedMedia:
+          GetExtendedMedia = other.GetExtendedMedia.Clone();
           break;
         case OutcomeOneofCase.AuthCapabilities:
           AuthCapabilities = other.AuthCapabilities.Clone();
@@ -4917,6 +6920,366 @@ namespace Botgram.Protocol.V1 {
       }
     }
 
+    /// <summary>Field number for the "delete_messages" field.</summary>
+    public const int DeleteMessagesFieldNumber = 144;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.AffectedMessages DeleteMessages {
+      get { return outcomeCase_ == OutcomeOneofCase.DeleteMessages ? (global::Botgram.Protocol.V1.AffectedMessages) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.DeleteMessages;
+      }
+    }
+
+    /// <summary>Field number for the "delete_history" field.</summary>
+    public const int DeleteHistoryFieldNumber = 145;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.AffectedHistory DeleteHistory {
+      get { return outcomeCase_ == OutcomeOneofCase.DeleteHistory ? (global::Botgram.Protocol.V1.AffectedHistory) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.DeleteHistory;
+      }
+    }
+
+    /// <summary>Field number for the "delete_saved_history" field.</summary>
+    public const int DeleteSavedHistoryFieldNumber = 146;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.AffectedHistory DeleteSavedHistory {
+      get { return outcomeCase_ == OutcomeOneofCase.DeleteSavedHistory ? (global::Botgram.Protocol.V1.AffectedHistory) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.DeleteSavedHistory;
+      }
+    }
+
+    /// <summary>Field number for the "delete_phone_call_history" field.</summary>
+    public const int DeletePhoneCallHistoryFieldNumber = 147;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.AffectedFoundMessages DeletePhoneCallHistory {
+      get { return outcomeCase_ == OutcomeOneofCase.DeletePhoneCallHistory ? (global::Botgram.Protocol.V1.AffectedFoundMessages) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.DeletePhoneCallHistory;
+      }
+    }
+
+    /// <summary>Field number for the "edit_message" field.</summary>
+    public const int EditMessageFieldNumber = 148;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.Updates EditMessage {
+      get { return outcomeCase_ == OutcomeOneofCase.EditMessage ? (global::Botgram.Protocol.V1.Updates) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.EditMessage;
+      }
+    }
+
+    /// <summary>Field number for the "get_message_edit_data" field.</summary>
+    public const int GetMessageEditDataFieldNumber = 149;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MessageEditData GetMessageEditData {
+      get { return outcomeCase_ == OutcomeOneofCase.GetMessageEditData ? (global::Botgram.Protocol.V1.MessageEditData) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.GetMessageEditData;
+      }
+    }
+
+    /// <summary>Field number for the "forward_messages" field.</summary>
+    public const int ForwardMessagesFieldNumber = 150;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.Updates ForwardMessages {
+      get { return outcomeCase_ == OutcomeOneofCase.ForwardMessages ? (global::Botgram.Protocol.V1.Updates) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.ForwardMessages;
+      }
+    }
+
+    /// <summary>Field number for the "set_typing" field.</summary>
+    public const int SetTypingFieldNumber = 151;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.BoolValue SetTyping {
+      get { return outcomeCase_ == OutcomeOneofCase.SetTyping ? (global::Botgram.Protocol.V1.BoolValue) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.SetTyping;
+      }
+    }
+
+    /// <summary>Field number for the "save_draft" field.</summary>
+    public const int SaveDraftFieldNumber = 152;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.BoolValue SaveDraft {
+      get { return outcomeCase_ == OutcomeOneofCase.SaveDraft ? (global::Botgram.Protocol.V1.BoolValue) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.SaveDraft;
+      }
+    }
+
+    /// <summary>Field number for the "clear_all_drafts" field.</summary>
+    public const int ClearAllDraftsFieldNumber = 153;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.BoolValue ClearAllDrafts {
+      get { return outcomeCase_ == OutcomeOneofCase.ClearAllDrafts ? (global::Botgram.Protocol.V1.BoolValue) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.ClearAllDrafts;
+      }
+    }
+
+    /// <summary>Field number for the "get_all_drafts" field.</summary>
+    public const int GetAllDraftsFieldNumber = 154;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.Updates GetAllDrafts {
+      get { return outcomeCase_ == OutcomeOneofCase.GetAllDrafts ? (global::Botgram.Protocol.V1.Updates) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.GetAllDrafts;
+      }
+    }
+
+    /// <summary>Field number for the "update_pinned_message" field.</summary>
+    public const int UpdatePinnedMessageFieldNumber = 155;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.Updates UpdatePinnedMessage {
+      get { return outcomeCase_ == OutcomeOneofCase.UpdatePinnedMessage ? (global::Botgram.Protocol.V1.Updates) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.UpdatePinnedMessage;
+      }
+    }
+
+    /// <summary>Field number for the "unpin_all_messages" field.</summary>
+    public const int UnpinAllMessagesFieldNumber = 156;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.AffectedHistory UnpinAllMessages {
+      get { return outcomeCase_ == OutcomeOneofCase.UnpinAllMessages ? (global::Botgram.Protocol.V1.AffectedHistory) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.UnpinAllMessages;
+      }
+    }
+
+    /// <summary>Field number for the "toggle_dialog_pin" field.</summary>
+    public const int ToggleDialogPinFieldNumber = 157;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.BoolValue ToggleDialogPin {
+      get { return outcomeCase_ == OutcomeOneofCase.ToggleDialogPin ? (global::Botgram.Protocol.V1.BoolValue) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.ToggleDialogPin;
+      }
+    }
+
+    /// <summary>Field number for the "reorder_pinned_dialogs" field.</summary>
+    public const int ReorderPinnedDialogsFieldNumber = 158;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.BoolValue ReorderPinnedDialogs {
+      get { return outcomeCase_ == OutcomeOneofCase.ReorderPinnedDialogs ? (global::Botgram.Protocol.V1.BoolValue) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.ReorderPinnedDialogs;
+      }
+    }
+
+    /// <summary>Field number for the "mark_dialog_unread" field.</summary>
+    public const int MarkDialogUnreadFieldNumber = 159;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.BoolValue MarkDialogUnread {
+      get { return outcomeCase_ == OutcomeOneofCase.MarkDialogUnread ? (global::Botgram.Protocol.V1.BoolValue) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.MarkDialogUnread;
+      }
+    }
+
+    /// <summary>Field number for the "get_dialog_unread_marks" field.</summary>
+    public const int GetDialogUnreadMarksFieldNumber = 160;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerList GetDialogUnreadMarks {
+      get { return outcomeCase_ == OutcomeOneofCase.GetDialogUnreadMarks ? (global::Botgram.Protocol.V1.PeerList) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.GetDialogUnreadMarks;
+      }
+    }
+
+    /// <summary>Field number for the "read_message_contents" field.</summary>
+    public const int ReadMessageContentsFieldNumber = 161;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.AffectedMessages ReadMessageContents {
+      get { return outcomeCase_ == OutcomeOneofCase.ReadMessageContents ? (global::Botgram.Protocol.V1.AffectedMessages) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.ReadMessageContents;
+      }
+    }
+
+    /// <summary>Field number for the "get_onlines" field.</summary>
+    public const int GetOnlinesFieldNumber = 162;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.ChatOnlines GetOnlines {
+      get { return outcomeCase_ == OutcomeOneofCase.GetOnlines ? (global::Botgram.Protocol.V1.ChatOnlines) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.GetOnlines;
+      }
+    }
+
+    /// <summary>Field number for the "get_common_chats" field.</summary>
+    public const int GetCommonChatsFieldNumber = 163;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.GroupList GetCommonChats {
+      get { return outcomeCase_ == OutcomeOneofCase.GetCommonChats ? (global::Botgram.Protocol.V1.GroupList) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.GetCommonChats;
+      }
+    }
+
+    /// <summary>Field number for the "hide_peer_settings_bar" field.</summary>
+    public const int HidePeerSettingsBarFieldNumber = 164;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.BoolValue HidePeerSettingsBar {
+      get { return outcomeCase_ == OutcomeOneofCase.HidePeerSettingsBar ? (global::Botgram.Protocol.V1.BoolValue) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.HidePeerSettingsBar;
+      }
+    }
+
+    /// <summary>Field number for the "report_spam" field.</summary>
+    public const int ReportSpamFieldNumber = 165;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.BoolValue ReportSpam {
+      get { return outcomeCase_ == OutcomeOneofCase.ReportSpam ? (global::Botgram.Protocol.V1.BoolValue) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.ReportSpam;
+      }
+    }
+
+    /// <summary>Field number for the "get_messages_views" field.</summary>
+    public const int GetMessagesViewsFieldNumber = 166;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MessageViewsList GetMessagesViews {
+      get { return outcomeCase_ == OutcomeOneofCase.GetMessagesViews ? (global::Botgram.Protocol.V1.MessageViewsList) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.GetMessagesViews;
+      }
+    }
+
+    /// <summary>Field number for the "get_outbox_read_date" field.</summary>
+    public const int GetOutboxReadDateFieldNumber = 167;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.OutboxReadDate GetOutboxReadDate {
+      get { return outcomeCase_ == OutcomeOneofCase.GetOutboxReadDate ? (global::Botgram.Protocol.V1.OutboxReadDate) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.GetOutboxReadDate;
+      }
+    }
+
+    /// <summary>Field number for the "search" field.</summary>
+    public const int SearchFieldNumber = 168;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.SearchPage Search {
+      get { return outcomeCase_ == OutcomeOneofCase.Search ? (global::Botgram.Protocol.V1.SearchPage) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.Search;
+      }
+    }
+
+    /// <summary>Field number for the "get_search_counters" field.</summary>
+    public const int GetSearchCountersFieldNumber = 169;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.SearchCounters GetSearchCounters {
+      get { return outcomeCase_ == OutcomeOneofCase.GetSearchCounters ? (global::Botgram.Protocol.V1.SearchCounters) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.GetSearchCounters;
+      }
+    }
+
+    /// <summary>Field number for the "upload_media" field.</summary>
+    public const int UploadMediaFieldNumber = 170;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.UploadMediaResult UploadMedia {
+      get { return outcomeCase_ == OutcomeOneofCase.UploadMedia ? (global::Botgram.Protocol.V1.UploadMediaResult) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.UploadMedia;
+      }
+    }
+
+    /// <summary>Field number for the "send_media" field.</summary>
+    public const int SendMediaFieldNumber = 171;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.Updates SendMedia {
+      get { return outcomeCase_ == OutcomeOneofCase.SendMedia ? (global::Botgram.Protocol.V1.Updates) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.SendMedia;
+      }
+    }
+
+    /// <summary>Field number for the "send_multi_media" field.</summary>
+    public const int SendMultiMediaFieldNumber = 172;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.Updates SendMultiMedia {
+      get { return outcomeCase_ == OutcomeOneofCase.SendMultiMedia ? (global::Botgram.Protocol.V1.Updates) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.SendMultiMedia;
+      }
+    }
+
+    /// <summary>Field number for the "get_extended_media" field.</summary>
+    public const int GetExtendedMediaFieldNumber = 173;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.Updates GetExtendedMedia {
+      get { return outcomeCase_ == OutcomeOneofCase.GetExtendedMedia ? (global::Botgram.Protocol.V1.Updates) outcome_ : null; }
+      set {
+        outcome_ = value;
+        outcomeCase_ = value == null ? OutcomeOneofCase.None : OutcomeOneofCase.GetExtendedMedia;
+      }
+    }
+
     /// <summary>Field number for the "auth_capabilities" field.</summary>
     public const int AuthCapabilitiesFieldNumber = 200;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -5086,6 +7449,36 @@ namespace Botgram.Protocol.V1 {
       E2EeGetStatus = 141,
       E2EeList = 142,
       E2EeGetPeerBundle = 143,
+      DeleteMessages = 144,
+      DeleteHistory = 145,
+      DeleteSavedHistory = 146,
+      DeletePhoneCallHistory = 147,
+      EditMessage = 148,
+      GetMessageEditData = 149,
+      ForwardMessages = 150,
+      SetTyping = 151,
+      SaveDraft = 152,
+      ClearAllDrafts = 153,
+      GetAllDrafts = 154,
+      UpdatePinnedMessage = 155,
+      UnpinAllMessages = 156,
+      ToggleDialogPin = 157,
+      ReorderPinnedDialogs = 158,
+      MarkDialogUnread = 159,
+      GetDialogUnreadMarks = 160,
+      ReadMessageContents = 161,
+      GetOnlines = 162,
+      GetCommonChats = 163,
+      HidePeerSettingsBar = 164,
+      ReportSpam = 165,
+      GetMessagesViews = 166,
+      GetOutboxReadDate = 167,
+      Search = 168,
+      GetSearchCounters = 169,
+      UploadMedia = 170,
+      SendMedia = 171,
+      SendMultiMedia = 172,
+      GetExtendedMedia = 173,
       AuthCapabilities = 200,
       AuthRegister = 201,
       AuthLogin = 202,
@@ -5173,6 +7566,36 @@ namespace Botgram.Protocol.V1 {
       if (!object.Equals(E2EeGetStatus, other.E2EeGetStatus)) return false;
       if (!object.Equals(E2EeList, other.E2EeList)) return false;
       if (!object.Equals(E2EeGetPeerBundle, other.E2EeGetPeerBundle)) return false;
+      if (!object.Equals(DeleteMessages, other.DeleteMessages)) return false;
+      if (!object.Equals(DeleteHistory, other.DeleteHistory)) return false;
+      if (!object.Equals(DeleteSavedHistory, other.DeleteSavedHistory)) return false;
+      if (!object.Equals(DeletePhoneCallHistory, other.DeletePhoneCallHistory)) return false;
+      if (!object.Equals(EditMessage, other.EditMessage)) return false;
+      if (!object.Equals(GetMessageEditData, other.GetMessageEditData)) return false;
+      if (!object.Equals(ForwardMessages, other.ForwardMessages)) return false;
+      if (!object.Equals(SetTyping, other.SetTyping)) return false;
+      if (!object.Equals(SaveDraft, other.SaveDraft)) return false;
+      if (!object.Equals(ClearAllDrafts, other.ClearAllDrafts)) return false;
+      if (!object.Equals(GetAllDrafts, other.GetAllDrafts)) return false;
+      if (!object.Equals(UpdatePinnedMessage, other.UpdatePinnedMessage)) return false;
+      if (!object.Equals(UnpinAllMessages, other.UnpinAllMessages)) return false;
+      if (!object.Equals(ToggleDialogPin, other.ToggleDialogPin)) return false;
+      if (!object.Equals(ReorderPinnedDialogs, other.ReorderPinnedDialogs)) return false;
+      if (!object.Equals(MarkDialogUnread, other.MarkDialogUnread)) return false;
+      if (!object.Equals(GetDialogUnreadMarks, other.GetDialogUnreadMarks)) return false;
+      if (!object.Equals(ReadMessageContents, other.ReadMessageContents)) return false;
+      if (!object.Equals(GetOnlines, other.GetOnlines)) return false;
+      if (!object.Equals(GetCommonChats, other.GetCommonChats)) return false;
+      if (!object.Equals(HidePeerSettingsBar, other.HidePeerSettingsBar)) return false;
+      if (!object.Equals(ReportSpam, other.ReportSpam)) return false;
+      if (!object.Equals(GetMessagesViews, other.GetMessagesViews)) return false;
+      if (!object.Equals(GetOutboxReadDate, other.GetOutboxReadDate)) return false;
+      if (!object.Equals(Search, other.Search)) return false;
+      if (!object.Equals(GetSearchCounters, other.GetSearchCounters)) return false;
+      if (!object.Equals(UploadMedia, other.UploadMedia)) return false;
+      if (!object.Equals(SendMedia, other.SendMedia)) return false;
+      if (!object.Equals(SendMultiMedia, other.SendMultiMedia)) return false;
+      if (!object.Equals(GetExtendedMedia, other.GetExtendedMedia)) return false;
       if (!object.Equals(AuthCapabilities, other.AuthCapabilities)) return false;
       if (!object.Equals(AuthRegister, other.AuthRegister)) return false;
       if (!object.Equals(AuthLogin, other.AuthLogin)) return false;
@@ -5238,6 +7661,36 @@ namespace Botgram.Protocol.V1 {
       if (outcomeCase_ == OutcomeOneofCase.E2EeGetStatus) hash ^= E2EeGetStatus.GetHashCode();
       if (outcomeCase_ == OutcomeOneofCase.E2EeList) hash ^= E2EeList.GetHashCode();
       if (outcomeCase_ == OutcomeOneofCase.E2EeGetPeerBundle) hash ^= E2EeGetPeerBundle.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.DeleteMessages) hash ^= DeleteMessages.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.DeleteHistory) hash ^= DeleteHistory.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.DeleteSavedHistory) hash ^= DeleteSavedHistory.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.DeletePhoneCallHistory) hash ^= DeletePhoneCallHistory.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.EditMessage) hash ^= EditMessage.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.GetMessageEditData) hash ^= GetMessageEditData.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.ForwardMessages) hash ^= ForwardMessages.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.SetTyping) hash ^= SetTyping.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.SaveDraft) hash ^= SaveDraft.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.ClearAllDrafts) hash ^= ClearAllDrafts.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.GetAllDrafts) hash ^= GetAllDrafts.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.UpdatePinnedMessage) hash ^= UpdatePinnedMessage.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.UnpinAllMessages) hash ^= UnpinAllMessages.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.ToggleDialogPin) hash ^= ToggleDialogPin.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.ReorderPinnedDialogs) hash ^= ReorderPinnedDialogs.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.MarkDialogUnread) hash ^= MarkDialogUnread.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.GetDialogUnreadMarks) hash ^= GetDialogUnreadMarks.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.ReadMessageContents) hash ^= ReadMessageContents.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.GetOnlines) hash ^= GetOnlines.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.GetCommonChats) hash ^= GetCommonChats.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.HidePeerSettingsBar) hash ^= HidePeerSettingsBar.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.ReportSpam) hash ^= ReportSpam.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.GetMessagesViews) hash ^= GetMessagesViews.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.GetOutboxReadDate) hash ^= GetOutboxReadDate.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.Search) hash ^= Search.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.GetSearchCounters) hash ^= GetSearchCounters.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.UploadMedia) hash ^= UploadMedia.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.SendMedia) hash ^= SendMedia.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.SendMultiMedia) hash ^= SendMultiMedia.GetHashCode();
+      if (outcomeCase_ == OutcomeOneofCase.GetExtendedMedia) hash ^= GetExtendedMedia.GetHashCode();
       if (outcomeCase_ == OutcomeOneofCase.AuthCapabilities) hash ^= AuthCapabilities.GetHashCode();
       if (outcomeCase_ == OutcomeOneofCase.AuthRegister) hash ^= AuthRegister.GetHashCode();
       if (outcomeCase_ == OutcomeOneofCase.AuthLogin) hash ^= AuthLogin.GetHashCode();
@@ -5454,6 +7907,126 @@ namespace Botgram.Protocol.V1 {
       if (outcomeCase_ == OutcomeOneofCase.E2EeGetPeerBundle) {
         output.WriteRawTag(250, 8);
         output.WriteMessage(E2EeGetPeerBundle);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeleteMessages) {
+        output.WriteRawTag(130, 9);
+        output.WriteMessage(DeleteMessages);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeleteHistory) {
+        output.WriteRawTag(138, 9);
+        output.WriteMessage(DeleteHistory);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeleteSavedHistory) {
+        output.WriteRawTag(146, 9);
+        output.WriteMessage(DeleteSavedHistory);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeletePhoneCallHistory) {
+        output.WriteRawTag(154, 9);
+        output.WriteMessage(DeletePhoneCallHistory);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.EditMessage) {
+        output.WriteRawTag(162, 9);
+        output.WriteMessage(EditMessage);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetMessageEditData) {
+        output.WriteRawTag(170, 9);
+        output.WriteMessage(GetMessageEditData);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ForwardMessages) {
+        output.WriteRawTag(178, 9);
+        output.WriteMessage(ForwardMessages);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SetTyping) {
+        output.WriteRawTag(186, 9);
+        output.WriteMessage(SetTyping);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SaveDraft) {
+        output.WriteRawTag(194, 9);
+        output.WriteMessage(SaveDraft);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ClearAllDrafts) {
+        output.WriteRawTag(202, 9);
+        output.WriteMessage(ClearAllDrafts);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetAllDrafts) {
+        output.WriteRawTag(210, 9);
+        output.WriteMessage(GetAllDrafts);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.UpdatePinnedMessage) {
+        output.WriteRawTag(218, 9);
+        output.WriteMessage(UpdatePinnedMessage);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.UnpinAllMessages) {
+        output.WriteRawTag(226, 9);
+        output.WriteMessage(UnpinAllMessages);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ToggleDialogPin) {
+        output.WriteRawTag(234, 9);
+        output.WriteMessage(ToggleDialogPin);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ReorderPinnedDialogs) {
+        output.WriteRawTag(242, 9);
+        output.WriteMessage(ReorderPinnedDialogs);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.MarkDialogUnread) {
+        output.WriteRawTag(250, 9);
+        output.WriteMessage(MarkDialogUnread);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetDialogUnreadMarks) {
+        output.WriteRawTag(130, 10);
+        output.WriteMessage(GetDialogUnreadMarks);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ReadMessageContents) {
+        output.WriteRawTag(138, 10);
+        output.WriteMessage(ReadMessageContents);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetOnlines) {
+        output.WriteRawTag(146, 10);
+        output.WriteMessage(GetOnlines);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetCommonChats) {
+        output.WriteRawTag(154, 10);
+        output.WriteMessage(GetCommonChats);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.HidePeerSettingsBar) {
+        output.WriteRawTag(162, 10);
+        output.WriteMessage(HidePeerSettingsBar);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ReportSpam) {
+        output.WriteRawTag(170, 10);
+        output.WriteMessage(ReportSpam);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetMessagesViews) {
+        output.WriteRawTag(178, 10);
+        output.WriteMessage(GetMessagesViews);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetOutboxReadDate) {
+        output.WriteRawTag(186, 10);
+        output.WriteMessage(GetOutboxReadDate);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.Search) {
+        output.WriteRawTag(194, 10);
+        output.WriteMessage(Search);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetSearchCounters) {
+        output.WriteRawTag(202, 10);
+        output.WriteMessage(GetSearchCounters);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.UploadMedia) {
+        output.WriteRawTag(210, 10);
+        output.WriteMessage(UploadMedia);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SendMedia) {
+        output.WriteRawTag(218, 10);
+        output.WriteMessage(SendMedia);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SendMultiMedia) {
+        output.WriteRawTag(226, 10);
+        output.WriteMessage(SendMultiMedia);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetExtendedMedia) {
+        output.WriteRawTag(234, 10);
+        output.WriteMessage(GetExtendedMedia);
       }
       if (outcomeCase_ == OutcomeOneofCase.AuthCapabilities) {
         output.WriteRawTag(194, 12);
@@ -5693,6 +8266,126 @@ namespace Botgram.Protocol.V1 {
         output.WriteRawTag(250, 8);
         output.WriteMessage(E2EeGetPeerBundle);
       }
+      if (outcomeCase_ == OutcomeOneofCase.DeleteMessages) {
+        output.WriteRawTag(130, 9);
+        output.WriteMessage(DeleteMessages);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeleteHistory) {
+        output.WriteRawTag(138, 9);
+        output.WriteMessage(DeleteHistory);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeleteSavedHistory) {
+        output.WriteRawTag(146, 9);
+        output.WriteMessage(DeleteSavedHistory);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeletePhoneCallHistory) {
+        output.WriteRawTag(154, 9);
+        output.WriteMessage(DeletePhoneCallHistory);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.EditMessage) {
+        output.WriteRawTag(162, 9);
+        output.WriteMessage(EditMessage);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetMessageEditData) {
+        output.WriteRawTag(170, 9);
+        output.WriteMessage(GetMessageEditData);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ForwardMessages) {
+        output.WriteRawTag(178, 9);
+        output.WriteMessage(ForwardMessages);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SetTyping) {
+        output.WriteRawTag(186, 9);
+        output.WriteMessage(SetTyping);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SaveDraft) {
+        output.WriteRawTag(194, 9);
+        output.WriteMessage(SaveDraft);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ClearAllDrafts) {
+        output.WriteRawTag(202, 9);
+        output.WriteMessage(ClearAllDrafts);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetAllDrafts) {
+        output.WriteRawTag(210, 9);
+        output.WriteMessage(GetAllDrafts);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.UpdatePinnedMessage) {
+        output.WriteRawTag(218, 9);
+        output.WriteMessage(UpdatePinnedMessage);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.UnpinAllMessages) {
+        output.WriteRawTag(226, 9);
+        output.WriteMessage(UnpinAllMessages);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ToggleDialogPin) {
+        output.WriteRawTag(234, 9);
+        output.WriteMessage(ToggleDialogPin);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ReorderPinnedDialogs) {
+        output.WriteRawTag(242, 9);
+        output.WriteMessage(ReorderPinnedDialogs);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.MarkDialogUnread) {
+        output.WriteRawTag(250, 9);
+        output.WriteMessage(MarkDialogUnread);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetDialogUnreadMarks) {
+        output.WriteRawTag(130, 10);
+        output.WriteMessage(GetDialogUnreadMarks);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ReadMessageContents) {
+        output.WriteRawTag(138, 10);
+        output.WriteMessage(ReadMessageContents);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetOnlines) {
+        output.WriteRawTag(146, 10);
+        output.WriteMessage(GetOnlines);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetCommonChats) {
+        output.WriteRawTag(154, 10);
+        output.WriteMessage(GetCommonChats);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.HidePeerSettingsBar) {
+        output.WriteRawTag(162, 10);
+        output.WriteMessage(HidePeerSettingsBar);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ReportSpam) {
+        output.WriteRawTag(170, 10);
+        output.WriteMessage(ReportSpam);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetMessagesViews) {
+        output.WriteRawTag(178, 10);
+        output.WriteMessage(GetMessagesViews);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetOutboxReadDate) {
+        output.WriteRawTag(186, 10);
+        output.WriteMessage(GetOutboxReadDate);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.Search) {
+        output.WriteRawTag(194, 10);
+        output.WriteMessage(Search);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetSearchCounters) {
+        output.WriteRawTag(202, 10);
+        output.WriteMessage(GetSearchCounters);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.UploadMedia) {
+        output.WriteRawTag(210, 10);
+        output.WriteMessage(UploadMedia);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SendMedia) {
+        output.WriteRawTag(218, 10);
+        output.WriteMessage(SendMedia);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SendMultiMedia) {
+        output.WriteRawTag(226, 10);
+        output.WriteMessage(SendMultiMedia);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetExtendedMedia) {
+        output.WriteRawTag(234, 10);
+        output.WriteMessage(GetExtendedMedia);
+      }
       if (outcomeCase_ == OutcomeOneofCase.AuthCapabilities) {
         output.WriteRawTag(194, 12);
         output.WriteMessage(AuthCapabilities);
@@ -5883,6 +8576,96 @@ namespace Botgram.Protocol.V1 {
       }
       if (outcomeCase_ == OutcomeOneofCase.E2EeGetPeerBundle) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(E2EeGetPeerBundle);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeleteMessages) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(DeleteMessages);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeleteHistory) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(DeleteHistory);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeleteSavedHistory) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(DeleteSavedHistory);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.DeletePhoneCallHistory) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(DeletePhoneCallHistory);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.EditMessage) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(EditMessage);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetMessageEditData) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetMessageEditData);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ForwardMessages) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ForwardMessages);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SetTyping) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SetTyping);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SaveDraft) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SaveDraft);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ClearAllDrafts) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ClearAllDrafts);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetAllDrafts) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetAllDrafts);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.UpdatePinnedMessage) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(UpdatePinnedMessage);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.UnpinAllMessages) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(UnpinAllMessages);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ToggleDialogPin) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ToggleDialogPin);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ReorderPinnedDialogs) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ReorderPinnedDialogs);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.MarkDialogUnread) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(MarkDialogUnread);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetDialogUnreadMarks) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetDialogUnreadMarks);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ReadMessageContents) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ReadMessageContents);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetOnlines) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetOnlines);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetCommonChats) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetCommonChats);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.HidePeerSettingsBar) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(HidePeerSettingsBar);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.ReportSpam) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ReportSpam);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetMessagesViews) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetMessagesViews);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetOutboxReadDate) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetOutboxReadDate);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.Search) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(Search);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetSearchCounters) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetSearchCounters);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.UploadMedia) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(UploadMedia);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SendMedia) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SendMedia);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.SendMultiMedia) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SendMultiMedia);
+      }
+      if (outcomeCase_ == OutcomeOneofCase.GetExtendedMedia) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(GetExtendedMedia);
       }
       if (outcomeCase_ == OutcomeOneofCase.AuthCapabilities) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(AuthCapabilities);
@@ -6202,6 +8985,186 @@ namespace Botgram.Protocol.V1 {
             E2EeGetPeerBundle = new global::Botgram.Protocol.V1.E2eePeerBundle();
           }
           E2EeGetPeerBundle.MergeFrom(other.E2EeGetPeerBundle);
+          break;
+        case OutcomeOneofCase.DeleteMessages:
+          if (DeleteMessages == null) {
+            DeleteMessages = new global::Botgram.Protocol.V1.AffectedMessages();
+          }
+          DeleteMessages.MergeFrom(other.DeleteMessages);
+          break;
+        case OutcomeOneofCase.DeleteHistory:
+          if (DeleteHistory == null) {
+            DeleteHistory = new global::Botgram.Protocol.V1.AffectedHistory();
+          }
+          DeleteHistory.MergeFrom(other.DeleteHistory);
+          break;
+        case OutcomeOneofCase.DeleteSavedHistory:
+          if (DeleteSavedHistory == null) {
+            DeleteSavedHistory = new global::Botgram.Protocol.V1.AffectedHistory();
+          }
+          DeleteSavedHistory.MergeFrom(other.DeleteSavedHistory);
+          break;
+        case OutcomeOneofCase.DeletePhoneCallHistory:
+          if (DeletePhoneCallHistory == null) {
+            DeletePhoneCallHistory = new global::Botgram.Protocol.V1.AffectedFoundMessages();
+          }
+          DeletePhoneCallHistory.MergeFrom(other.DeletePhoneCallHistory);
+          break;
+        case OutcomeOneofCase.EditMessage:
+          if (EditMessage == null) {
+            EditMessage = new global::Botgram.Protocol.V1.Updates();
+          }
+          EditMessage.MergeFrom(other.EditMessage);
+          break;
+        case OutcomeOneofCase.GetMessageEditData:
+          if (GetMessageEditData == null) {
+            GetMessageEditData = new global::Botgram.Protocol.V1.MessageEditData();
+          }
+          GetMessageEditData.MergeFrom(other.GetMessageEditData);
+          break;
+        case OutcomeOneofCase.ForwardMessages:
+          if (ForwardMessages == null) {
+            ForwardMessages = new global::Botgram.Protocol.V1.Updates();
+          }
+          ForwardMessages.MergeFrom(other.ForwardMessages);
+          break;
+        case OutcomeOneofCase.SetTyping:
+          if (SetTyping == null) {
+            SetTyping = new global::Botgram.Protocol.V1.BoolValue();
+          }
+          SetTyping.MergeFrom(other.SetTyping);
+          break;
+        case OutcomeOneofCase.SaveDraft:
+          if (SaveDraft == null) {
+            SaveDraft = new global::Botgram.Protocol.V1.BoolValue();
+          }
+          SaveDraft.MergeFrom(other.SaveDraft);
+          break;
+        case OutcomeOneofCase.ClearAllDrafts:
+          if (ClearAllDrafts == null) {
+            ClearAllDrafts = new global::Botgram.Protocol.V1.BoolValue();
+          }
+          ClearAllDrafts.MergeFrom(other.ClearAllDrafts);
+          break;
+        case OutcomeOneofCase.GetAllDrafts:
+          if (GetAllDrafts == null) {
+            GetAllDrafts = new global::Botgram.Protocol.V1.Updates();
+          }
+          GetAllDrafts.MergeFrom(other.GetAllDrafts);
+          break;
+        case OutcomeOneofCase.UpdatePinnedMessage:
+          if (UpdatePinnedMessage == null) {
+            UpdatePinnedMessage = new global::Botgram.Protocol.V1.Updates();
+          }
+          UpdatePinnedMessage.MergeFrom(other.UpdatePinnedMessage);
+          break;
+        case OutcomeOneofCase.UnpinAllMessages:
+          if (UnpinAllMessages == null) {
+            UnpinAllMessages = new global::Botgram.Protocol.V1.AffectedHistory();
+          }
+          UnpinAllMessages.MergeFrom(other.UnpinAllMessages);
+          break;
+        case OutcomeOneofCase.ToggleDialogPin:
+          if (ToggleDialogPin == null) {
+            ToggleDialogPin = new global::Botgram.Protocol.V1.BoolValue();
+          }
+          ToggleDialogPin.MergeFrom(other.ToggleDialogPin);
+          break;
+        case OutcomeOneofCase.ReorderPinnedDialogs:
+          if (ReorderPinnedDialogs == null) {
+            ReorderPinnedDialogs = new global::Botgram.Protocol.V1.BoolValue();
+          }
+          ReorderPinnedDialogs.MergeFrom(other.ReorderPinnedDialogs);
+          break;
+        case OutcomeOneofCase.MarkDialogUnread:
+          if (MarkDialogUnread == null) {
+            MarkDialogUnread = new global::Botgram.Protocol.V1.BoolValue();
+          }
+          MarkDialogUnread.MergeFrom(other.MarkDialogUnread);
+          break;
+        case OutcomeOneofCase.GetDialogUnreadMarks:
+          if (GetDialogUnreadMarks == null) {
+            GetDialogUnreadMarks = new global::Botgram.Protocol.V1.PeerList();
+          }
+          GetDialogUnreadMarks.MergeFrom(other.GetDialogUnreadMarks);
+          break;
+        case OutcomeOneofCase.ReadMessageContents:
+          if (ReadMessageContents == null) {
+            ReadMessageContents = new global::Botgram.Protocol.V1.AffectedMessages();
+          }
+          ReadMessageContents.MergeFrom(other.ReadMessageContents);
+          break;
+        case OutcomeOneofCase.GetOnlines:
+          if (GetOnlines == null) {
+            GetOnlines = new global::Botgram.Protocol.V1.ChatOnlines();
+          }
+          GetOnlines.MergeFrom(other.GetOnlines);
+          break;
+        case OutcomeOneofCase.GetCommonChats:
+          if (GetCommonChats == null) {
+            GetCommonChats = new global::Botgram.Protocol.V1.GroupList();
+          }
+          GetCommonChats.MergeFrom(other.GetCommonChats);
+          break;
+        case OutcomeOneofCase.HidePeerSettingsBar:
+          if (HidePeerSettingsBar == null) {
+            HidePeerSettingsBar = new global::Botgram.Protocol.V1.BoolValue();
+          }
+          HidePeerSettingsBar.MergeFrom(other.HidePeerSettingsBar);
+          break;
+        case OutcomeOneofCase.ReportSpam:
+          if (ReportSpam == null) {
+            ReportSpam = new global::Botgram.Protocol.V1.BoolValue();
+          }
+          ReportSpam.MergeFrom(other.ReportSpam);
+          break;
+        case OutcomeOneofCase.GetMessagesViews:
+          if (GetMessagesViews == null) {
+            GetMessagesViews = new global::Botgram.Protocol.V1.MessageViewsList();
+          }
+          GetMessagesViews.MergeFrom(other.GetMessagesViews);
+          break;
+        case OutcomeOneofCase.GetOutboxReadDate:
+          if (GetOutboxReadDate == null) {
+            GetOutboxReadDate = new global::Botgram.Protocol.V1.OutboxReadDate();
+          }
+          GetOutboxReadDate.MergeFrom(other.GetOutboxReadDate);
+          break;
+        case OutcomeOneofCase.Search:
+          if (Search == null) {
+            Search = new global::Botgram.Protocol.V1.SearchPage();
+          }
+          Search.MergeFrom(other.Search);
+          break;
+        case OutcomeOneofCase.GetSearchCounters:
+          if (GetSearchCounters == null) {
+            GetSearchCounters = new global::Botgram.Protocol.V1.SearchCounters();
+          }
+          GetSearchCounters.MergeFrom(other.GetSearchCounters);
+          break;
+        case OutcomeOneofCase.UploadMedia:
+          if (UploadMedia == null) {
+            UploadMedia = new global::Botgram.Protocol.V1.UploadMediaResult();
+          }
+          UploadMedia.MergeFrom(other.UploadMedia);
+          break;
+        case OutcomeOneofCase.SendMedia:
+          if (SendMedia == null) {
+            SendMedia = new global::Botgram.Protocol.V1.Updates();
+          }
+          SendMedia.MergeFrom(other.SendMedia);
+          break;
+        case OutcomeOneofCase.SendMultiMedia:
+          if (SendMultiMedia == null) {
+            SendMultiMedia = new global::Botgram.Protocol.V1.Updates();
+          }
+          SendMultiMedia.MergeFrom(other.SendMultiMedia);
+          break;
+        case OutcomeOneofCase.GetExtendedMedia:
+          if (GetExtendedMedia == null) {
+            GetExtendedMedia = new global::Botgram.Protocol.V1.Updates();
+          }
+          GetExtendedMedia.MergeFrom(other.GetExtendedMedia);
           break;
         case OutcomeOneofCase.AuthCapabilities:
           if (AuthCapabilities == null) {
@@ -6691,6 +9654,276 @@ namespace Botgram.Protocol.V1 {
             }
             input.ReadMessage(subBuilder);
             E2EeGetPeerBundle = subBuilder;
+            break;
+          }
+          case 1154: {
+            global::Botgram.Protocol.V1.AffectedMessages subBuilder = new global::Botgram.Protocol.V1.AffectedMessages();
+            if (outcomeCase_ == OutcomeOneofCase.DeleteMessages) {
+              subBuilder.MergeFrom(DeleteMessages);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteMessages = subBuilder;
+            break;
+          }
+          case 1162: {
+            global::Botgram.Protocol.V1.AffectedHistory subBuilder = new global::Botgram.Protocol.V1.AffectedHistory();
+            if (outcomeCase_ == OutcomeOneofCase.DeleteHistory) {
+              subBuilder.MergeFrom(DeleteHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteHistory = subBuilder;
+            break;
+          }
+          case 1170: {
+            global::Botgram.Protocol.V1.AffectedHistory subBuilder = new global::Botgram.Protocol.V1.AffectedHistory();
+            if (outcomeCase_ == OutcomeOneofCase.DeleteSavedHistory) {
+              subBuilder.MergeFrom(DeleteSavedHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteSavedHistory = subBuilder;
+            break;
+          }
+          case 1178: {
+            global::Botgram.Protocol.V1.AffectedFoundMessages subBuilder = new global::Botgram.Protocol.V1.AffectedFoundMessages();
+            if (outcomeCase_ == OutcomeOneofCase.DeletePhoneCallHistory) {
+              subBuilder.MergeFrom(DeletePhoneCallHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeletePhoneCallHistory = subBuilder;
+            break;
+          }
+          case 1186: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.EditMessage) {
+              subBuilder.MergeFrom(EditMessage);
+            }
+            input.ReadMessage(subBuilder);
+            EditMessage = subBuilder;
+            break;
+          }
+          case 1194: {
+            global::Botgram.Protocol.V1.MessageEditData subBuilder = new global::Botgram.Protocol.V1.MessageEditData();
+            if (outcomeCase_ == OutcomeOneofCase.GetMessageEditData) {
+              subBuilder.MergeFrom(GetMessageEditData);
+            }
+            input.ReadMessage(subBuilder);
+            GetMessageEditData = subBuilder;
+            break;
+          }
+          case 1202: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.ForwardMessages) {
+              subBuilder.MergeFrom(ForwardMessages);
+            }
+            input.ReadMessage(subBuilder);
+            ForwardMessages = subBuilder;
+            break;
+          }
+          case 1210: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.SetTyping) {
+              subBuilder.MergeFrom(SetTyping);
+            }
+            input.ReadMessage(subBuilder);
+            SetTyping = subBuilder;
+            break;
+          }
+          case 1218: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.SaveDraft) {
+              subBuilder.MergeFrom(SaveDraft);
+            }
+            input.ReadMessage(subBuilder);
+            SaveDraft = subBuilder;
+            break;
+          }
+          case 1226: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.ClearAllDrafts) {
+              subBuilder.MergeFrom(ClearAllDrafts);
+            }
+            input.ReadMessage(subBuilder);
+            ClearAllDrafts = subBuilder;
+            break;
+          }
+          case 1234: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.GetAllDrafts) {
+              subBuilder.MergeFrom(GetAllDrafts);
+            }
+            input.ReadMessage(subBuilder);
+            GetAllDrafts = subBuilder;
+            break;
+          }
+          case 1242: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.UpdatePinnedMessage) {
+              subBuilder.MergeFrom(UpdatePinnedMessage);
+            }
+            input.ReadMessage(subBuilder);
+            UpdatePinnedMessage = subBuilder;
+            break;
+          }
+          case 1250: {
+            global::Botgram.Protocol.V1.AffectedHistory subBuilder = new global::Botgram.Protocol.V1.AffectedHistory();
+            if (outcomeCase_ == OutcomeOneofCase.UnpinAllMessages) {
+              subBuilder.MergeFrom(UnpinAllMessages);
+            }
+            input.ReadMessage(subBuilder);
+            UnpinAllMessages = subBuilder;
+            break;
+          }
+          case 1258: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.ToggleDialogPin) {
+              subBuilder.MergeFrom(ToggleDialogPin);
+            }
+            input.ReadMessage(subBuilder);
+            ToggleDialogPin = subBuilder;
+            break;
+          }
+          case 1266: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.ReorderPinnedDialogs) {
+              subBuilder.MergeFrom(ReorderPinnedDialogs);
+            }
+            input.ReadMessage(subBuilder);
+            ReorderPinnedDialogs = subBuilder;
+            break;
+          }
+          case 1274: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.MarkDialogUnread) {
+              subBuilder.MergeFrom(MarkDialogUnread);
+            }
+            input.ReadMessage(subBuilder);
+            MarkDialogUnread = subBuilder;
+            break;
+          }
+          case 1282: {
+            global::Botgram.Protocol.V1.PeerList subBuilder = new global::Botgram.Protocol.V1.PeerList();
+            if (outcomeCase_ == OutcomeOneofCase.GetDialogUnreadMarks) {
+              subBuilder.MergeFrom(GetDialogUnreadMarks);
+            }
+            input.ReadMessage(subBuilder);
+            GetDialogUnreadMarks = subBuilder;
+            break;
+          }
+          case 1290: {
+            global::Botgram.Protocol.V1.AffectedMessages subBuilder = new global::Botgram.Protocol.V1.AffectedMessages();
+            if (outcomeCase_ == OutcomeOneofCase.ReadMessageContents) {
+              subBuilder.MergeFrom(ReadMessageContents);
+            }
+            input.ReadMessage(subBuilder);
+            ReadMessageContents = subBuilder;
+            break;
+          }
+          case 1298: {
+            global::Botgram.Protocol.V1.ChatOnlines subBuilder = new global::Botgram.Protocol.V1.ChatOnlines();
+            if (outcomeCase_ == OutcomeOneofCase.GetOnlines) {
+              subBuilder.MergeFrom(GetOnlines);
+            }
+            input.ReadMessage(subBuilder);
+            GetOnlines = subBuilder;
+            break;
+          }
+          case 1306: {
+            global::Botgram.Protocol.V1.GroupList subBuilder = new global::Botgram.Protocol.V1.GroupList();
+            if (outcomeCase_ == OutcomeOneofCase.GetCommonChats) {
+              subBuilder.MergeFrom(GetCommonChats);
+            }
+            input.ReadMessage(subBuilder);
+            GetCommonChats = subBuilder;
+            break;
+          }
+          case 1314: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.HidePeerSettingsBar) {
+              subBuilder.MergeFrom(HidePeerSettingsBar);
+            }
+            input.ReadMessage(subBuilder);
+            HidePeerSettingsBar = subBuilder;
+            break;
+          }
+          case 1322: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.ReportSpam) {
+              subBuilder.MergeFrom(ReportSpam);
+            }
+            input.ReadMessage(subBuilder);
+            ReportSpam = subBuilder;
+            break;
+          }
+          case 1330: {
+            global::Botgram.Protocol.V1.MessageViewsList subBuilder = new global::Botgram.Protocol.V1.MessageViewsList();
+            if (outcomeCase_ == OutcomeOneofCase.GetMessagesViews) {
+              subBuilder.MergeFrom(GetMessagesViews);
+            }
+            input.ReadMessage(subBuilder);
+            GetMessagesViews = subBuilder;
+            break;
+          }
+          case 1338: {
+            global::Botgram.Protocol.V1.OutboxReadDate subBuilder = new global::Botgram.Protocol.V1.OutboxReadDate();
+            if (outcomeCase_ == OutcomeOneofCase.GetOutboxReadDate) {
+              subBuilder.MergeFrom(GetOutboxReadDate);
+            }
+            input.ReadMessage(subBuilder);
+            GetOutboxReadDate = subBuilder;
+            break;
+          }
+          case 1346: {
+            global::Botgram.Protocol.V1.SearchPage subBuilder = new global::Botgram.Protocol.V1.SearchPage();
+            if (outcomeCase_ == OutcomeOneofCase.Search) {
+              subBuilder.MergeFrom(Search);
+            }
+            input.ReadMessage(subBuilder);
+            Search = subBuilder;
+            break;
+          }
+          case 1354: {
+            global::Botgram.Protocol.V1.SearchCounters subBuilder = new global::Botgram.Protocol.V1.SearchCounters();
+            if (outcomeCase_ == OutcomeOneofCase.GetSearchCounters) {
+              subBuilder.MergeFrom(GetSearchCounters);
+            }
+            input.ReadMessage(subBuilder);
+            GetSearchCounters = subBuilder;
+            break;
+          }
+          case 1362: {
+            global::Botgram.Protocol.V1.UploadMediaResult subBuilder = new global::Botgram.Protocol.V1.UploadMediaResult();
+            if (outcomeCase_ == OutcomeOneofCase.UploadMedia) {
+              subBuilder.MergeFrom(UploadMedia);
+            }
+            input.ReadMessage(subBuilder);
+            UploadMedia = subBuilder;
+            break;
+          }
+          case 1370: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.SendMedia) {
+              subBuilder.MergeFrom(SendMedia);
+            }
+            input.ReadMessage(subBuilder);
+            SendMedia = subBuilder;
+            break;
+          }
+          case 1378: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.SendMultiMedia) {
+              subBuilder.MergeFrom(SendMultiMedia);
+            }
+            input.ReadMessage(subBuilder);
+            SendMultiMedia = subBuilder;
+            break;
+          }
+          case 1386: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.GetExtendedMedia) {
+              subBuilder.MergeFrom(GetExtendedMedia);
+            }
+            input.ReadMessage(subBuilder);
+            GetExtendedMedia = subBuilder;
             break;
           }
           case 1602: {
@@ -7209,6 +10442,276 @@ namespace Botgram.Protocol.V1 {
             }
             input.ReadMessage(subBuilder);
             E2EeGetPeerBundle = subBuilder;
+            break;
+          }
+          case 1154: {
+            global::Botgram.Protocol.V1.AffectedMessages subBuilder = new global::Botgram.Protocol.V1.AffectedMessages();
+            if (outcomeCase_ == OutcomeOneofCase.DeleteMessages) {
+              subBuilder.MergeFrom(DeleteMessages);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteMessages = subBuilder;
+            break;
+          }
+          case 1162: {
+            global::Botgram.Protocol.V1.AffectedHistory subBuilder = new global::Botgram.Protocol.V1.AffectedHistory();
+            if (outcomeCase_ == OutcomeOneofCase.DeleteHistory) {
+              subBuilder.MergeFrom(DeleteHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteHistory = subBuilder;
+            break;
+          }
+          case 1170: {
+            global::Botgram.Protocol.V1.AffectedHistory subBuilder = new global::Botgram.Protocol.V1.AffectedHistory();
+            if (outcomeCase_ == OutcomeOneofCase.DeleteSavedHistory) {
+              subBuilder.MergeFrom(DeleteSavedHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeleteSavedHistory = subBuilder;
+            break;
+          }
+          case 1178: {
+            global::Botgram.Protocol.V1.AffectedFoundMessages subBuilder = new global::Botgram.Protocol.V1.AffectedFoundMessages();
+            if (outcomeCase_ == OutcomeOneofCase.DeletePhoneCallHistory) {
+              subBuilder.MergeFrom(DeletePhoneCallHistory);
+            }
+            input.ReadMessage(subBuilder);
+            DeletePhoneCallHistory = subBuilder;
+            break;
+          }
+          case 1186: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.EditMessage) {
+              subBuilder.MergeFrom(EditMessage);
+            }
+            input.ReadMessage(subBuilder);
+            EditMessage = subBuilder;
+            break;
+          }
+          case 1194: {
+            global::Botgram.Protocol.V1.MessageEditData subBuilder = new global::Botgram.Protocol.V1.MessageEditData();
+            if (outcomeCase_ == OutcomeOneofCase.GetMessageEditData) {
+              subBuilder.MergeFrom(GetMessageEditData);
+            }
+            input.ReadMessage(subBuilder);
+            GetMessageEditData = subBuilder;
+            break;
+          }
+          case 1202: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.ForwardMessages) {
+              subBuilder.MergeFrom(ForwardMessages);
+            }
+            input.ReadMessage(subBuilder);
+            ForwardMessages = subBuilder;
+            break;
+          }
+          case 1210: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.SetTyping) {
+              subBuilder.MergeFrom(SetTyping);
+            }
+            input.ReadMessage(subBuilder);
+            SetTyping = subBuilder;
+            break;
+          }
+          case 1218: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.SaveDraft) {
+              subBuilder.MergeFrom(SaveDraft);
+            }
+            input.ReadMessage(subBuilder);
+            SaveDraft = subBuilder;
+            break;
+          }
+          case 1226: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.ClearAllDrafts) {
+              subBuilder.MergeFrom(ClearAllDrafts);
+            }
+            input.ReadMessage(subBuilder);
+            ClearAllDrafts = subBuilder;
+            break;
+          }
+          case 1234: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.GetAllDrafts) {
+              subBuilder.MergeFrom(GetAllDrafts);
+            }
+            input.ReadMessage(subBuilder);
+            GetAllDrafts = subBuilder;
+            break;
+          }
+          case 1242: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.UpdatePinnedMessage) {
+              subBuilder.MergeFrom(UpdatePinnedMessage);
+            }
+            input.ReadMessage(subBuilder);
+            UpdatePinnedMessage = subBuilder;
+            break;
+          }
+          case 1250: {
+            global::Botgram.Protocol.V1.AffectedHistory subBuilder = new global::Botgram.Protocol.V1.AffectedHistory();
+            if (outcomeCase_ == OutcomeOneofCase.UnpinAllMessages) {
+              subBuilder.MergeFrom(UnpinAllMessages);
+            }
+            input.ReadMessage(subBuilder);
+            UnpinAllMessages = subBuilder;
+            break;
+          }
+          case 1258: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.ToggleDialogPin) {
+              subBuilder.MergeFrom(ToggleDialogPin);
+            }
+            input.ReadMessage(subBuilder);
+            ToggleDialogPin = subBuilder;
+            break;
+          }
+          case 1266: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.ReorderPinnedDialogs) {
+              subBuilder.MergeFrom(ReorderPinnedDialogs);
+            }
+            input.ReadMessage(subBuilder);
+            ReorderPinnedDialogs = subBuilder;
+            break;
+          }
+          case 1274: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.MarkDialogUnread) {
+              subBuilder.MergeFrom(MarkDialogUnread);
+            }
+            input.ReadMessage(subBuilder);
+            MarkDialogUnread = subBuilder;
+            break;
+          }
+          case 1282: {
+            global::Botgram.Protocol.V1.PeerList subBuilder = new global::Botgram.Protocol.V1.PeerList();
+            if (outcomeCase_ == OutcomeOneofCase.GetDialogUnreadMarks) {
+              subBuilder.MergeFrom(GetDialogUnreadMarks);
+            }
+            input.ReadMessage(subBuilder);
+            GetDialogUnreadMarks = subBuilder;
+            break;
+          }
+          case 1290: {
+            global::Botgram.Protocol.V1.AffectedMessages subBuilder = new global::Botgram.Protocol.V1.AffectedMessages();
+            if (outcomeCase_ == OutcomeOneofCase.ReadMessageContents) {
+              subBuilder.MergeFrom(ReadMessageContents);
+            }
+            input.ReadMessage(subBuilder);
+            ReadMessageContents = subBuilder;
+            break;
+          }
+          case 1298: {
+            global::Botgram.Protocol.V1.ChatOnlines subBuilder = new global::Botgram.Protocol.V1.ChatOnlines();
+            if (outcomeCase_ == OutcomeOneofCase.GetOnlines) {
+              subBuilder.MergeFrom(GetOnlines);
+            }
+            input.ReadMessage(subBuilder);
+            GetOnlines = subBuilder;
+            break;
+          }
+          case 1306: {
+            global::Botgram.Protocol.V1.GroupList subBuilder = new global::Botgram.Protocol.V1.GroupList();
+            if (outcomeCase_ == OutcomeOneofCase.GetCommonChats) {
+              subBuilder.MergeFrom(GetCommonChats);
+            }
+            input.ReadMessage(subBuilder);
+            GetCommonChats = subBuilder;
+            break;
+          }
+          case 1314: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.HidePeerSettingsBar) {
+              subBuilder.MergeFrom(HidePeerSettingsBar);
+            }
+            input.ReadMessage(subBuilder);
+            HidePeerSettingsBar = subBuilder;
+            break;
+          }
+          case 1322: {
+            global::Botgram.Protocol.V1.BoolValue subBuilder = new global::Botgram.Protocol.V1.BoolValue();
+            if (outcomeCase_ == OutcomeOneofCase.ReportSpam) {
+              subBuilder.MergeFrom(ReportSpam);
+            }
+            input.ReadMessage(subBuilder);
+            ReportSpam = subBuilder;
+            break;
+          }
+          case 1330: {
+            global::Botgram.Protocol.V1.MessageViewsList subBuilder = new global::Botgram.Protocol.V1.MessageViewsList();
+            if (outcomeCase_ == OutcomeOneofCase.GetMessagesViews) {
+              subBuilder.MergeFrom(GetMessagesViews);
+            }
+            input.ReadMessage(subBuilder);
+            GetMessagesViews = subBuilder;
+            break;
+          }
+          case 1338: {
+            global::Botgram.Protocol.V1.OutboxReadDate subBuilder = new global::Botgram.Protocol.V1.OutboxReadDate();
+            if (outcomeCase_ == OutcomeOneofCase.GetOutboxReadDate) {
+              subBuilder.MergeFrom(GetOutboxReadDate);
+            }
+            input.ReadMessage(subBuilder);
+            GetOutboxReadDate = subBuilder;
+            break;
+          }
+          case 1346: {
+            global::Botgram.Protocol.V1.SearchPage subBuilder = new global::Botgram.Protocol.V1.SearchPage();
+            if (outcomeCase_ == OutcomeOneofCase.Search) {
+              subBuilder.MergeFrom(Search);
+            }
+            input.ReadMessage(subBuilder);
+            Search = subBuilder;
+            break;
+          }
+          case 1354: {
+            global::Botgram.Protocol.V1.SearchCounters subBuilder = new global::Botgram.Protocol.V1.SearchCounters();
+            if (outcomeCase_ == OutcomeOneofCase.GetSearchCounters) {
+              subBuilder.MergeFrom(GetSearchCounters);
+            }
+            input.ReadMessage(subBuilder);
+            GetSearchCounters = subBuilder;
+            break;
+          }
+          case 1362: {
+            global::Botgram.Protocol.V1.UploadMediaResult subBuilder = new global::Botgram.Protocol.V1.UploadMediaResult();
+            if (outcomeCase_ == OutcomeOneofCase.UploadMedia) {
+              subBuilder.MergeFrom(UploadMedia);
+            }
+            input.ReadMessage(subBuilder);
+            UploadMedia = subBuilder;
+            break;
+          }
+          case 1370: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.SendMedia) {
+              subBuilder.MergeFrom(SendMedia);
+            }
+            input.ReadMessage(subBuilder);
+            SendMedia = subBuilder;
+            break;
+          }
+          case 1378: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.SendMultiMedia) {
+              subBuilder.MergeFrom(SendMultiMedia);
+            }
+            input.ReadMessage(subBuilder);
+            SendMultiMedia = subBuilder;
+            break;
+          }
+          case 1386: {
+            global::Botgram.Protocol.V1.Updates subBuilder = new global::Botgram.Protocol.V1.Updates();
+            if (outcomeCase_ == OutcomeOneofCase.GetExtendedMedia) {
+              subBuilder.MergeFrom(GetExtendedMedia);
+            }
+            input.ReadMessage(subBuilder);
+            GetExtendedMedia = subBuilder;
             break;
           }
           case 1602: {
@@ -23318,6 +26821,7 @@ namespace Botgram.Protocol.V1 {
   {
     private static readonly pb::MessageParser<Message> _parser = new pb::MessageParser<Message>(() => new Message());
     private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pb::MessageParser<Message> Parser { get { return _parser; } }
@@ -23345,12 +26849,17 @@ namespace Botgram.Protocol.V1 {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public Message(Message other) : this() {
+      _hasBits0 = other._hasBits0;
       messageId_ = other.messageId_;
       peer_ = other.peer_ != null ? other.peer_.Clone() : null;
       sender_ = other.sender_ != null ? other.sender_.Clone() : null;
       createdAtMs_ = other.createdAtMs_;
       outgoing_ = other.outgoing_;
       unread_ = other.unread_;
+      forwardFrom_ = other.forwardFrom_ != null ? other.forwardFrom_.Clone() : null;
+      forwardFromDateMs_ = other.forwardFromDateMs_;
+      media_ = other.media_ != null ? other.media_.Clone() : null;
+      groupedId_ = other.groupedId_;
       switch (other.BodyCase) {
         case BodyOneofCase.Text:
           Text = other.Text.Clone();
@@ -23480,6 +26989,90 @@ namespace Botgram.Protocol.V1 {
       }
     }
 
+    /// <summary>Field number for the "forward_from" field.</summary>
+    public const int ForwardFromFieldNumber = 13;
+    private global::Botgram.Protocol.V1.UserRef forwardFrom_;
+    /// <summary>
+    /// Forward attribution for copied messages; absent on natively sent messages.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.UserRef ForwardFrom {
+      get { return forwardFrom_; }
+      set {
+        forwardFrom_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "forward_from_date_ms" field.</summary>
+    public const int ForwardFromDateMsFieldNumber = 14;
+    private readonly static long ForwardFromDateMsDefaultValue = 0L;
+
+    private long forwardFromDateMs_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ForwardFromDateMs {
+      get { if ((_hasBits0 & 1) != 0) { return forwardFromDateMs_; } else { return ForwardFromDateMsDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        forwardFromDateMs_ = value;
+      }
+    }
+    /// <summary>Gets whether the "forward_from_date_ms" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasForwardFromDateMs {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "forward_from_date_ms" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearForwardFromDateMs() {
+      _hasBits0 &= ~1;
+    }
+
+    /// <summary>Field number for the "media" field.</summary>
+    public const int MediaFieldNumber = 15;
+    private global::Botgram.Protocol.V1.MediaMessage media_;
+    /// <summary>
+    /// Media body and album grouping (batch I); absent on text and service messages.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MediaMessage Media {
+      get { return media_; }
+      set {
+        media_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "grouped_id" field.</summary>
+    public const int GroupedIdFieldNumber = 16;
+    private readonly static long GroupedIdDefaultValue = 0L;
+
+    private long groupedId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long GroupedId {
+      get { if ((_hasBits0 & 2) != 0) { return groupedId_; } else { return GroupedIdDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        groupedId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "grouped_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasGroupedId {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "grouped_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearGroupedId() {
+      _hasBits0 &= ~2;
+    }
+
     private object body_;
     /// <summary>Enum of possible cases for the "body" oneof.</summary>
     public enum BodyOneofCase {
@@ -23526,6 +27119,10 @@ namespace Botgram.Protocol.V1 {
       if (!object.Equals(Text, other.Text)) return false;
       if (!object.Equals(Service, other.Service)) return false;
       if (!object.Equals(E2Ee, other.E2Ee)) return false;
+      if (!object.Equals(ForwardFrom, other.ForwardFrom)) return false;
+      if (ForwardFromDateMs != other.ForwardFromDateMs) return false;
+      if (!object.Equals(Media, other.Media)) return false;
+      if (GroupedId != other.GroupedId) return false;
       if (BodyCase != other.BodyCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -23543,6 +27140,10 @@ namespace Botgram.Protocol.V1 {
       if (bodyCase_ == BodyOneofCase.Text) hash ^= Text.GetHashCode();
       if (bodyCase_ == BodyOneofCase.Service) hash ^= Service.GetHashCode();
       if (bodyCase_ == BodyOneofCase.E2Ee) hash ^= E2Ee.GetHashCode();
+      if (forwardFrom_ != null) hash ^= ForwardFrom.GetHashCode();
+      if (HasForwardFromDateMs) hash ^= ForwardFromDateMs.GetHashCode();
+      if (media_ != null) hash ^= Media.GetHashCode();
+      if (HasGroupedId) hash ^= GroupedId.GetHashCode();
       hash ^= (int) bodyCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -23598,6 +27199,22 @@ namespace Botgram.Protocol.V1 {
         output.WriteRawTag(98);
         output.WriteMessage(E2Ee);
       }
+      if (forwardFrom_ != null) {
+        output.WriteRawTag(106);
+        output.WriteMessage(ForwardFrom);
+      }
+      if (HasForwardFromDateMs) {
+        output.WriteRawTag(112);
+        output.WriteInt64(ForwardFromDateMs);
+      }
+      if (media_ != null) {
+        output.WriteRawTag(122);
+        output.WriteMessage(Media);
+      }
+      if (HasGroupedId) {
+        output.WriteRawTag(128, 1);
+        output.WriteInt64(GroupedId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -23644,6 +27261,22 @@ namespace Botgram.Protocol.V1 {
         output.WriteRawTag(98);
         output.WriteMessage(E2Ee);
       }
+      if (forwardFrom_ != null) {
+        output.WriteRawTag(106);
+        output.WriteMessage(ForwardFrom);
+      }
+      if (HasForwardFromDateMs) {
+        output.WriteRawTag(112);
+        output.WriteInt64(ForwardFromDateMs);
+      }
+      if (media_ != null) {
+        output.WriteRawTag(122);
+        output.WriteMessage(Media);
+      }
+      if (HasGroupedId) {
+        output.WriteRawTag(128, 1);
+        output.WriteInt64(GroupedId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -23681,6 +27314,18 @@ namespace Botgram.Protocol.V1 {
       if (bodyCase_ == BodyOneofCase.E2Ee) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(E2Ee);
       }
+      if (forwardFrom_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ForwardFrom);
+      }
+      if (HasForwardFromDateMs) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ForwardFromDateMs);
+      }
+      if (media_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Media);
+      }
+      if (HasGroupedId) {
+        size += 2 + pb::CodedOutputStream.ComputeInt64Size(GroupedId);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -23716,6 +27361,24 @@ namespace Botgram.Protocol.V1 {
       }
       if (other.Unread != false) {
         Unread = other.Unread;
+      }
+      if (other.forwardFrom_ != null) {
+        if (forwardFrom_ == null) {
+          ForwardFrom = new global::Botgram.Protocol.V1.UserRef();
+        }
+        ForwardFrom.MergeFrom(other.ForwardFrom);
+      }
+      if (other.HasForwardFromDateMs) {
+        ForwardFromDateMs = other.ForwardFromDateMs;
+      }
+      if (other.media_ != null) {
+        if (media_ == null) {
+          Media = new global::Botgram.Protocol.V1.MediaMessage();
+        }
+        Media.MergeFrom(other.Media);
+      }
+      if (other.HasGroupedId) {
+        GroupedId = other.GroupedId;
       }
       switch (other.BodyCase) {
         case BodyOneofCase.Text:
@@ -23810,6 +27473,28 @@ namespace Botgram.Protocol.V1 {
             E2Ee = subBuilder;
             break;
           }
+          case 106: {
+            if (forwardFrom_ == null) {
+              ForwardFrom = new global::Botgram.Protocol.V1.UserRef();
+            }
+            input.ReadMessage(ForwardFrom);
+            break;
+          }
+          case 112: {
+            ForwardFromDateMs = input.ReadInt64();
+            break;
+          }
+          case 122: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaMessage();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+          case 128: {
+            GroupedId = input.ReadInt64();
+            break;
+          }
         }
       }
     #endif
@@ -23880,6 +27565,28 @@ namespace Botgram.Protocol.V1 {
             }
             input.ReadMessage(subBuilder);
             E2Ee = subBuilder;
+            break;
+          }
+          case 106: {
+            if (forwardFrom_ == null) {
+              ForwardFrom = new global::Botgram.Protocol.V1.UserRef();
+            }
+            input.ReadMessage(ForwardFrom);
+            break;
+          }
+          case 112: {
+            ForwardFromDateMs = input.ReadInt64();
+            break;
+          }
+          case 122: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaMessage();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+          case 128: {
+            GroupedId = input.ReadInt64();
             break;
           }
         }
@@ -24394,6 +28101,9 @@ namespace Botgram.Protocol.V1 {
       readOutboxMaxId_ = other.readOutboxMaxId_;
       unreadCount_ = other.unreadCount_;
       notifySettings_ = other.notifySettings_ != null ? other.notifySettings_.Clone() : null;
+      pinned_ = other.pinned_;
+      unreadMark_ = other.unreadMark_;
+      draft_ = other.draft_ != null ? other.draft_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -24475,6 +28185,45 @@ namespace Botgram.Protocol.V1 {
       }
     }
 
+    /// <summary>Field number for the "pinned" field.</summary>
+    public const int PinnedFieldNumber = 7;
+    private bool pinned_;
+    /// <summary>
+    /// Per-account dialog state (schema v10). Absent fields keep pre-v10 defaults.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Pinned {
+      get { return pinned_; }
+      set {
+        pinned_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "unread_mark" field.</summary>
+    public const int UnreadMarkFieldNumber = 8;
+    private bool unreadMark_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool UnreadMark {
+      get { return unreadMark_; }
+      set {
+        unreadMark_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "draft" field.</summary>
+    public const int DraftFieldNumber = 9;
+    private global::Botgram.Protocol.V1.DraftState draft_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.DraftState Draft {
+      get { return draft_; }
+      set {
+        draft_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -24496,6 +28245,9 @@ namespace Botgram.Protocol.V1 {
       if (ReadOutboxMaxId != other.ReadOutboxMaxId) return false;
       if (UnreadCount != other.UnreadCount) return false;
       if (!object.Equals(NotifySettings, other.NotifySettings)) return false;
+      if (Pinned != other.Pinned) return false;
+      if (UnreadMark != other.UnreadMark) return false;
+      if (!object.Equals(Draft, other.Draft)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -24509,6 +28261,9 @@ namespace Botgram.Protocol.V1 {
       if (ReadOutboxMaxId != 0L) hash ^= ReadOutboxMaxId.GetHashCode();
       if (UnreadCount != 0) hash ^= UnreadCount.GetHashCode();
       if (notifySettings_ != null) hash ^= NotifySettings.GetHashCode();
+      if (Pinned != false) hash ^= Pinned.GetHashCode();
+      if (UnreadMark != false) hash ^= UnreadMark.GetHashCode();
+      if (draft_ != null) hash ^= Draft.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -24551,6 +28306,18 @@ namespace Botgram.Protocol.V1 {
         output.WriteRawTag(50);
         output.WriteMessage(NotifySettings);
       }
+      if (Pinned != false) {
+        output.WriteRawTag(56);
+        output.WriteBool(Pinned);
+      }
+      if (UnreadMark != false) {
+        output.WriteRawTag(64);
+        output.WriteBool(UnreadMark);
+      }
+      if (draft_ != null) {
+        output.WriteRawTag(74);
+        output.WriteMessage(Draft);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -24585,6 +28352,18 @@ namespace Botgram.Protocol.V1 {
         output.WriteRawTag(50);
         output.WriteMessage(NotifySettings);
       }
+      if (Pinned != false) {
+        output.WriteRawTag(56);
+        output.WriteBool(Pinned);
+      }
+      if (UnreadMark != false) {
+        output.WriteRawTag(64);
+        output.WriteBool(UnreadMark);
+      }
+      if (draft_ != null) {
+        output.WriteRawTag(74);
+        output.WriteMessage(Draft);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -24612,6 +28391,15 @@ namespace Botgram.Protocol.V1 {
       }
       if (notifySettings_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(NotifySettings);
+      }
+      if (Pinned != false) {
+        size += 1 + 1;
+      }
+      if (UnreadMark != false) {
+        size += 1 + 1;
+      }
+      if (draft_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Draft);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -24648,6 +28436,18 @@ namespace Botgram.Protocol.V1 {
           NotifySettings = new global::Botgram.Protocol.V1.NotifySettings();
         }
         NotifySettings.MergeFrom(other.NotifySettings);
+      }
+      if (other.Pinned != false) {
+        Pinned = other.Pinned;
+      }
+      if (other.UnreadMark != false) {
+        UnreadMark = other.UnreadMark;
+      }
+      if (other.draft_ != null) {
+        if (draft_ == null) {
+          Draft = new global::Botgram.Protocol.V1.DraftState();
+        }
+        Draft.MergeFrom(other.Draft);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -24694,6 +28494,21 @@ namespace Botgram.Protocol.V1 {
             input.ReadMessage(NotifySettings);
             break;
           }
+          case 56: {
+            Pinned = input.ReadBool();
+            break;
+          }
+          case 64: {
+            UnreadMark = input.ReadBool();
+            break;
+          }
+          case 74: {
+            if (draft_ == null) {
+              Draft = new global::Botgram.Protocol.V1.DraftState();
+            }
+            input.ReadMessage(Draft);
+            break;
+          }
         }
       }
     #endif
@@ -24737,6 +28552,21 @@ namespace Botgram.Protocol.V1 {
               NotifySettings = new global::Botgram.Protocol.V1.NotifySettings();
             }
             input.ReadMessage(NotifySettings);
+            break;
+          }
+          case 56: {
+            Pinned = input.ReadBool();
+            break;
+          }
+          case 64: {
+            UnreadMark = input.ReadBool();
+            break;
+          }
+          case 74: {
+            if (draft_ == null) {
+              Draft = new global::Botgram.Protocol.V1.DraftState();
+            }
+            input.ReadMessage(Draft);
             break;
           }
         }
@@ -26193,6 +30023,24 @@ namespace Botgram.Protocol.V1 {
         case KindOneofCase.PhoneCallSignaling:
           PhoneCallSignaling = other.PhoneCallSignaling.Clone();
           break;
+        case KindOneofCase.MessagesDeleted:
+          MessagesDeleted = other.MessagesDeleted.Clone();
+          break;
+        case KindOneofCase.MessageEdited:
+          MessageEdited = other.MessageEdited.Clone();
+          break;
+        case KindOneofCase.MessagesPinned:
+          MessagesPinned = other.MessagesPinned.Clone();
+          break;
+        case KindOneofCase.ContentsRead:
+          ContentsRead = other.ContentsRead.Clone();
+          break;
+        case KindOneofCase.DraftChanged:
+          DraftChanged = other.DraftChanged.Clone();
+          break;
+        case KindOneofCase.UserTyping:
+          UserTyping = other.UserTyping.Clone();
+          break;
       }
 
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -26315,6 +30163,83 @@ namespace Botgram.Protocol.V1 {
       }
     }
 
+    /// <summary>Field number for the "messages_deleted" field.</summary>
+    public const int MessagesDeletedFieldNumber = 10;
+    /// <summary>
+    /// Batch A message-lifecycle updates. messages_deleted, message_edited,
+    /// messages_pinned and contents_read carry the recipient's own pts/pts_count;
+    /// draft_changed and user_typing are replayable stateless notifications.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MessagesDeleted MessagesDeleted {
+      get { return kindCase_ == KindOneofCase.MessagesDeleted ? (global::Botgram.Protocol.V1.MessagesDeleted) kind_ : null; }
+      set {
+        kind_ = value;
+        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.MessagesDeleted;
+      }
+    }
+
+    /// <summary>Field number for the "message_edited" field.</summary>
+    public const int MessageEditedFieldNumber = 11;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MessageEdited MessageEdited {
+      get { return kindCase_ == KindOneofCase.MessageEdited ? (global::Botgram.Protocol.V1.MessageEdited) kind_ : null; }
+      set {
+        kind_ = value;
+        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.MessageEdited;
+      }
+    }
+
+    /// <summary>Field number for the "messages_pinned" field.</summary>
+    public const int MessagesPinnedFieldNumber = 12;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MessagesPinned MessagesPinned {
+      get { return kindCase_ == KindOneofCase.MessagesPinned ? (global::Botgram.Protocol.V1.MessagesPinned) kind_ : null; }
+      set {
+        kind_ = value;
+        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.MessagesPinned;
+      }
+    }
+
+    /// <summary>Field number for the "contents_read" field.</summary>
+    public const int ContentsReadFieldNumber = 13;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.ContentsRead ContentsRead {
+      get { return kindCase_ == KindOneofCase.ContentsRead ? (global::Botgram.Protocol.V1.ContentsRead) kind_ : null; }
+      set {
+        kind_ = value;
+        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.ContentsRead;
+      }
+    }
+
+    /// <summary>Field number for the "draft_changed" field.</summary>
+    public const int DraftChangedFieldNumber = 14;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.DraftChanged DraftChanged {
+      get { return kindCase_ == KindOneofCase.DraftChanged ? (global::Botgram.Protocol.V1.DraftChanged) kind_ : null; }
+      set {
+        kind_ = value;
+        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.DraftChanged;
+      }
+    }
+
+    /// <summary>Field number for the "user_typing" field.</summary>
+    public const int UserTypingFieldNumber = 15;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.UserTyping UserTyping {
+      get { return kindCase_ == KindOneofCase.UserTyping ? (global::Botgram.Protocol.V1.UserTyping) kind_ : null; }
+      set {
+        kind_ = value;
+        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.UserTyping;
+      }
+    }
+
     private object kind_;
     /// <summary>Enum of possible cases for the "kind" oneof.</summary>
     public enum KindOneofCase {
@@ -26328,6 +30253,12 @@ namespace Botgram.Protocol.V1 {
       PresenceChanged = 7,
       PhoneCall = 8,
       PhoneCallSignaling = 9,
+      MessagesDeleted = 10,
+      MessageEdited = 11,
+      MessagesPinned = 12,
+      ContentsRead = 13,
+      DraftChanged = 14,
+      UserTyping = 15,
     }
     private KindOneofCase kindCase_ = KindOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -26367,6 +30298,12 @@ namespace Botgram.Protocol.V1 {
       if (!object.Equals(PresenceChanged, other.PresenceChanged)) return false;
       if (!object.Equals(PhoneCall, other.PhoneCall)) return false;
       if (!object.Equals(PhoneCallSignaling, other.PhoneCallSignaling)) return false;
+      if (!object.Equals(MessagesDeleted, other.MessagesDeleted)) return false;
+      if (!object.Equals(MessageEdited, other.MessageEdited)) return false;
+      if (!object.Equals(MessagesPinned, other.MessagesPinned)) return false;
+      if (!object.Equals(ContentsRead, other.ContentsRead)) return false;
+      if (!object.Equals(DraftChanged, other.DraftChanged)) return false;
+      if (!object.Equals(UserTyping, other.UserTyping)) return false;
       if (KindCase != other.KindCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -26384,6 +30321,12 @@ namespace Botgram.Protocol.V1 {
       if (kindCase_ == KindOneofCase.PresenceChanged) hash ^= PresenceChanged.GetHashCode();
       if (kindCase_ == KindOneofCase.PhoneCall) hash ^= PhoneCall.GetHashCode();
       if (kindCase_ == KindOneofCase.PhoneCallSignaling) hash ^= PhoneCallSignaling.GetHashCode();
+      if (kindCase_ == KindOneofCase.MessagesDeleted) hash ^= MessagesDeleted.GetHashCode();
+      if (kindCase_ == KindOneofCase.MessageEdited) hash ^= MessageEdited.GetHashCode();
+      if (kindCase_ == KindOneofCase.MessagesPinned) hash ^= MessagesPinned.GetHashCode();
+      if (kindCase_ == KindOneofCase.ContentsRead) hash ^= ContentsRead.GetHashCode();
+      if (kindCase_ == KindOneofCase.DraftChanged) hash ^= DraftChanged.GetHashCode();
+      if (kindCase_ == KindOneofCase.UserTyping) hash ^= UserTyping.GetHashCode();
       hash ^= (int) kindCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -26439,6 +30382,30 @@ namespace Botgram.Protocol.V1 {
         output.WriteRawTag(74);
         output.WriteMessage(PhoneCallSignaling);
       }
+      if (kindCase_ == KindOneofCase.MessagesDeleted) {
+        output.WriteRawTag(82);
+        output.WriteMessage(MessagesDeleted);
+      }
+      if (kindCase_ == KindOneofCase.MessageEdited) {
+        output.WriteRawTag(90);
+        output.WriteMessage(MessageEdited);
+      }
+      if (kindCase_ == KindOneofCase.MessagesPinned) {
+        output.WriteRawTag(98);
+        output.WriteMessage(MessagesPinned);
+      }
+      if (kindCase_ == KindOneofCase.ContentsRead) {
+        output.WriteRawTag(106);
+        output.WriteMessage(ContentsRead);
+      }
+      if (kindCase_ == KindOneofCase.DraftChanged) {
+        output.WriteRawTag(114);
+        output.WriteMessage(DraftChanged);
+      }
+      if (kindCase_ == KindOneofCase.UserTyping) {
+        output.WriteRawTag(122);
+        output.WriteMessage(UserTyping);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -26485,6 +30452,30 @@ namespace Botgram.Protocol.V1 {
         output.WriteRawTag(74);
         output.WriteMessage(PhoneCallSignaling);
       }
+      if (kindCase_ == KindOneofCase.MessagesDeleted) {
+        output.WriteRawTag(82);
+        output.WriteMessage(MessagesDeleted);
+      }
+      if (kindCase_ == KindOneofCase.MessageEdited) {
+        output.WriteRawTag(90);
+        output.WriteMessage(MessageEdited);
+      }
+      if (kindCase_ == KindOneofCase.MessagesPinned) {
+        output.WriteRawTag(98);
+        output.WriteMessage(MessagesPinned);
+      }
+      if (kindCase_ == KindOneofCase.ContentsRead) {
+        output.WriteRawTag(106);
+        output.WriteMessage(ContentsRead);
+      }
+      if (kindCase_ == KindOneofCase.DraftChanged) {
+        output.WriteRawTag(114);
+        output.WriteMessage(DraftChanged);
+      }
+      if (kindCase_ == KindOneofCase.UserTyping) {
+        output.WriteRawTag(122);
+        output.WriteMessage(UserTyping);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -26521,6 +30512,24 @@ namespace Botgram.Protocol.V1 {
       }
       if (kindCase_ == KindOneofCase.PhoneCallSignaling) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(PhoneCallSignaling);
+      }
+      if (kindCase_ == KindOneofCase.MessagesDeleted) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(MessagesDeleted);
+      }
+      if (kindCase_ == KindOneofCase.MessageEdited) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(MessageEdited);
+      }
+      if (kindCase_ == KindOneofCase.MessagesPinned) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(MessagesPinned);
+      }
+      if (kindCase_ == KindOneofCase.ContentsRead) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ContentsRead);
+      }
+      if (kindCase_ == KindOneofCase.DraftChanged) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(DraftChanged);
+      }
+      if (kindCase_ == KindOneofCase.UserTyping) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(UserTyping);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -26588,6 +30597,42 @@ namespace Botgram.Protocol.V1 {
             PhoneCallSignaling = new global::Botgram.Protocol.V1.PhoneCallSignalingData();
           }
           PhoneCallSignaling.MergeFrom(other.PhoneCallSignaling);
+          break;
+        case KindOneofCase.MessagesDeleted:
+          if (MessagesDeleted == null) {
+            MessagesDeleted = new global::Botgram.Protocol.V1.MessagesDeleted();
+          }
+          MessagesDeleted.MergeFrom(other.MessagesDeleted);
+          break;
+        case KindOneofCase.MessageEdited:
+          if (MessageEdited == null) {
+            MessageEdited = new global::Botgram.Protocol.V1.MessageEdited();
+          }
+          MessageEdited.MergeFrom(other.MessageEdited);
+          break;
+        case KindOneofCase.MessagesPinned:
+          if (MessagesPinned == null) {
+            MessagesPinned = new global::Botgram.Protocol.V1.MessagesPinned();
+          }
+          MessagesPinned.MergeFrom(other.MessagesPinned);
+          break;
+        case KindOneofCase.ContentsRead:
+          if (ContentsRead == null) {
+            ContentsRead = new global::Botgram.Protocol.V1.ContentsRead();
+          }
+          ContentsRead.MergeFrom(other.ContentsRead);
+          break;
+        case KindOneofCase.DraftChanged:
+          if (DraftChanged == null) {
+            DraftChanged = new global::Botgram.Protocol.V1.DraftChanged();
+          }
+          DraftChanged.MergeFrom(other.DraftChanged);
+          break;
+        case KindOneofCase.UserTyping:
+          if (UserTyping == null) {
+            UserTyping = new global::Botgram.Protocol.V1.UserTyping();
+          }
+          UserTyping.MergeFrom(other.UserTyping);
           break;
       }
 
@@ -26687,6 +30732,60 @@ namespace Botgram.Protocol.V1 {
             PhoneCallSignaling = subBuilder;
             break;
           }
+          case 82: {
+            global::Botgram.Protocol.V1.MessagesDeleted subBuilder = new global::Botgram.Protocol.V1.MessagesDeleted();
+            if (kindCase_ == KindOneofCase.MessagesDeleted) {
+              subBuilder.MergeFrom(MessagesDeleted);
+            }
+            input.ReadMessage(subBuilder);
+            MessagesDeleted = subBuilder;
+            break;
+          }
+          case 90: {
+            global::Botgram.Protocol.V1.MessageEdited subBuilder = new global::Botgram.Protocol.V1.MessageEdited();
+            if (kindCase_ == KindOneofCase.MessageEdited) {
+              subBuilder.MergeFrom(MessageEdited);
+            }
+            input.ReadMessage(subBuilder);
+            MessageEdited = subBuilder;
+            break;
+          }
+          case 98: {
+            global::Botgram.Protocol.V1.MessagesPinned subBuilder = new global::Botgram.Protocol.V1.MessagesPinned();
+            if (kindCase_ == KindOneofCase.MessagesPinned) {
+              subBuilder.MergeFrom(MessagesPinned);
+            }
+            input.ReadMessage(subBuilder);
+            MessagesPinned = subBuilder;
+            break;
+          }
+          case 106: {
+            global::Botgram.Protocol.V1.ContentsRead subBuilder = new global::Botgram.Protocol.V1.ContentsRead();
+            if (kindCase_ == KindOneofCase.ContentsRead) {
+              subBuilder.MergeFrom(ContentsRead);
+            }
+            input.ReadMessage(subBuilder);
+            ContentsRead = subBuilder;
+            break;
+          }
+          case 114: {
+            global::Botgram.Protocol.V1.DraftChanged subBuilder = new global::Botgram.Protocol.V1.DraftChanged();
+            if (kindCase_ == KindOneofCase.DraftChanged) {
+              subBuilder.MergeFrom(DraftChanged);
+            }
+            input.ReadMessage(subBuilder);
+            DraftChanged = subBuilder;
+            break;
+          }
+          case 122: {
+            global::Botgram.Protocol.V1.UserTyping subBuilder = new global::Botgram.Protocol.V1.UserTyping();
+            if (kindCase_ == KindOneofCase.UserTyping) {
+              subBuilder.MergeFrom(UserTyping);
+            }
+            input.ReadMessage(subBuilder);
+            UserTyping = subBuilder;
+            break;
+          }
         }
       }
     #endif
@@ -26781,6 +30880,60 @@ namespace Botgram.Protocol.V1 {
             }
             input.ReadMessage(subBuilder);
             PhoneCallSignaling = subBuilder;
+            break;
+          }
+          case 82: {
+            global::Botgram.Protocol.V1.MessagesDeleted subBuilder = new global::Botgram.Protocol.V1.MessagesDeleted();
+            if (kindCase_ == KindOneofCase.MessagesDeleted) {
+              subBuilder.MergeFrom(MessagesDeleted);
+            }
+            input.ReadMessage(subBuilder);
+            MessagesDeleted = subBuilder;
+            break;
+          }
+          case 90: {
+            global::Botgram.Protocol.V1.MessageEdited subBuilder = new global::Botgram.Protocol.V1.MessageEdited();
+            if (kindCase_ == KindOneofCase.MessageEdited) {
+              subBuilder.MergeFrom(MessageEdited);
+            }
+            input.ReadMessage(subBuilder);
+            MessageEdited = subBuilder;
+            break;
+          }
+          case 98: {
+            global::Botgram.Protocol.V1.MessagesPinned subBuilder = new global::Botgram.Protocol.V1.MessagesPinned();
+            if (kindCase_ == KindOneofCase.MessagesPinned) {
+              subBuilder.MergeFrom(MessagesPinned);
+            }
+            input.ReadMessage(subBuilder);
+            MessagesPinned = subBuilder;
+            break;
+          }
+          case 106: {
+            global::Botgram.Protocol.V1.ContentsRead subBuilder = new global::Botgram.Protocol.V1.ContentsRead();
+            if (kindCase_ == KindOneofCase.ContentsRead) {
+              subBuilder.MergeFrom(ContentsRead);
+            }
+            input.ReadMessage(subBuilder);
+            ContentsRead = subBuilder;
+            break;
+          }
+          case 114: {
+            global::Botgram.Protocol.V1.DraftChanged subBuilder = new global::Botgram.Protocol.V1.DraftChanged();
+            if (kindCase_ == KindOneofCase.DraftChanged) {
+              subBuilder.MergeFrom(DraftChanged);
+            }
+            input.ReadMessage(subBuilder);
+            DraftChanged = subBuilder;
+            break;
+          }
+          case 122: {
+            global::Botgram.Protocol.V1.UserTyping subBuilder = new global::Botgram.Protocol.V1.UserTyping();
+            if (kindCase_ == KindOneofCase.UserTyping) {
+              subBuilder.MergeFrom(UserTyping);
+            }
+            input.ReadMessage(subBuilder);
+            UserTyping = subBuilder;
             break;
           }
         }
@@ -56875,6 +61028,13591 @@ namespace Botgram.Protocol.V1 {
           }
           case 50: {
             recoveryCodes_.AddEntriesFrom(ref input, _repeated_recoveryCodes_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// --- Batch A: core message lifecycle and per-account dialog state (messages.*) ---
+  /// Deletes: delete_messages without revoke hides messages for the caller only;
+  /// revoke applies per conversation kind (direct: either party, group: author only).
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class DeleteMessagesRequest : pb::IMessage<DeleteMessagesRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<DeleteMessagesRequest> _parser = new pb::MessageParser<DeleteMessagesRequest>(() => new DeleteMessagesRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<DeleteMessagesRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[165]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeleteMessagesRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeleteMessagesRequest(DeleteMessagesRequest other) : this() {
+      messageIds_ = other.messageIds_.Clone();
+      revoke_ = other.revoke_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeleteMessagesRequest Clone() {
+      return new DeleteMessagesRequest(this);
+    }
+
+    /// <summary>Field number for the "message_ids" field.</summary>
+    public const int MessageIdsFieldNumber = 1;
+    private static readonly pb::FieldCodec<long> _repeated_messageIds_codec
+        = pb::FieldCodec.ForInt64(10);
+    private readonly pbc::RepeatedField<long> messageIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> MessageIds {
+      get { return messageIds_; }
+    }
+
+    /// <summary>Field number for the "revoke" field.</summary>
+    public const int RevokeFieldNumber = 2;
+    private bool revoke_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Revoke {
+      get { return revoke_; }
+      set {
+        revoke_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as DeleteMessagesRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(DeleteMessagesRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!messageIds_.Equals(other.messageIds_)) return false;
+      if (Revoke != other.Revoke) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= messageIds_.GetHashCode();
+      if (Revoke != false) hash ^= Revoke.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      messageIds_.WriteTo(output, _repeated_messageIds_codec);
+      if (Revoke != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(Revoke);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      messageIds_.WriteTo(ref output, _repeated_messageIds_codec);
+      if (Revoke != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(Revoke);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += messageIds_.CalculateSize(_repeated_messageIds_codec);
+      if (Revoke != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(DeleteMessagesRequest other) {
+      if (other == null) {
+        return;
+      }
+      messageIds_.Add(other.messageIds_);
+      if (other.Revoke != false) {
+        Revoke = other.Revoke;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10:
+          case 8: {
+            messageIds_.AddEntriesFrom(input, _repeated_messageIds_codec);
+            break;
+          }
+          case 16: {
+            Revoke = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10:
+          case 8: {
+            messageIds_.AddEntriesFrom(ref input, _repeated_messageIds_codec);
+            break;
+          }
+          case 16: {
+            Revoke = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// delete_history clears the caller's view through max_message_id. just_clear keeps
+  /// the dialog listed; without it the dialog stays hidden until a newer message id
+  /// appears (server stores a hidden_through boundary, never deletes membership).
+  /// revoke (direct chats only) also clears the peer's boundary and notifies both.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class DeleteHistoryRequest : pb::IMessage<DeleteHistoryRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<DeleteHistoryRequest> _parser = new pb::MessageParser<DeleteHistoryRequest>(() => new DeleteHistoryRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<DeleteHistoryRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[166]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeleteHistoryRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeleteHistoryRequest(DeleteHistoryRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      justClear_ = other.justClear_;
+      revoke_ = other.revoke_;
+      maxMessageId_ = other.maxMessageId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeleteHistoryRequest Clone() {
+      return new DeleteHistoryRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "just_clear" field.</summary>
+    public const int JustClearFieldNumber = 2;
+    private bool justClear_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool JustClear {
+      get { return justClear_; }
+      set {
+        justClear_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "revoke" field.</summary>
+    public const int RevokeFieldNumber = 3;
+    private bool revoke_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Revoke {
+      get { return revoke_; }
+      set {
+        revoke_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "max_message_id" field.</summary>
+    public const int MaxMessageIdFieldNumber = 4;
+    private long maxMessageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MaxMessageId {
+      get { return maxMessageId_; }
+      set {
+        maxMessageId_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as DeleteHistoryRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(DeleteHistoryRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (JustClear != other.JustClear) return false;
+      if (Revoke != other.Revoke) return false;
+      if (MaxMessageId != other.MaxMessageId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (JustClear != false) hash ^= JustClear.GetHashCode();
+      if (Revoke != false) hash ^= Revoke.GetHashCode();
+      if (MaxMessageId != 0L) hash ^= MaxMessageId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (JustClear != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(JustClear);
+      }
+      if (Revoke != false) {
+        output.WriteRawTag(24);
+        output.WriteBool(Revoke);
+      }
+      if (MaxMessageId != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(MaxMessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (JustClear != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(JustClear);
+      }
+      if (Revoke != false) {
+        output.WriteRawTag(24);
+        output.WriteBool(Revoke);
+      }
+      if (MaxMessageId != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(MaxMessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (JustClear != false) {
+        size += 1 + 1;
+      }
+      if (Revoke != false) {
+        size += 1 + 1;
+      }
+      if (MaxMessageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MaxMessageId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(DeleteHistoryRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.JustClear != false) {
+        JustClear = other.JustClear;
+      }
+      if (other.Revoke != false) {
+        Revoke = other.Revoke;
+      }
+      if (other.MaxMessageId != 0L) {
+        MaxMessageId = other.MaxMessageId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            JustClear = input.ReadBool();
+            break;
+          }
+          case 24: {
+            Revoke = input.ReadBool();
+            break;
+          }
+          case 32: {
+            MaxMessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            JustClear = input.ReadBool();
+            break;
+          }
+          case 24: {
+            Revoke = input.ReadBool();
+            break;
+          }
+          case 32: {
+            MaxMessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class DeleteSavedHistoryRequest : pb::IMessage<DeleteSavedHistoryRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<DeleteSavedHistoryRequest> _parser = new pb::MessageParser<DeleteSavedHistoryRequest>(() => new DeleteSavedHistoryRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<DeleteSavedHistoryRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[167]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeleteSavedHistoryRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeleteSavedHistoryRequest(DeleteSavedHistoryRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      maxMessageId_ = other.maxMessageId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeleteSavedHistoryRequest Clone() {
+      return new DeleteSavedHistoryRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "max_message_id" field.</summary>
+    public const int MaxMessageIdFieldNumber = 2;
+    private long maxMessageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MaxMessageId {
+      get { return maxMessageId_; }
+      set {
+        maxMessageId_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as DeleteSavedHistoryRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(DeleteSavedHistoryRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (MaxMessageId != other.MaxMessageId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (MaxMessageId != 0L) hash ^= MaxMessageId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MaxMessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MaxMessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MaxMessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MaxMessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (MaxMessageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MaxMessageId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(DeleteSavedHistoryRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.MaxMessageId != 0L) {
+        MaxMessageId = other.MaxMessageId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MaxMessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MaxMessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// revoke clears the call-history boundary for both direct-chat parties.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class DeletePhoneCallHistoryRequest : pb::IMessage<DeletePhoneCallHistoryRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<DeletePhoneCallHistoryRequest> _parser = new pb::MessageParser<DeletePhoneCallHistoryRequest>(() => new DeletePhoneCallHistoryRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<DeletePhoneCallHistoryRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[168]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeletePhoneCallHistoryRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeletePhoneCallHistoryRequest(DeletePhoneCallHistoryRequest other) : this() {
+      revoke_ = other.revoke_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DeletePhoneCallHistoryRequest Clone() {
+      return new DeletePhoneCallHistoryRequest(this);
+    }
+
+    /// <summary>Field number for the "revoke" field.</summary>
+    public const int RevokeFieldNumber = 1;
+    private bool revoke_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Revoke {
+      get { return revoke_; }
+      set {
+        revoke_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as DeletePhoneCallHistoryRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(DeletePhoneCallHistoryRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Revoke != other.Revoke) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Revoke != false) hash ^= Revoke.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Revoke != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Revoke);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Revoke != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Revoke);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Revoke != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(DeletePhoneCallHistoryRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Revoke != false) {
+        Revoke = other.Revoke;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Revoke = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Revoke = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class AffectedHistory : pb::IMessage<AffectedHistory>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<AffectedHistory> _parser = new pb::MessageParser<AffectedHistory>(() => new AffectedHistory());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<AffectedHistory> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[169]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AffectedHistory() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AffectedHistory(AffectedHistory other) : this() {
+      pts_ = other.pts_;
+      ptsCount_ = other.ptsCount_;
+      offset_ = other.offset_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AffectedHistory Clone() {
+      return new AffectedHistory(this);
+    }
+
+    /// <summary>Field number for the "pts" field.</summary>
+    public const int PtsFieldNumber = 1;
+    private int pts_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Pts {
+      get { return pts_; }
+      set {
+        pts_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pts_count" field.</summary>
+    public const int PtsCountFieldNumber = 2;
+    private int ptsCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int PtsCount {
+      get { return ptsCount_; }
+      set {
+        ptsCount_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "offset" field.</summary>
+    public const int OffsetFieldNumber = 3;
+    private int offset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Offset {
+      get { return offset_; }
+      set {
+        offset_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as AffectedHistory);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(AffectedHistory other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Pts != other.Pts) return false;
+      if (PtsCount != other.PtsCount) return false;
+      if (Offset != other.Offset) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Pts != 0) hash ^= Pts.GetHashCode();
+      if (PtsCount != 0) hash ^= PtsCount.GetHashCode();
+      if (Offset != 0) hash ^= Offset.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Pts != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(PtsCount);
+      }
+      if (Offset != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Offset);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Pts != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(PtsCount);
+      }
+      if (Offset != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Offset);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Pts != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Pts);
+      }
+      if (PtsCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PtsCount);
+      }
+      if (Offset != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Offset);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(AffectedHistory other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Pts != 0) {
+        Pts = other.Pts;
+      }
+      if (other.PtsCount != 0) {
+        PtsCount = other.PtsCount;
+      }
+      if (other.Offset != 0) {
+        Offset = other.Offset;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            Offset = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            Offset = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class AffectedFoundMessages : pb::IMessage<AffectedFoundMessages>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<AffectedFoundMessages> _parser = new pb::MessageParser<AffectedFoundMessages>(() => new AffectedFoundMessages());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<AffectedFoundMessages> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[170]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AffectedFoundMessages() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AffectedFoundMessages(AffectedFoundMessages other) : this() {
+      pts_ = other.pts_;
+      ptsCount_ = other.ptsCount_;
+      offset_ = other.offset_;
+      messages_ = other.messages_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AffectedFoundMessages Clone() {
+      return new AffectedFoundMessages(this);
+    }
+
+    /// <summary>Field number for the "pts" field.</summary>
+    public const int PtsFieldNumber = 1;
+    private int pts_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Pts {
+      get { return pts_; }
+      set {
+        pts_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pts_count" field.</summary>
+    public const int PtsCountFieldNumber = 2;
+    private int ptsCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int PtsCount {
+      get { return ptsCount_; }
+      set {
+        ptsCount_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "offset" field.</summary>
+    public const int OffsetFieldNumber = 3;
+    private int offset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Offset {
+      get { return offset_; }
+      set {
+        offset_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "messages" field.</summary>
+    public const int MessagesFieldNumber = 4;
+    private static readonly pb::FieldCodec<long> _repeated_messages_codec
+        = pb::FieldCodec.ForInt64(34);
+    private readonly pbc::RepeatedField<long> messages_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> Messages {
+      get { return messages_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as AffectedFoundMessages);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(AffectedFoundMessages other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Pts != other.Pts) return false;
+      if (PtsCount != other.PtsCount) return false;
+      if (Offset != other.Offset) return false;
+      if(!messages_.Equals(other.messages_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Pts != 0) hash ^= Pts.GetHashCode();
+      if (PtsCount != 0) hash ^= PtsCount.GetHashCode();
+      if (Offset != 0) hash ^= Offset.GetHashCode();
+      hash ^= messages_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Pts != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(PtsCount);
+      }
+      if (Offset != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Offset);
+      }
+      messages_.WriteTo(output, _repeated_messages_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Pts != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(PtsCount);
+      }
+      if (Offset != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Offset);
+      }
+      messages_.WriteTo(ref output, _repeated_messages_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Pts != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Pts);
+      }
+      if (PtsCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PtsCount);
+      }
+      if (Offset != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Offset);
+      }
+      size += messages_.CalculateSize(_repeated_messages_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(AffectedFoundMessages other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Pts != 0) {
+        Pts = other.Pts;
+      }
+      if (other.PtsCount != 0) {
+        PtsCount = other.PtsCount;
+      }
+      if (other.Offset != 0) {
+        Offset = other.Offset;
+      }
+      messages_.Add(other.messages_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            Offset = input.ReadInt32();
+            break;
+          }
+          case 34:
+          case 32: {
+            messages_.AddEntriesFrom(input, _repeated_messages_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            Offset = input.ReadInt32();
+            break;
+          }
+          case 34:
+          case 32: {
+            messages_.AddEntriesFrom(ref input, _repeated_messages_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Author-only text edits within the 48h window; media/markup/scheduling rejected.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class EditMessageRequest : pb::IMessage<EditMessageRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<EditMessageRequest> _parser = new pb::MessageParser<EditMessageRequest>(() => new EditMessageRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<EditMessageRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[171]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public EditMessageRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public EditMessageRequest(EditMessageRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      messageId_ = other.messageId_;
+      text_ = other.text_;
+      entities_ = other.entities_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public EditMessageRequest Clone() {
+      return new EditMessageRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "message_id" field.</summary>
+    public const int MessageIdFieldNumber = 2;
+    private long messageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MessageId {
+      get { return messageId_; }
+      set {
+        messageId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "text" field.</summary>
+    public const int TextFieldNumber = 3;
+    private string text_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Text {
+      get { return text_; }
+      set {
+        text_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "entities" field.</summary>
+    public const int EntitiesFieldNumber = 4;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.MessageEntity> _repeated_entities_codec
+        = pb::FieldCodec.ForMessage(34, global::Botgram.Protocol.V1.MessageEntity.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> entities_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> Entities {
+      get { return entities_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as EditMessageRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(EditMessageRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (MessageId != other.MessageId) return false;
+      if (Text != other.Text) return false;
+      if(!entities_.Equals(other.entities_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (MessageId != 0L) hash ^= MessageId.GetHashCode();
+      if (Text.Length != 0) hash ^= Text.GetHashCode();
+      hash ^= entities_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MessageId);
+      }
+      if (Text.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(Text);
+      }
+      entities_.WriteTo(output, _repeated_entities_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MessageId);
+      }
+      if (Text.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(Text);
+      }
+      entities_.WriteTo(ref output, _repeated_entities_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (MessageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MessageId);
+      }
+      if (Text.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Text);
+      }
+      size += entities_.CalculateSize(_repeated_entities_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(EditMessageRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.MessageId != 0L) {
+        MessageId = other.MessageId;
+      }
+      if (other.Text.Length != 0) {
+        Text = other.Text;
+      }
+      entities_.Add(other.entities_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MessageId = input.ReadInt64();
+            break;
+          }
+          case 26: {
+            Text = input.ReadString();
+            break;
+          }
+          case 34: {
+            entities_.AddEntriesFrom(input, _repeated_entities_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MessageId = input.ReadInt64();
+            break;
+          }
+          case 26: {
+            Text = input.ReadString();
+            break;
+          }
+          case 34: {
+            entities_.AddEntriesFrom(ref input, _repeated_entities_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MessageEditData : pb::IMessage<MessageEditData>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MessageEditData> _parser = new pb::MessageParser<MessageEditData>(() => new MessageEditData());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MessageEditData> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[172]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessageEditData() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessageEditData(MessageEditData other) : this() {
+      caption_ = other.caption_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessageEditData Clone() {
+      return new MessageEditData(this);
+    }
+
+    /// <summary>Field number for the "caption" field.</summary>
+    public const int CaptionFieldNumber = 1;
+    private bool caption_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Caption {
+      get { return caption_; }
+      set {
+        caption_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MessageEditData);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MessageEditData other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Caption != other.Caption) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Caption != false) hash ^= Caption.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Caption != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Caption);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Caption != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Caption);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Caption != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MessageEditData other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Caption != false) {
+        Caption = other.Caption;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Caption = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Caption = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class GetMessageEditDataRequest : pb::IMessage<GetMessageEditDataRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GetMessageEditDataRequest> _parser = new pb::MessageParser<GetMessageEditDataRequest>(() => new GetMessageEditDataRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<GetMessageEditDataRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[173]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetMessageEditDataRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetMessageEditDataRequest(GetMessageEditDataRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      messageId_ = other.messageId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetMessageEditDataRequest Clone() {
+      return new GetMessageEditDataRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "message_id" field.</summary>
+    public const int MessageIdFieldNumber = 2;
+    private long messageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MessageId {
+      get { return messageId_; }
+      set {
+        messageId_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as GetMessageEditDataRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(GetMessageEditDataRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (MessageId != other.MessageId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (MessageId != 0L) hash ^= MessageId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (MessageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MessageId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(GetMessageEditDataRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.MessageId != 0L) {
+        MessageId = other.MessageId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Copies text messages with forward attribution. Service and e2ee bodies are
+  /// rejected; each copy enters the target through the idempotent acceptance path.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ForwardMessagesRequest : pb::IMessage<ForwardMessagesRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ForwardMessagesRequest> _parser = new pb::MessageParser<ForwardMessagesRequest>(() => new ForwardMessagesRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ForwardMessagesRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[174]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ForwardMessagesRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ForwardMessagesRequest(ForwardMessagesRequest other) : this() {
+      fromPeer_ = other.fromPeer_ != null ? other.fromPeer_.Clone() : null;
+      toPeer_ = other.toPeer_ != null ? other.toPeer_.Clone() : null;
+      messageIds_ = other.messageIds_.Clone();
+      randomIds_ = other.randomIds_.Clone();
+      silent_ = other.silent_;
+      dropAuthor_ = other.dropAuthor_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ForwardMessagesRequest Clone() {
+      return new ForwardMessagesRequest(this);
+    }
+
+    /// <summary>Field number for the "from_peer" field.</summary>
+    public const int FromPeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef fromPeer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef FromPeer {
+      get { return fromPeer_; }
+      set {
+        fromPeer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "to_peer" field.</summary>
+    public const int ToPeerFieldNumber = 2;
+    private global::Botgram.Protocol.V1.PeerRef toPeer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef ToPeer {
+      get { return toPeer_; }
+      set {
+        toPeer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "message_ids" field.</summary>
+    public const int MessageIdsFieldNumber = 3;
+    private static readonly pb::FieldCodec<long> _repeated_messageIds_codec
+        = pb::FieldCodec.ForInt64(26);
+    private readonly pbc::RepeatedField<long> messageIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> MessageIds {
+      get { return messageIds_; }
+    }
+
+    /// <summary>Field number for the "random_ids" field.</summary>
+    public const int RandomIdsFieldNumber = 4;
+    private static readonly pb::FieldCodec<long> _repeated_randomIds_codec
+        = pb::FieldCodec.ForSFixed64(34);
+    private readonly pbc::RepeatedField<long> randomIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> RandomIds {
+      get { return randomIds_; }
+    }
+
+    /// <summary>Field number for the "silent" field.</summary>
+    public const int SilentFieldNumber = 5;
+    private bool silent_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Silent {
+      get { return silent_; }
+      set {
+        silent_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "drop_author" field.</summary>
+    public const int DropAuthorFieldNumber = 6;
+    private bool dropAuthor_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool DropAuthor {
+      get { return dropAuthor_; }
+      set {
+        dropAuthor_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ForwardMessagesRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ForwardMessagesRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(FromPeer, other.FromPeer)) return false;
+      if (!object.Equals(ToPeer, other.ToPeer)) return false;
+      if(!messageIds_.Equals(other.messageIds_)) return false;
+      if(!randomIds_.Equals(other.randomIds_)) return false;
+      if (Silent != other.Silent) return false;
+      if (DropAuthor != other.DropAuthor) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (fromPeer_ != null) hash ^= FromPeer.GetHashCode();
+      if (toPeer_ != null) hash ^= ToPeer.GetHashCode();
+      hash ^= messageIds_.GetHashCode();
+      hash ^= randomIds_.GetHashCode();
+      if (Silent != false) hash ^= Silent.GetHashCode();
+      if (DropAuthor != false) hash ^= DropAuthor.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (fromPeer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(FromPeer);
+      }
+      if (toPeer_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(ToPeer);
+      }
+      messageIds_.WriteTo(output, _repeated_messageIds_codec);
+      randomIds_.WriteTo(output, _repeated_randomIds_codec);
+      if (Silent != false) {
+        output.WriteRawTag(40);
+        output.WriteBool(Silent);
+      }
+      if (DropAuthor != false) {
+        output.WriteRawTag(48);
+        output.WriteBool(DropAuthor);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (fromPeer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(FromPeer);
+      }
+      if (toPeer_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(ToPeer);
+      }
+      messageIds_.WriteTo(ref output, _repeated_messageIds_codec);
+      randomIds_.WriteTo(ref output, _repeated_randomIds_codec);
+      if (Silent != false) {
+        output.WriteRawTag(40);
+        output.WriteBool(Silent);
+      }
+      if (DropAuthor != false) {
+        output.WriteRawTag(48);
+        output.WriteBool(DropAuthor);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (fromPeer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(FromPeer);
+      }
+      if (toPeer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ToPeer);
+      }
+      size += messageIds_.CalculateSize(_repeated_messageIds_codec);
+      size += randomIds_.CalculateSize(_repeated_randomIds_codec);
+      if (Silent != false) {
+        size += 1 + 1;
+      }
+      if (DropAuthor != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ForwardMessagesRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.fromPeer_ != null) {
+        if (fromPeer_ == null) {
+          FromPeer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        FromPeer.MergeFrom(other.FromPeer);
+      }
+      if (other.toPeer_ != null) {
+        if (toPeer_ == null) {
+          ToPeer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        ToPeer.MergeFrom(other.ToPeer);
+      }
+      messageIds_.Add(other.messageIds_);
+      randomIds_.Add(other.randomIds_);
+      if (other.Silent != false) {
+        Silent = other.Silent;
+      }
+      if (other.DropAuthor != false) {
+        DropAuthor = other.DropAuthor;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (fromPeer_ == null) {
+              FromPeer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(FromPeer);
+            break;
+          }
+          case 18: {
+            if (toPeer_ == null) {
+              ToPeer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(ToPeer);
+            break;
+          }
+          case 26:
+          case 24: {
+            messageIds_.AddEntriesFrom(input, _repeated_messageIds_codec);
+            break;
+          }
+          case 34:
+          case 33: {
+            randomIds_.AddEntriesFrom(input, _repeated_randomIds_codec);
+            break;
+          }
+          case 40: {
+            Silent = input.ReadBool();
+            break;
+          }
+          case 48: {
+            DropAuthor = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (fromPeer_ == null) {
+              FromPeer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(FromPeer);
+            break;
+          }
+          case 18: {
+            if (toPeer_ == null) {
+              ToPeer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(ToPeer);
+            break;
+          }
+          case 26:
+          case 24: {
+            messageIds_.AddEntriesFrom(ref input, _repeated_messageIds_codec);
+            break;
+          }
+          case 34:
+          case 33: {
+            randomIds_.AddEntriesFrom(ref input, _repeated_randomIds_codec);
+            break;
+          }
+          case 40: {
+            Silent = input.ReadBool();
+            break;
+          }
+          case 48: {
+            DropAuthor = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Transient: delivered as an expiring event, never replayed after expiry.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class SetTypingRequest : pb::IMessage<SetTypingRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SetTypingRequest> _parser = new pb::MessageParser<SetTypingRequest>(() => new SetTypingRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SetTypingRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[175]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SetTypingRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SetTypingRequest(SetTypingRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      action_ = other.action_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SetTypingRequest Clone() {
+      return new SetTypingRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "action" field.</summary>
+    public const int ActionFieldNumber = 2;
+    private global::Botgram.Protocol.V1.TypingAction action_ = global::Botgram.Protocol.V1.TypingAction.Unspecified;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.TypingAction Action {
+      get { return action_; }
+      set {
+        action_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SetTypingRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SetTypingRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (Action != other.Action) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) hash ^= Action.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) {
+        output.WriteRawTag(16);
+        output.WriteEnum((int) Action);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) {
+        output.WriteRawTag(16);
+        output.WriteEnum((int) Action);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Action);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SetTypingRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) {
+        Action = other.Action;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            Action = (global::Botgram.Protocol.V1.TypingAction) input.ReadEnum();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            Action = (global::Botgram.Protocol.V1.TypingAction) input.ReadEnum();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Server-side draft for one conversation; empty text clears the draft.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class DraftState : pb::IMessage<DraftState>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<DraftState> _parser = new pb::MessageParser<DraftState>(() => new DraftState());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<DraftState> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[176]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DraftState() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DraftState(DraftState other) : this() {
+      _hasBits0 = other._hasBits0;
+      text_ = other.text_;
+      entities_ = other.entities_.Clone();
+      replyToMessageId_ = other.replyToMessageId_;
+      updatedAtMs_ = other.updatedAtMs_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DraftState Clone() {
+      return new DraftState(this);
+    }
+
+    /// <summary>Field number for the "text" field.</summary>
+    public const int TextFieldNumber = 1;
+    private string text_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Text {
+      get { return text_; }
+      set {
+        text_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "entities" field.</summary>
+    public const int EntitiesFieldNumber = 2;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.MessageEntity> _repeated_entities_codec
+        = pb::FieldCodec.ForMessage(18, global::Botgram.Protocol.V1.MessageEntity.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> entities_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> Entities {
+      get { return entities_; }
+    }
+
+    /// <summary>Field number for the "reply_to_message_id" field.</summary>
+    public const int ReplyToMessageIdFieldNumber = 3;
+    private readonly static long ReplyToMessageIdDefaultValue = 0L;
+
+    private long replyToMessageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ReplyToMessageId {
+      get { if ((_hasBits0 & 1) != 0) { return replyToMessageId_; } else { return ReplyToMessageIdDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        replyToMessageId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "reply_to_message_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasReplyToMessageId {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "reply_to_message_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearReplyToMessageId() {
+      _hasBits0 &= ~1;
+    }
+
+    /// <summary>Field number for the "updated_at_ms" field.</summary>
+    public const int UpdatedAtMsFieldNumber = 4;
+    private long updatedAtMs_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long UpdatedAtMs {
+      get { return updatedAtMs_; }
+      set {
+        updatedAtMs_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as DraftState);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(DraftState other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Text != other.Text) return false;
+      if(!entities_.Equals(other.entities_)) return false;
+      if (ReplyToMessageId != other.ReplyToMessageId) return false;
+      if (UpdatedAtMs != other.UpdatedAtMs) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Text.Length != 0) hash ^= Text.GetHashCode();
+      hash ^= entities_.GetHashCode();
+      if (HasReplyToMessageId) hash ^= ReplyToMessageId.GetHashCode();
+      if (UpdatedAtMs != 0L) hash ^= UpdatedAtMs.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Text.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(Text);
+      }
+      entities_.WriteTo(output, _repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        output.WriteRawTag(24);
+        output.WriteInt64(ReplyToMessageId);
+      }
+      if (UpdatedAtMs != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(UpdatedAtMs);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Text.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(Text);
+      }
+      entities_.WriteTo(ref output, _repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        output.WriteRawTag(24);
+        output.WriteInt64(ReplyToMessageId);
+      }
+      if (UpdatedAtMs != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(UpdatedAtMs);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Text.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Text);
+      }
+      size += entities_.CalculateSize(_repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ReplyToMessageId);
+      }
+      if (UpdatedAtMs != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(UpdatedAtMs);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(DraftState other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Text.Length != 0) {
+        Text = other.Text;
+      }
+      entities_.Add(other.entities_);
+      if (other.HasReplyToMessageId) {
+        ReplyToMessageId = other.ReplyToMessageId;
+      }
+      if (other.UpdatedAtMs != 0L) {
+        UpdatedAtMs = other.UpdatedAtMs;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            Text = input.ReadString();
+            break;
+          }
+          case 18: {
+            entities_.AddEntriesFrom(input, _repeated_entities_codec);
+            break;
+          }
+          case 24: {
+            ReplyToMessageId = input.ReadInt64();
+            break;
+          }
+          case 32: {
+            UpdatedAtMs = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            Text = input.ReadString();
+            break;
+          }
+          case 18: {
+            entities_.AddEntriesFrom(ref input, _repeated_entities_codec);
+            break;
+          }
+          case 24: {
+            ReplyToMessageId = input.ReadInt64();
+            break;
+          }
+          case 32: {
+            UpdatedAtMs = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class SaveDraftRequest : pb::IMessage<SaveDraftRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SaveDraftRequest> _parser = new pb::MessageParser<SaveDraftRequest>(() => new SaveDraftRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SaveDraftRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[177]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SaveDraftRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SaveDraftRequest(SaveDraftRequest other) : this() {
+      _hasBits0 = other._hasBits0;
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      text_ = other.text_;
+      entities_ = other.entities_.Clone();
+      replyToMessageId_ = other.replyToMessageId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SaveDraftRequest Clone() {
+      return new SaveDraftRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "text" field.</summary>
+    public const int TextFieldNumber = 2;
+    private string text_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Text {
+      get { return text_; }
+      set {
+        text_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "entities" field.</summary>
+    public const int EntitiesFieldNumber = 3;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.MessageEntity> _repeated_entities_codec
+        = pb::FieldCodec.ForMessage(26, global::Botgram.Protocol.V1.MessageEntity.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> entities_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> Entities {
+      get { return entities_; }
+    }
+
+    /// <summary>Field number for the "reply_to_message_id" field.</summary>
+    public const int ReplyToMessageIdFieldNumber = 4;
+    private readonly static long ReplyToMessageIdDefaultValue = 0L;
+
+    private long replyToMessageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ReplyToMessageId {
+      get { if ((_hasBits0 & 1) != 0) { return replyToMessageId_; } else { return ReplyToMessageIdDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        replyToMessageId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "reply_to_message_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasReplyToMessageId {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "reply_to_message_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearReplyToMessageId() {
+      _hasBits0 &= ~1;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SaveDraftRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SaveDraftRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (Text != other.Text) return false;
+      if(!entities_.Equals(other.entities_)) return false;
+      if (ReplyToMessageId != other.ReplyToMessageId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (Text.Length != 0) hash ^= Text.GetHashCode();
+      hash ^= entities_.GetHashCode();
+      if (HasReplyToMessageId) hash ^= ReplyToMessageId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Text.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Text);
+      }
+      entities_.WriteTo(output, _repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        output.WriteRawTag(32);
+        output.WriteInt64(ReplyToMessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Text.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Text);
+      }
+      entities_.WriteTo(ref output, _repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        output.WriteRawTag(32);
+        output.WriteInt64(ReplyToMessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (Text.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Text);
+      }
+      size += entities_.CalculateSize(_repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ReplyToMessageId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SaveDraftRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.Text.Length != 0) {
+        Text = other.Text;
+      }
+      entities_.Add(other.entities_);
+      if (other.HasReplyToMessageId) {
+        ReplyToMessageId = other.ReplyToMessageId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            Text = input.ReadString();
+            break;
+          }
+          case 26: {
+            entities_.AddEntriesFrom(input, _repeated_entities_codec);
+            break;
+          }
+          case 32: {
+            ReplyToMessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            Text = input.ReadString();
+            break;
+          }
+          case 26: {
+            entities_.AddEntriesFrom(ref input, _repeated_entities_codec);
+            break;
+          }
+          case 32: {
+            ReplyToMessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ClearAllDraftsRequest : pb::IMessage<ClearAllDraftsRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ClearAllDraftsRequest> _parser = new pb::MessageParser<ClearAllDraftsRequest>(() => new ClearAllDraftsRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ClearAllDraftsRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[178]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ClearAllDraftsRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ClearAllDraftsRequest(ClearAllDraftsRequest other) : this() {
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ClearAllDraftsRequest Clone() {
+      return new ClearAllDraftsRequest(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ClearAllDraftsRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ClearAllDraftsRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ClearAllDraftsRequest other) {
+      if (other == null) {
+        return;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class GetAllDraftsRequest : pb::IMessage<GetAllDraftsRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GetAllDraftsRequest> _parser = new pb::MessageParser<GetAllDraftsRequest>(() => new GetAllDraftsRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<GetAllDraftsRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[179]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetAllDraftsRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetAllDraftsRequest(GetAllDraftsRequest other) : this() {
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetAllDraftsRequest Clone() {
+      return new GetAllDraftsRequest(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as GetAllDraftsRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(GetAllDraftsRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(GetAllDraftsRequest other) {
+      if (other == null) {
+        return;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class UpdatePinnedMessageRequest : pb::IMessage<UpdatePinnedMessageRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<UpdatePinnedMessageRequest> _parser = new pb::MessageParser<UpdatePinnedMessageRequest>(() => new UpdatePinnedMessageRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<UpdatePinnedMessageRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[180]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UpdatePinnedMessageRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UpdatePinnedMessageRequest(UpdatePinnedMessageRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      messageId_ = other.messageId_;
+      unpin_ = other.unpin_;
+      silent_ = other.silent_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UpdatePinnedMessageRequest Clone() {
+      return new UpdatePinnedMessageRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "message_id" field.</summary>
+    public const int MessageIdFieldNumber = 2;
+    private long messageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MessageId {
+      get { return messageId_; }
+      set {
+        messageId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "unpin" field.</summary>
+    public const int UnpinFieldNumber = 3;
+    private bool unpin_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Unpin {
+      get { return unpin_; }
+      set {
+        unpin_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "silent" field.</summary>
+    public const int SilentFieldNumber = 4;
+    private bool silent_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Silent {
+      get { return silent_; }
+      set {
+        silent_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as UpdatePinnedMessageRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(UpdatePinnedMessageRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (MessageId != other.MessageId) return false;
+      if (Unpin != other.Unpin) return false;
+      if (Silent != other.Silent) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (MessageId != 0L) hash ^= MessageId.GetHashCode();
+      if (Unpin != false) hash ^= Unpin.GetHashCode();
+      if (Silent != false) hash ^= Silent.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MessageId);
+      }
+      if (Unpin != false) {
+        output.WriteRawTag(24);
+        output.WriteBool(Unpin);
+      }
+      if (Silent != false) {
+        output.WriteRawTag(32);
+        output.WriteBool(Silent);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MessageId);
+      }
+      if (Unpin != false) {
+        output.WriteRawTag(24);
+        output.WriteBool(Unpin);
+      }
+      if (Silent != false) {
+        output.WriteRawTag(32);
+        output.WriteBool(Silent);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (MessageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MessageId);
+      }
+      if (Unpin != false) {
+        size += 1 + 1;
+      }
+      if (Silent != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(UpdatePinnedMessageRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.MessageId != 0L) {
+        MessageId = other.MessageId;
+      }
+      if (other.Unpin != false) {
+        Unpin = other.Unpin;
+      }
+      if (other.Silent != false) {
+        Silent = other.Silent;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MessageId = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            Unpin = input.ReadBool();
+            break;
+          }
+          case 32: {
+            Silent = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MessageId = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            Unpin = input.ReadBool();
+            break;
+          }
+          case 32: {
+            Silent = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class UnpinAllMessagesRequest : pb::IMessage<UnpinAllMessagesRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<UnpinAllMessagesRequest> _parser = new pb::MessageParser<UnpinAllMessagesRequest>(() => new UnpinAllMessagesRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<UnpinAllMessagesRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[181]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UnpinAllMessagesRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UnpinAllMessagesRequest(UnpinAllMessagesRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UnpinAllMessagesRequest Clone() {
+      return new UnpinAllMessagesRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as UnpinAllMessagesRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(UnpinAllMessagesRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(UnpinAllMessagesRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ToggleDialogPinRequest : pb::IMessage<ToggleDialogPinRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ToggleDialogPinRequest> _parser = new pb::MessageParser<ToggleDialogPinRequest>(() => new ToggleDialogPinRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ToggleDialogPinRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[182]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ToggleDialogPinRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ToggleDialogPinRequest(ToggleDialogPinRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      pinned_ = other.pinned_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ToggleDialogPinRequest Clone() {
+      return new ToggleDialogPinRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pinned" field.</summary>
+    public const int PinnedFieldNumber = 2;
+    private bool pinned_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Pinned {
+      get { return pinned_; }
+      set {
+        pinned_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ToggleDialogPinRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ToggleDialogPinRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (Pinned != other.Pinned) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (Pinned != false) hash ^= Pinned.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Pinned != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(Pinned);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Pinned != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(Pinned);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (Pinned != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ToggleDialogPinRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.Pinned != false) {
+        Pinned = other.Pinned;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            Pinned = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            Pinned = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ReorderPinnedDialogsRequest : pb::IMessage<ReorderPinnedDialogsRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ReorderPinnedDialogsRequest> _parser = new pb::MessageParser<ReorderPinnedDialogsRequest>(() => new ReorderPinnedDialogsRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ReorderPinnedDialogsRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[183]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReorderPinnedDialogsRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReorderPinnedDialogsRequest(ReorderPinnedDialogsRequest other) : this() {
+      order_ = other.order_.Clone();
+      force_ = other.force_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReorderPinnedDialogsRequest Clone() {
+      return new ReorderPinnedDialogsRequest(this);
+    }
+
+    /// <summary>Field number for the "order" field.</summary>
+    public const int OrderFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.PeerRef> _repeated_order_codec
+        = pb::FieldCodec.ForMessage(10, global::Botgram.Protocol.V1.PeerRef.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.PeerRef> order_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.PeerRef>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.PeerRef> Order {
+      get { return order_; }
+    }
+
+    /// <summary>Field number for the "force" field.</summary>
+    public const int ForceFieldNumber = 2;
+    private bool force_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Force {
+      get { return force_; }
+      set {
+        force_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ReorderPinnedDialogsRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ReorderPinnedDialogsRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!order_.Equals(other.order_)) return false;
+      if (Force != other.Force) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= order_.GetHashCode();
+      if (Force != false) hash ^= Force.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      order_.WriteTo(output, _repeated_order_codec);
+      if (Force != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(Force);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      order_.WriteTo(ref output, _repeated_order_codec);
+      if (Force != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(Force);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += order_.CalculateSize(_repeated_order_codec);
+      if (Force != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ReorderPinnedDialogsRequest other) {
+      if (other == null) {
+        return;
+      }
+      order_.Add(other.order_);
+      if (other.Force != false) {
+        Force = other.Force;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            order_.AddEntriesFrom(input, _repeated_order_codec);
+            break;
+          }
+          case 16: {
+            Force = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            order_.AddEntriesFrom(ref input, _repeated_order_codec);
+            break;
+          }
+          case 16: {
+            Force = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MarkDialogUnreadRequest : pb::IMessage<MarkDialogUnreadRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MarkDialogUnreadRequest> _parser = new pb::MessageParser<MarkDialogUnreadRequest>(() => new MarkDialogUnreadRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MarkDialogUnreadRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[184]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MarkDialogUnreadRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MarkDialogUnreadRequest(MarkDialogUnreadRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      unread_ = other.unread_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MarkDialogUnreadRequest Clone() {
+      return new MarkDialogUnreadRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "unread" field.</summary>
+    public const int UnreadFieldNumber = 2;
+    private bool unread_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Unread {
+      get { return unread_; }
+      set {
+        unread_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MarkDialogUnreadRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MarkDialogUnreadRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (Unread != other.Unread) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (Unread != false) hash ^= Unread.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Unread != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(Unread);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Unread != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(Unread);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (Unread != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MarkDialogUnreadRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.Unread != false) {
+        Unread = other.Unread;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            Unread = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            Unread = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class GetDialogUnreadMarksRequest : pb::IMessage<GetDialogUnreadMarksRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GetDialogUnreadMarksRequest> _parser = new pb::MessageParser<GetDialogUnreadMarksRequest>(() => new GetDialogUnreadMarksRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<GetDialogUnreadMarksRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[185]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetDialogUnreadMarksRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetDialogUnreadMarksRequest(GetDialogUnreadMarksRequest other) : this() {
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetDialogUnreadMarksRequest Clone() {
+      return new GetDialogUnreadMarksRequest(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as GetDialogUnreadMarksRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(GetDialogUnreadMarksRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(GetDialogUnreadMarksRequest other) {
+      if (other == null) {
+        return;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class PeerList : pb::IMessage<PeerList>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<PeerList> _parser = new pb::MessageParser<PeerList>(() => new PeerList());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<PeerList> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[186]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public PeerList() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public PeerList(PeerList other) : this() {
+      peers_ = other.peers_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public PeerList Clone() {
+      return new PeerList(this);
+    }
+
+    /// <summary>Field number for the "peers" field.</summary>
+    public const int PeersFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.PeerRef> _repeated_peers_codec
+        = pb::FieldCodec.ForMessage(10, global::Botgram.Protocol.V1.PeerRef.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.PeerRef> peers_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.PeerRef>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.PeerRef> Peers {
+      get { return peers_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as PeerList);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(PeerList other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!peers_.Equals(other.peers_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= peers_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      peers_.WriteTo(output, _repeated_peers_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      peers_.WriteTo(ref output, _repeated_peers_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += peers_.CalculateSize(_repeated_peers_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(PeerList other) {
+      if (other == null) {
+        return;
+      }
+      peers_.Add(other.peers_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            peers_.AddEntriesFrom(input, _repeated_peers_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            peers_.AddEntriesFrom(ref input, _repeated_peers_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ReadMessageContentsRequest : pb::IMessage<ReadMessageContentsRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ReadMessageContentsRequest> _parser = new pb::MessageParser<ReadMessageContentsRequest>(() => new ReadMessageContentsRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ReadMessageContentsRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[187]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReadMessageContentsRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReadMessageContentsRequest(ReadMessageContentsRequest other) : this() {
+      messageIds_ = other.messageIds_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReadMessageContentsRequest Clone() {
+      return new ReadMessageContentsRequest(this);
+    }
+
+    /// <summary>Field number for the "message_ids" field.</summary>
+    public const int MessageIdsFieldNumber = 1;
+    private static readonly pb::FieldCodec<long> _repeated_messageIds_codec
+        = pb::FieldCodec.ForInt64(10);
+    private readonly pbc::RepeatedField<long> messageIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> MessageIds {
+      get { return messageIds_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ReadMessageContentsRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ReadMessageContentsRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!messageIds_.Equals(other.messageIds_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= messageIds_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      messageIds_.WriteTo(output, _repeated_messageIds_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      messageIds_.WriteTo(ref output, _repeated_messageIds_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += messageIds_.CalculateSize(_repeated_messageIds_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ReadMessageContentsRequest other) {
+      if (other == null) {
+        return;
+      }
+      messageIds_.Add(other.messageIds_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10:
+          case 8: {
+            messageIds_.AddEntriesFrom(input, _repeated_messageIds_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10:
+          case 8: {
+            messageIds_.AddEntriesFrom(ref input, _repeated_messageIds_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class GetOnlinesRequest : pb::IMessage<GetOnlinesRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GetOnlinesRequest> _parser = new pb::MessageParser<GetOnlinesRequest>(() => new GetOnlinesRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<GetOnlinesRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[188]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetOnlinesRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetOnlinesRequest(GetOnlinesRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetOnlinesRequest Clone() {
+      return new GetOnlinesRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as GetOnlinesRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(GetOnlinesRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(GetOnlinesRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ChatOnlines : pb::IMessage<ChatOnlines>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ChatOnlines> _parser = new pb::MessageParser<ChatOnlines>(() => new ChatOnlines());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ChatOnlines> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[189]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ChatOnlines() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ChatOnlines(ChatOnlines other) : this() {
+      onlines_ = other.onlines_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ChatOnlines Clone() {
+      return new ChatOnlines(this);
+    }
+
+    /// <summary>Field number for the "onlines" field.</summary>
+    public const int OnlinesFieldNumber = 1;
+    private int onlines_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Onlines {
+      get { return onlines_; }
+      set {
+        onlines_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ChatOnlines);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ChatOnlines other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Onlines != other.Onlines) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Onlines != 0) hash ^= Onlines.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Onlines != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Onlines);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Onlines != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Onlines);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Onlines != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Onlines);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ChatOnlines other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Onlines != 0) {
+        Onlines = other.Onlines;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Onlines = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Onlines = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class GetCommonChatsRequest : pb::IMessage<GetCommonChatsRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GetCommonChatsRequest> _parser = new pb::MessageParser<GetCommonChatsRequest>(() => new GetCommonChatsRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<GetCommonChatsRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[190]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetCommonChatsRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetCommonChatsRequest(GetCommonChatsRequest other) : this() {
+      user_ = other.user_ != null ? other.user_.Clone() : null;
+      maxChatId_ = other.maxChatId_;
+      limit_ = other.limit_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetCommonChatsRequest Clone() {
+      return new GetCommonChatsRequest(this);
+    }
+
+    /// <summary>Field number for the "user" field.</summary>
+    public const int UserFieldNumber = 1;
+    private global::Botgram.Protocol.V1.UserSelector user_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.UserSelector User {
+      get { return user_; }
+      set {
+        user_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "max_chat_id" field.</summary>
+    public const int MaxChatIdFieldNumber = 2;
+    private long maxChatId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MaxChatId {
+      get { return maxChatId_; }
+      set {
+        maxChatId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "limit" field.</summary>
+    public const int LimitFieldNumber = 3;
+    private int limit_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Limit {
+      get { return limit_; }
+      set {
+        limit_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as GetCommonChatsRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(GetCommonChatsRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(User, other.User)) return false;
+      if (MaxChatId != other.MaxChatId) return false;
+      if (Limit != other.Limit) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (user_ != null) hash ^= User.GetHashCode();
+      if (MaxChatId != 0L) hash ^= MaxChatId.GetHashCode();
+      if (Limit != 0) hash ^= Limit.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (user_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(User);
+      }
+      if (MaxChatId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MaxChatId);
+      }
+      if (Limit != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Limit);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (user_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(User);
+      }
+      if (MaxChatId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MaxChatId);
+      }
+      if (Limit != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Limit);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (user_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(User);
+      }
+      if (MaxChatId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MaxChatId);
+      }
+      if (Limit != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Limit);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(GetCommonChatsRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.user_ != null) {
+        if (user_ == null) {
+          User = new global::Botgram.Protocol.V1.UserSelector();
+        }
+        User.MergeFrom(other.User);
+      }
+      if (other.MaxChatId != 0L) {
+        MaxChatId = other.MaxChatId;
+      }
+      if (other.Limit != 0) {
+        Limit = other.Limit;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (user_ == null) {
+              User = new global::Botgram.Protocol.V1.UserSelector();
+            }
+            input.ReadMessage(User);
+            break;
+          }
+          case 16: {
+            MaxChatId = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            Limit = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (user_ == null) {
+              User = new global::Botgram.Protocol.V1.UserSelector();
+            }
+            input.ReadMessage(User);
+            break;
+          }
+          case 16: {
+            MaxChatId = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            Limit = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class HidePeerSettingsBarRequest : pb::IMessage<HidePeerSettingsBarRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<HidePeerSettingsBarRequest> _parser = new pb::MessageParser<HidePeerSettingsBarRequest>(() => new HidePeerSettingsBarRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<HidePeerSettingsBarRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[191]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public HidePeerSettingsBarRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public HidePeerSettingsBarRequest(HidePeerSettingsBarRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public HidePeerSettingsBarRequest Clone() {
+      return new HidePeerSettingsBarRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as HidePeerSettingsBarRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(HidePeerSettingsBarRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(HidePeerSettingsBarRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ReportSpamRequest : pb::IMessage<ReportSpamRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ReportSpamRequest> _parser = new pb::MessageParser<ReportSpamRequest>(() => new ReportSpamRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ReportSpamRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[192]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReportSpamRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReportSpamRequest(ReportSpamRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ReportSpamRequest Clone() {
+      return new ReportSpamRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ReportSpamRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ReportSpamRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ReportSpamRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class GetMessagesViewsRequest : pb::IMessage<GetMessagesViewsRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GetMessagesViewsRequest> _parser = new pb::MessageParser<GetMessagesViewsRequest>(() => new GetMessagesViewsRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<GetMessagesViewsRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[193]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetMessagesViewsRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetMessagesViewsRequest(GetMessagesViewsRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      messageIds_ = other.messageIds_.Clone();
+      increment_ = other.increment_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetMessagesViewsRequest Clone() {
+      return new GetMessagesViewsRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "message_ids" field.</summary>
+    public const int MessageIdsFieldNumber = 2;
+    private static readonly pb::FieldCodec<long> _repeated_messageIds_codec
+        = pb::FieldCodec.ForInt64(18);
+    private readonly pbc::RepeatedField<long> messageIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> MessageIds {
+      get { return messageIds_; }
+    }
+
+    /// <summary>Field number for the "increment" field.</summary>
+    public const int IncrementFieldNumber = 3;
+    private bool increment_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Increment {
+      get { return increment_; }
+      set {
+        increment_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as GetMessagesViewsRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(GetMessagesViewsRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if(!messageIds_.Equals(other.messageIds_)) return false;
+      if (Increment != other.Increment) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      hash ^= messageIds_.GetHashCode();
+      if (Increment != false) hash ^= Increment.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      messageIds_.WriteTo(output, _repeated_messageIds_codec);
+      if (Increment != false) {
+        output.WriteRawTag(24);
+        output.WriteBool(Increment);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      messageIds_.WriteTo(ref output, _repeated_messageIds_codec);
+      if (Increment != false) {
+        output.WriteRawTag(24);
+        output.WriteBool(Increment);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      size += messageIds_.CalculateSize(_repeated_messageIds_codec);
+      if (Increment != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(GetMessagesViewsRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      messageIds_.Add(other.messageIds_);
+      if (other.Increment != false) {
+        Increment = other.Increment;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18:
+          case 16: {
+            messageIds_.AddEntriesFrom(input, _repeated_messageIds_codec);
+            break;
+          }
+          case 24: {
+            Increment = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18:
+          case 16: {
+            messageIds_.AddEntriesFrom(ref input, _repeated_messageIds_codec);
+            break;
+          }
+          case 24: {
+            Increment = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Views parallel to the requested message ids; 0 for messages without viewers.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MessageViewsList : pb::IMessage<MessageViewsList>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MessageViewsList> _parser = new pb::MessageParser<MessageViewsList>(() => new MessageViewsList());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MessageViewsList> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[194]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessageViewsList() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessageViewsList(MessageViewsList other) : this() {
+      views_ = other.views_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessageViewsList Clone() {
+      return new MessageViewsList(this);
+    }
+
+    /// <summary>Field number for the "views" field.</summary>
+    public const int ViewsFieldNumber = 1;
+    private static readonly pb::FieldCodec<int> _repeated_views_codec
+        = pb::FieldCodec.ForInt32(10);
+    private readonly pbc::RepeatedField<int> views_ = new pbc::RepeatedField<int>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<int> Views {
+      get { return views_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MessageViewsList);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MessageViewsList other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!views_.Equals(other.views_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= views_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      views_.WriteTo(output, _repeated_views_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      views_.WriteTo(ref output, _repeated_views_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += views_.CalculateSize(_repeated_views_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MessageViewsList other) {
+      if (other == null) {
+        return;
+      }
+      views_.Add(other.views_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10:
+          case 8: {
+            views_.AddEntriesFrom(input, _repeated_views_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10:
+          case 8: {
+            views_.AddEntriesFrom(ref input, _repeated_views_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class GetOutboxReadDateRequest : pb::IMessage<GetOutboxReadDateRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GetOutboxReadDateRequest> _parser = new pb::MessageParser<GetOutboxReadDateRequest>(() => new GetOutboxReadDateRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<GetOutboxReadDateRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[195]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetOutboxReadDateRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetOutboxReadDateRequest(GetOutboxReadDateRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      messageId_ = other.messageId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetOutboxReadDateRequest Clone() {
+      return new GetOutboxReadDateRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "message_id" field.</summary>
+    public const int MessageIdFieldNumber = 2;
+    private long messageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MessageId {
+      get { return messageId_; }
+      set {
+        messageId_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as GetOutboxReadDateRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(GetOutboxReadDateRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (MessageId != other.MessageId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (MessageId != 0L) hash ^= MessageId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (MessageId != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (MessageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MessageId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(GetOutboxReadDateRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.MessageId != 0L) {
+        MessageId = other.MessageId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 16: {
+            MessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class OutboxReadDate : pb::IMessage<OutboxReadDate>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<OutboxReadDate> _parser = new pb::MessageParser<OutboxReadDate>(() => new OutboxReadDate());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<OutboxReadDate> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[196]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public OutboxReadDate() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public OutboxReadDate(OutboxReadDate other) : this() {
+      dateMs_ = other.dateMs_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public OutboxReadDate Clone() {
+      return new OutboxReadDate(this);
+    }
+
+    /// <summary>Field number for the "date_ms" field.</summary>
+    public const int DateMsFieldNumber = 1;
+    private long dateMs_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long DateMs {
+      get { return dateMs_; }
+      set {
+        dateMs_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as OutboxReadDate);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(OutboxReadDate other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (DateMs != other.DateMs) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (DateMs != 0L) hash ^= DateMs.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (DateMs != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(DateMs);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (DateMs != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(DateMs);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (DateMs != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(DateMs);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(OutboxReadDate other) {
+      if (other == null) {
+        return;
+      }
+      if (other.DateMs != 0L) {
+        DateMs = other.DateMs;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            DateMs = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            DateMs = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Conversation-scoped text search. Only EMPTY and PINNED filters are accepted;
+  /// media filters are explicitly unsupported until media storage exists.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class SearchRequest : pb::IMessage<SearchRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SearchRequest> _parser = new pb::MessageParser<SearchRequest>(() => new SearchRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SearchRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[197]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchRequest(SearchRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      query_ = other.query_;
+      filter_ = other.filter_;
+      fromUser_ = other.fromUser_ != null ? other.fromUser_.Clone() : null;
+      minDateMs_ = other.minDateMs_;
+      maxDateMs_ = other.maxDateMs_;
+      offsetMessageId_ = other.offsetMessageId_;
+      addOffset_ = other.addOffset_;
+      limit_ = other.limit_;
+      maxMessageId_ = other.maxMessageId_;
+      minMessageId_ = other.minMessageId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchRequest Clone() {
+      return new SearchRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "query" field.</summary>
+    public const int QueryFieldNumber = 2;
+    private string query_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Query {
+      get { return query_; }
+      set {
+        query_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "filter" field.</summary>
+    public const int FilterFieldNumber = 3;
+    private global::Botgram.Protocol.V1.SearchFilter filter_ = global::Botgram.Protocol.V1.SearchFilter.Unspecified;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.SearchFilter Filter {
+      get { return filter_; }
+      set {
+        filter_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "from_user" field.</summary>
+    public const int FromUserFieldNumber = 4;
+    private global::Botgram.Protocol.V1.UserSelector fromUser_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.UserSelector FromUser {
+      get { return fromUser_; }
+      set {
+        fromUser_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "min_date_ms" field.</summary>
+    public const int MinDateMsFieldNumber = 5;
+    private long minDateMs_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MinDateMs {
+      get { return minDateMs_; }
+      set {
+        minDateMs_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "max_date_ms" field.</summary>
+    public const int MaxDateMsFieldNumber = 6;
+    private long maxDateMs_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MaxDateMs {
+      get { return maxDateMs_; }
+      set {
+        maxDateMs_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "offset_message_id" field.</summary>
+    public const int OffsetMessageIdFieldNumber = 7;
+    private long offsetMessageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long OffsetMessageId {
+      get { return offsetMessageId_; }
+      set {
+        offsetMessageId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "add_offset" field.</summary>
+    public const int AddOffsetFieldNumber = 8;
+    private int addOffset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int AddOffset {
+      get { return addOffset_; }
+      set {
+        addOffset_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "limit" field.</summary>
+    public const int LimitFieldNumber = 9;
+    private int limit_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Limit {
+      get { return limit_; }
+      set {
+        limit_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "max_message_id" field.</summary>
+    public const int MaxMessageIdFieldNumber = 10;
+    private long maxMessageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MaxMessageId {
+      get { return maxMessageId_; }
+      set {
+        maxMessageId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "min_message_id" field.</summary>
+    public const int MinMessageIdFieldNumber = 11;
+    private long minMessageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MinMessageId {
+      get { return minMessageId_; }
+      set {
+        minMessageId_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SearchRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SearchRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (Query != other.Query) return false;
+      if (Filter != other.Filter) return false;
+      if (!object.Equals(FromUser, other.FromUser)) return false;
+      if (MinDateMs != other.MinDateMs) return false;
+      if (MaxDateMs != other.MaxDateMs) return false;
+      if (OffsetMessageId != other.OffsetMessageId) return false;
+      if (AddOffset != other.AddOffset) return false;
+      if (Limit != other.Limit) return false;
+      if (MaxMessageId != other.MaxMessageId) return false;
+      if (MinMessageId != other.MinMessageId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (Query.Length != 0) hash ^= Query.GetHashCode();
+      if (Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) hash ^= Filter.GetHashCode();
+      if (fromUser_ != null) hash ^= FromUser.GetHashCode();
+      if (MinDateMs != 0L) hash ^= MinDateMs.GetHashCode();
+      if (MaxDateMs != 0L) hash ^= MaxDateMs.GetHashCode();
+      if (OffsetMessageId != 0L) hash ^= OffsetMessageId.GetHashCode();
+      if (AddOffset != 0) hash ^= AddOffset.GetHashCode();
+      if (Limit != 0) hash ^= Limit.GetHashCode();
+      if (MaxMessageId != 0L) hash ^= MaxMessageId.GetHashCode();
+      if (MinMessageId != 0L) hash ^= MinMessageId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Query.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Query);
+      }
+      if (Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) Filter);
+      }
+      if (fromUser_ != null) {
+        output.WriteRawTag(34);
+        output.WriteMessage(FromUser);
+      }
+      if (MinDateMs != 0L) {
+        output.WriteRawTag(40);
+        output.WriteInt64(MinDateMs);
+      }
+      if (MaxDateMs != 0L) {
+        output.WriteRawTag(48);
+        output.WriteInt64(MaxDateMs);
+      }
+      if (OffsetMessageId != 0L) {
+        output.WriteRawTag(56);
+        output.WriteInt64(OffsetMessageId);
+      }
+      if (AddOffset != 0) {
+        output.WriteRawTag(64);
+        output.WriteInt32(AddOffset);
+      }
+      if (Limit != 0) {
+        output.WriteRawTag(72);
+        output.WriteInt32(Limit);
+      }
+      if (MaxMessageId != 0L) {
+        output.WriteRawTag(80);
+        output.WriteInt64(MaxMessageId);
+      }
+      if (MinMessageId != 0L) {
+        output.WriteRawTag(88);
+        output.WriteInt64(MinMessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (Query.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Query);
+      }
+      if (Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) Filter);
+      }
+      if (fromUser_ != null) {
+        output.WriteRawTag(34);
+        output.WriteMessage(FromUser);
+      }
+      if (MinDateMs != 0L) {
+        output.WriteRawTag(40);
+        output.WriteInt64(MinDateMs);
+      }
+      if (MaxDateMs != 0L) {
+        output.WriteRawTag(48);
+        output.WriteInt64(MaxDateMs);
+      }
+      if (OffsetMessageId != 0L) {
+        output.WriteRawTag(56);
+        output.WriteInt64(OffsetMessageId);
+      }
+      if (AddOffset != 0) {
+        output.WriteRawTag(64);
+        output.WriteInt32(AddOffset);
+      }
+      if (Limit != 0) {
+        output.WriteRawTag(72);
+        output.WriteInt32(Limit);
+      }
+      if (MaxMessageId != 0L) {
+        output.WriteRawTag(80);
+        output.WriteInt64(MaxMessageId);
+      }
+      if (MinMessageId != 0L) {
+        output.WriteRawTag(88);
+        output.WriteInt64(MinMessageId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (Query.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Query);
+      }
+      if (Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Filter);
+      }
+      if (fromUser_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(FromUser);
+      }
+      if (MinDateMs != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MinDateMs);
+      }
+      if (MaxDateMs != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MaxDateMs);
+      }
+      if (OffsetMessageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(OffsetMessageId);
+      }
+      if (AddOffset != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(AddOffset);
+      }
+      if (Limit != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Limit);
+      }
+      if (MaxMessageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MaxMessageId);
+      }
+      if (MinMessageId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MinMessageId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SearchRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.Query.Length != 0) {
+        Query = other.Query;
+      }
+      if (other.Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) {
+        Filter = other.Filter;
+      }
+      if (other.fromUser_ != null) {
+        if (fromUser_ == null) {
+          FromUser = new global::Botgram.Protocol.V1.UserSelector();
+        }
+        FromUser.MergeFrom(other.FromUser);
+      }
+      if (other.MinDateMs != 0L) {
+        MinDateMs = other.MinDateMs;
+      }
+      if (other.MaxDateMs != 0L) {
+        MaxDateMs = other.MaxDateMs;
+      }
+      if (other.OffsetMessageId != 0L) {
+        OffsetMessageId = other.OffsetMessageId;
+      }
+      if (other.AddOffset != 0) {
+        AddOffset = other.AddOffset;
+      }
+      if (other.Limit != 0) {
+        Limit = other.Limit;
+      }
+      if (other.MaxMessageId != 0L) {
+        MaxMessageId = other.MaxMessageId;
+      }
+      if (other.MinMessageId != 0L) {
+        MinMessageId = other.MinMessageId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            Query = input.ReadString();
+            break;
+          }
+          case 24: {
+            Filter = (global::Botgram.Protocol.V1.SearchFilter) input.ReadEnum();
+            break;
+          }
+          case 34: {
+            if (fromUser_ == null) {
+              FromUser = new global::Botgram.Protocol.V1.UserSelector();
+            }
+            input.ReadMessage(FromUser);
+            break;
+          }
+          case 40: {
+            MinDateMs = input.ReadInt64();
+            break;
+          }
+          case 48: {
+            MaxDateMs = input.ReadInt64();
+            break;
+          }
+          case 56: {
+            OffsetMessageId = input.ReadInt64();
+            break;
+          }
+          case 64: {
+            AddOffset = input.ReadInt32();
+            break;
+          }
+          case 72: {
+            Limit = input.ReadInt32();
+            break;
+          }
+          case 80: {
+            MaxMessageId = input.ReadInt64();
+            break;
+          }
+          case 88: {
+            MinMessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            Query = input.ReadString();
+            break;
+          }
+          case 24: {
+            Filter = (global::Botgram.Protocol.V1.SearchFilter) input.ReadEnum();
+            break;
+          }
+          case 34: {
+            if (fromUser_ == null) {
+              FromUser = new global::Botgram.Protocol.V1.UserSelector();
+            }
+            input.ReadMessage(FromUser);
+            break;
+          }
+          case 40: {
+            MinDateMs = input.ReadInt64();
+            break;
+          }
+          case 48: {
+            MaxDateMs = input.ReadInt64();
+            break;
+          }
+          case 56: {
+            OffsetMessageId = input.ReadInt64();
+            break;
+          }
+          case 64: {
+            AddOffset = input.ReadInt32();
+            break;
+          }
+          case 72: {
+            Limit = input.ReadInt32();
+            break;
+          }
+          case 80: {
+            MaxMessageId = input.ReadInt64();
+            break;
+          }
+          case 88: {
+            MinMessageId = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class SearchPage : pb::IMessage<SearchPage>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SearchPage> _parser = new pb::MessageParser<SearchPage>(() => new SearchPage());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SearchPage> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[198]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchPage() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchPage(SearchPage other) : this() {
+      messages_ = other.messages_.Clone();
+      users_ = other.users_.Clone();
+      groups_ = other.groups_.Clone();
+      count_ = other.count_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchPage Clone() {
+      return new SearchPage(this);
+    }
+
+    /// <summary>Field number for the "messages" field.</summary>
+    public const int MessagesFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.Message> _repeated_messages_codec
+        = pb::FieldCodec.ForMessage(10, global::Botgram.Protocol.V1.Message.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.Message> messages_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.Message>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.Message> Messages {
+      get { return messages_; }
+    }
+
+    /// <summary>Field number for the "users" field.</summary>
+    public const int UsersFieldNumber = 2;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.UserSummary> _repeated_users_codec
+        = pb::FieldCodec.ForMessage(18, global::Botgram.Protocol.V1.UserSummary.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.UserSummary> users_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.UserSummary>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.UserSummary> Users {
+      get { return users_; }
+    }
+
+    /// <summary>Field number for the "groups" field.</summary>
+    public const int GroupsFieldNumber = 3;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.GroupSummary> _repeated_groups_codec
+        = pb::FieldCodec.ForMessage(26, global::Botgram.Protocol.V1.GroupSummary.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.GroupSummary> groups_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.GroupSummary>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.GroupSummary> Groups {
+      get { return groups_; }
+    }
+
+    /// <summary>Field number for the "count" field.</summary>
+    public const int CountFieldNumber = 4;
+    private int count_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Count {
+      get { return count_; }
+      set {
+        count_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SearchPage);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SearchPage other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!messages_.Equals(other.messages_)) return false;
+      if(!users_.Equals(other.users_)) return false;
+      if(!groups_.Equals(other.groups_)) return false;
+      if (Count != other.Count) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= messages_.GetHashCode();
+      hash ^= users_.GetHashCode();
+      hash ^= groups_.GetHashCode();
+      if (Count != 0) hash ^= Count.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      messages_.WriteTo(output, _repeated_messages_codec);
+      users_.WriteTo(output, _repeated_users_codec);
+      groups_.WriteTo(output, _repeated_groups_codec);
+      if (Count != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Count);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      messages_.WriteTo(ref output, _repeated_messages_codec);
+      users_.WriteTo(ref output, _repeated_users_codec);
+      groups_.WriteTo(ref output, _repeated_groups_codec);
+      if (Count != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Count);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += messages_.CalculateSize(_repeated_messages_codec);
+      size += users_.CalculateSize(_repeated_users_codec);
+      size += groups_.CalculateSize(_repeated_groups_codec);
+      if (Count != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Count);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SearchPage other) {
+      if (other == null) {
+        return;
+      }
+      messages_.Add(other.messages_);
+      users_.Add(other.users_);
+      groups_.Add(other.groups_);
+      if (other.Count != 0) {
+        Count = other.Count;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            messages_.AddEntriesFrom(input, _repeated_messages_codec);
+            break;
+          }
+          case 18: {
+            users_.AddEntriesFrom(input, _repeated_users_codec);
+            break;
+          }
+          case 26: {
+            groups_.AddEntriesFrom(input, _repeated_groups_codec);
+            break;
+          }
+          case 32: {
+            Count = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            messages_.AddEntriesFrom(ref input, _repeated_messages_codec);
+            break;
+          }
+          case 18: {
+            users_.AddEntriesFrom(ref input, _repeated_users_codec);
+            break;
+          }
+          case 26: {
+            groups_.AddEntriesFrom(ref input, _repeated_groups_codec);
+            break;
+          }
+          case 32: {
+            Count = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class GetSearchCountersRequest : pb::IMessage<GetSearchCountersRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GetSearchCountersRequest> _parser = new pb::MessageParser<GetSearchCountersRequest>(() => new GetSearchCountersRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<GetSearchCountersRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[199]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetSearchCountersRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetSearchCountersRequest(GetSearchCountersRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      filters_ = other.filters_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetSearchCountersRequest Clone() {
+      return new GetSearchCountersRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "filters" field.</summary>
+    public const int FiltersFieldNumber = 2;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.SearchFilter> _repeated_filters_codec
+        = pb::FieldCodec.ForEnum(18, x => (int) x, x => (global::Botgram.Protocol.V1.SearchFilter) x);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.SearchFilter> filters_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.SearchFilter>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.SearchFilter> Filters {
+      get { return filters_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as GetSearchCountersRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(GetSearchCountersRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if(!filters_.Equals(other.filters_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      hash ^= filters_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      filters_.WriteTo(output, _repeated_filters_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      filters_.WriteTo(ref output, _repeated_filters_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      size += filters_.CalculateSize(_repeated_filters_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(GetSearchCountersRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      filters_.Add(other.filters_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18:
+          case 16: {
+            filters_.AddEntriesFrom(input, _repeated_filters_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18:
+          case 16: {
+            filters_.AddEntriesFrom(ref input, _repeated_filters_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Each counter echoes its requested filter kind with the current match count.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class SearchCounter : pb::IMessage<SearchCounter>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SearchCounter> _parser = new pb::MessageParser<SearchCounter>(() => new SearchCounter());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SearchCounter> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[200]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchCounter() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchCounter(SearchCounter other) : this() {
+      filter_ = other.filter_;
+      count_ = other.count_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchCounter Clone() {
+      return new SearchCounter(this);
+    }
+
+    /// <summary>Field number for the "filter" field.</summary>
+    public const int FilterFieldNumber = 1;
+    private global::Botgram.Protocol.V1.SearchFilter filter_ = global::Botgram.Protocol.V1.SearchFilter.Unspecified;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.SearchFilter Filter {
+      get { return filter_; }
+      set {
+        filter_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "count" field.</summary>
+    public const int CountFieldNumber = 2;
+    private int count_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Count {
+      get { return count_; }
+      set {
+        count_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SearchCounter);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SearchCounter other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Filter != other.Filter) return false;
+      if (Count != other.Count) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) hash ^= Filter.GetHashCode();
+      if (Count != 0) hash ^= Count.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) {
+        output.WriteRawTag(8);
+        output.WriteEnum((int) Filter);
+      }
+      if (Count != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Count);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) {
+        output.WriteRawTag(8);
+        output.WriteEnum((int) Filter);
+      }
+      if (Count != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Count);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Filter);
+      }
+      if (Count != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Count);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SearchCounter other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Filter != global::Botgram.Protocol.V1.SearchFilter.Unspecified) {
+        Filter = other.Filter;
+      }
+      if (other.Count != 0) {
+        Count = other.Count;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Filter = (global::Botgram.Protocol.V1.SearchFilter) input.ReadEnum();
+            break;
+          }
+          case 16: {
+            Count = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Filter = (global::Botgram.Protocol.V1.SearchFilter) input.ReadEnum();
+            break;
+          }
+          case 16: {
+            Count = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class SearchCounters : pb::IMessage<SearchCounters>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SearchCounters> _parser = new pb::MessageParser<SearchCounters>(() => new SearchCounters());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SearchCounters> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[201]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchCounters() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchCounters(SearchCounters other) : this() {
+      counters_ = other.counters_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SearchCounters Clone() {
+      return new SearchCounters(this);
+    }
+
+    /// <summary>Field number for the "counters" field.</summary>
+    public const int CountersFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.SearchCounter> _repeated_counters_codec
+        = pb::FieldCodec.ForMessage(10, global::Botgram.Protocol.V1.SearchCounter.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.SearchCounter> counters_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.SearchCounter>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.SearchCounter> Counters {
+      get { return counters_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SearchCounters);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SearchCounters other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!counters_.Equals(other.counters_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= counters_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      counters_.WriteTo(output, _repeated_counters_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      counters_.WriteTo(ref output, _repeated_counters_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += counters_.CalculateSize(_repeated_counters_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SearchCounters other) {
+      if (other == null) {
+        return;
+      }
+      counters_.Add(other.counters_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            counters_.AddEntriesFrom(input, _repeated_counters_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            counters_.AddEntriesFrom(ref input, _repeated_counters_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// --- Batch A update payloads ---
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MessagesDeleted : pb::IMessage<MessagesDeleted>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MessagesDeleted> _parser = new pb::MessageParser<MessagesDeleted>(() => new MessagesDeleted());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MessagesDeleted> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[202]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessagesDeleted() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessagesDeleted(MessagesDeleted other) : this() {
+      messageIds_ = other.messageIds_.Clone();
+      pts_ = other.pts_;
+      ptsCount_ = other.ptsCount_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessagesDeleted Clone() {
+      return new MessagesDeleted(this);
+    }
+
+    /// <summary>Field number for the "message_ids" field.</summary>
+    public const int MessageIdsFieldNumber = 1;
+    private static readonly pb::FieldCodec<long> _repeated_messageIds_codec
+        = pb::FieldCodec.ForInt64(10);
+    private readonly pbc::RepeatedField<long> messageIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> MessageIds {
+      get { return messageIds_; }
+    }
+
+    /// <summary>Field number for the "pts" field.</summary>
+    public const int PtsFieldNumber = 2;
+    private int pts_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Pts {
+      get { return pts_; }
+      set {
+        pts_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pts_count" field.</summary>
+    public const int PtsCountFieldNumber = 3;
+    private int ptsCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int PtsCount {
+      get { return ptsCount_; }
+      set {
+        ptsCount_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MessagesDeleted);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MessagesDeleted other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!messageIds_.Equals(other.messageIds_)) return false;
+      if (Pts != other.Pts) return false;
+      if (PtsCount != other.PtsCount) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= messageIds_.GetHashCode();
+      if (Pts != 0) hash ^= Pts.GetHashCode();
+      if (PtsCount != 0) hash ^= PtsCount.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      messageIds_.WriteTo(output, _repeated_messageIds_codec);
+      if (Pts != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(PtsCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      messageIds_.WriteTo(ref output, _repeated_messageIds_codec);
+      if (Pts != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(PtsCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += messageIds_.CalculateSize(_repeated_messageIds_codec);
+      if (Pts != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Pts);
+      }
+      if (PtsCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PtsCount);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MessagesDeleted other) {
+      if (other == null) {
+        return;
+      }
+      messageIds_.Add(other.messageIds_);
+      if (other.Pts != 0) {
+        Pts = other.Pts;
+      }
+      if (other.PtsCount != 0) {
+        PtsCount = other.PtsCount;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10:
+          case 8: {
+            messageIds_.AddEntriesFrom(input, _repeated_messageIds_codec);
+            break;
+          }
+          case 16: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10:
+          case 8: {
+            messageIds_.AddEntriesFrom(ref input, _repeated_messageIds_codec);
+            break;
+          }
+          case 16: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MessageEdited : pb::IMessage<MessageEdited>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MessageEdited> _parser = new pb::MessageParser<MessageEdited>(() => new MessageEdited());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MessageEdited> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[203]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessageEdited() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessageEdited(MessageEdited other) : this() {
+      message_ = other.message_ != null ? other.message_.Clone() : null;
+      pts_ = other.pts_;
+      ptsCount_ = other.ptsCount_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessageEdited Clone() {
+      return new MessageEdited(this);
+    }
+
+    /// <summary>Field number for the "message" field.</summary>
+    public const int MessageFieldNumber = 1;
+    private global::Botgram.Protocol.V1.Message message_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.Message Message {
+      get { return message_; }
+      set {
+        message_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pts" field.</summary>
+    public const int PtsFieldNumber = 2;
+    private int pts_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Pts {
+      get { return pts_; }
+      set {
+        pts_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pts_count" field.</summary>
+    public const int PtsCountFieldNumber = 3;
+    private int ptsCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int PtsCount {
+      get { return ptsCount_; }
+      set {
+        ptsCount_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MessageEdited);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MessageEdited other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Message, other.Message)) return false;
+      if (Pts != other.Pts) return false;
+      if (PtsCount != other.PtsCount) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (message_ != null) hash ^= Message.GetHashCode();
+      if (Pts != 0) hash ^= Pts.GetHashCode();
+      if (PtsCount != 0) hash ^= PtsCount.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (message_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Message);
+      }
+      if (Pts != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(PtsCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (message_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Message);
+      }
+      if (Pts != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(PtsCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (message_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Message);
+      }
+      if (Pts != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Pts);
+      }
+      if (PtsCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PtsCount);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MessageEdited other) {
+      if (other == null) {
+        return;
+      }
+      if (other.message_ != null) {
+        if (message_ == null) {
+          Message = new global::Botgram.Protocol.V1.Message();
+        }
+        Message.MergeFrom(other.Message);
+      }
+      if (other.Pts != 0) {
+        Pts = other.Pts;
+      }
+      if (other.PtsCount != 0) {
+        PtsCount = other.PtsCount;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (message_ == null) {
+              Message = new global::Botgram.Protocol.V1.Message();
+            }
+            input.ReadMessage(Message);
+            break;
+          }
+          case 16: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (message_ == null) {
+              Message = new global::Botgram.Protocol.V1.Message();
+            }
+            input.ReadMessage(Message);
+            break;
+          }
+          case 16: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MessagesPinned : pb::IMessage<MessagesPinned>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MessagesPinned> _parser = new pb::MessageParser<MessagesPinned>(() => new MessagesPinned());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MessagesPinned> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[204]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessagesPinned() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessagesPinned(MessagesPinned other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      messageIds_ = other.messageIds_.Clone();
+      pinned_ = other.pinned_;
+      pts_ = other.pts_;
+      ptsCount_ = other.ptsCount_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MessagesPinned Clone() {
+      return new MessagesPinned(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "message_ids" field.</summary>
+    public const int MessageIdsFieldNumber = 2;
+    private static readonly pb::FieldCodec<long> _repeated_messageIds_codec
+        = pb::FieldCodec.ForInt64(18);
+    private readonly pbc::RepeatedField<long> messageIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> MessageIds {
+      get { return messageIds_; }
+    }
+
+    /// <summary>Field number for the "pinned" field.</summary>
+    public const int PinnedFieldNumber = 3;
+    private bool pinned_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Pinned {
+      get { return pinned_; }
+      set {
+        pinned_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pts" field.</summary>
+    public const int PtsFieldNumber = 4;
+    private int pts_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Pts {
+      get { return pts_; }
+      set {
+        pts_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pts_count" field.</summary>
+    public const int PtsCountFieldNumber = 5;
+    private int ptsCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int PtsCount {
+      get { return ptsCount_; }
+      set {
+        ptsCount_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MessagesPinned);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MessagesPinned other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if(!messageIds_.Equals(other.messageIds_)) return false;
+      if (Pinned != other.Pinned) return false;
+      if (Pts != other.Pts) return false;
+      if (PtsCount != other.PtsCount) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      hash ^= messageIds_.GetHashCode();
+      if (Pinned != false) hash ^= Pinned.GetHashCode();
+      if (Pts != 0) hash ^= Pts.GetHashCode();
+      if (PtsCount != 0) hash ^= PtsCount.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      messageIds_.WriteTo(output, _repeated_messageIds_codec);
+      if (Pinned != false) {
+        output.WriteRawTag(24);
+        output.WriteBool(Pinned);
+      }
+      if (Pts != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(PtsCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      messageIds_.WriteTo(ref output, _repeated_messageIds_codec);
+      if (Pinned != false) {
+        output.WriteRawTag(24);
+        output.WriteBool(Pinned);
+      }
+      if (Pts != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(PtsCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      size += messageIds_.CalculateSize(_repeated_messageIds_codec);
+      if (Pinned != false) {
+        size += 1 + 1;
+      }
+      if (Pts != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Pts);
+      }
+      if (PtsCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PtsCount);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MessagesPinned other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      messageIds_.Add(other.messageIds_);
+      if (other.Pinned != false) {
+        Pinned = other.Pinned;
+      }
+      if (other.Pts != 0) {
+        Pts = other.Pts;
+      }
+      if (other.PtsCount != 0) {
+        PtsCount = other.PtsCount;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18:
+          case 16: {
+            messageIds_.AddEntriesFrom(input, _repeated_messageIds_codec);
+            break;
+          }
+          case 24: {
+            Pinned = input.ReadBool();
+            break;
+          }
+          case 32: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 40: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18:
+          case 16: {
+            messageIds_.AddEntriesFrom(ref input, _repeated_messageIds_codec);
+            break;
+          }
+          case 24: {
+            Pinned = input.ReadBool();
+            break;
+          }
+          case 32: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 40: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ContentsRead : pb::IMessage<ContentsRead>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ContentsRead> _parser = new pb::MessageParser<ContentsRead>(() => new ContentsRead());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ContentsRead> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[205]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ContentsRead() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ContentsRead(ContentsRead other) : this() {
+      messageIds_ = other.messageIds_.Clone();
+      pts_ = other.pts_;
+      ptsCount_ = other.ptsCount_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ContentsRead Clone() {
+      return new ContentsRead(this);
+    }
+
+    /// <summary>Field number for the "message_ids" field.</summary>
+    public const int MessageIdsFieldNumber = 1;
+    private static readonly pb::FieldCodec<long> _repeated_messageIds_codec
+        = pb::FieldCodec.ForInt64(10);
+    private readonly pbc::RepeatedField<long> messageIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> MessageIds {
+      get { return messageIds_; }
+    }
+
+    /// <summary>Field number for the "pts" field.</summary>
+    public const int PtsFieldNumber = 2;
+    private int pts_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Pts {
+      get { return pts_; }
+      set {
+        pts_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pts_count" field.</summary>
+    public const int PtsCountFieldNumber = 3;
+    private int ptsCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int PtsCount {
+      get { return ptsCount_; }
+      set {
+        ptsCount_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ContentsRead);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ContentsRead other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!messageIds_.Equals(other.messageIds_)) return false;
+      if (Pts != other.Pts) return false;
+      if (PtsCount != other.PtsCount) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= messageIds_.GetHashCode();
+      if (Pts != 0) hash ^= Pts.GetHashCode();
+      if (PtsCount != 0) hash ^= PtsCount.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      messageIds_.WriteTo(output, _repeated_messageIds_codec);
+      if (Pts != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(PtsCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      messageIds_.WriteTo(ref output, _repeated_messageIds_codec);
+      if (Pts != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Pts);
+      }
+      if (PtsCount != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(PtsCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += messageIds_.CalculateSize(_repeated_messageIds_codec);
+      if (Pts != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Pts);
+      }
+      if (PtsCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PtsCount);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ContentsRead other) {
+      if (other == null) {
+        return;
+      }
+      messageIds_.Add(other.messageIds_);
+      if (other.Pts != 0) {
+        Pts = other.Pts;
+      }
+      if (other.PtsCount != 0) {
+        PtsCount = other.PtsCount;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10:
+          case 8: {
+            messageIds_.AddEntriesFrom(input, _repeated_messageIds_codec);
+            break;
+          }
+          case 16: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10:
+          case 8: {
+            messageIds_.AddEntriesFrom(ref input, _repeated_messageIds_codec);
+            break;
+          }
+          case 16: {
+            Pts = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            PtsCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Absent draft means the stored draft was cleared.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class DraftChanged : pb::IMessage<DraftChanged>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<DraftChanged> _parser = new pb::MessageParser<DraftChanged>(() => new DraftChanged());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<DraftChanged> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[206]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DraftChanged() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DraftChanged(DraftChanged other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      draft_ = other.draft_ != null ? other.draft_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public DraftChanged Clone() {
+      return new DraftChanged(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "draft" field.</summary>
+    public const int DraftFieldNumber = 2;
+    private global::Botgram.Protocol.V1.DraftState draft_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.DraftState Draft {
+      get { return draft_; }
+      set {
+        draft_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as DraftChanged);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(DraftChanged other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (!object.Equals(Draft, other.Draft)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (draft_ != null) hash ^= Draft.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (draft_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Draft);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (draft_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Draft);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (draft_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Draft);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(DraftChanged other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.draft_ != null) {
+        if (draft_ == null) {
+          Draft = new global::Botgram.Protocol.V1.DraftState();
+        }
+        Draft.MergeFrom(other.Draft);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            if (draft_ == null) {
+              Draft = new global::Botgram.Protocol.V1.DraftState();
+            }
+            input.ReadMessage(Draft);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            if (draft_ == null) {
+              Draft = new global::Botgram.Protocol.V1.DraftState();
+            }
+            input.ReadMessage(Draft);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class UserTyping : pb::IMessage<UserTyping>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<UserTyping> _parser = new pb::MessageParser<UserTyping>(() => new UserTyping());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<UserTyping> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[207]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UserTyping() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UserTyping(UserTyping other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      user_ = other.user_ != null ? other.user_.Clone() : null;
+      action_ = other.action_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UserTyping Clone() {
+      return new UserTyping(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "user" field.</summary>
+    public const int UserFieldNumber = 2;
+    private global::Botgram.Protocol.V1.UserRef user_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.UserRef User {
+      get { return user_; }
+      set {
+        user_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "action" field.</summary>
+    public const int ActionFieldNumber = 3;
+    private global::Botgram.Protocol.V1.TypingAction action_ = global::Botgram.Protocol.V1.TypingAction.Unspecified;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.TypingAction Action {
+      get { return action_; }
+      set {
+        action_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as UserTyping);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(UserTyping other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (!object.Equals(User, other.User)) return false;
+      if (Action != other.Action) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (user_ != null) hash ^= User.GetHashCode();
+      if (Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) hash ^= Action.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (user_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(User);
+      }
+      if (Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) Action);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (user_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(User);
+      }
+      if (Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) Action);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (user_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(User);
+      }
+      if (Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Action);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(UserTyping other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.user_ != null) {
+        if (user_ == null) {
+          User = new global::Botgram.Protocol.V1.UserRef();
+        }
+        User.MergeFrom(other.User);
+      }
+      if (other.Action != global::Botgram.Protocol.V1.TypingAction.Unspecified) {
+        Action = other.Action;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            if (user_ == null) {
+              User = new global::Botgram.Protocol.V1.UserRef();
+            }
+            input.ReadMessage(User);
+            break;
+          }
+          case 24: {
+            Action = (global::Botgram.Protocol.V1.TypingAction) input.ReadEnum();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            if (user_ == null) {
+              User = new global::Botgram.Protocol.V1.UserRef();
+            }
+            input.ReadMessage(User);
+            break;
+          }
+          case 24: {
+            Action = (global::Botgram.Protocol.V1.TypingAction) input.ReadEnum();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MediaRef : pb::IMessage<MediaRef>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MediaRef> _parser = new pb::MessageParser<MediaRef>(() => new MediaRef());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MediaRef> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[208]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaRef() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaRef(MediaRef other) : this() {
+      mediaId_ = other.mediaId_;
+      kind_ = other.kind_;
+      mime_ = other.mime_;
+      byteSize_ = other.byteSize_;
+      width_ = other.width_;
+      height_ = other.height_;
+      duration_ = other.duration_;
+      fileName_ = other.fileName_;
+      totalParts_ = other.totalParts_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaRef Clone() {
+      return new MediaRef(this);
+    }
+
+    /// <summary>Field number for the "media_id" field.</summary>
+    public const int MediaIdFieldNumber = 1;
+    private long mediaId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MediaId {
+      get { return mediaId_; }
+      set {
+        mediaId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "kind" field.</summary>
+    public const int KindFieldNumber = 2;
+    private global::Botgram.Protocol.V1.MediaKind kind_ = global::Botgram.Protocol.V1.MediaKind.Unspecified;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MediaKind Kind {
+      get { return kind_; }
+      set {
+        kind_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "mime" field.</summary>
+    public const int MimeFieldNumber = 3;
+    private string mime_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Mime {
+      get { return mime_; }
+      set {
+        mime_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "byte_size" field.</summary>
+    public const int ByteSizeFieldNumber = 4;
+    private long byteSize_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ByteSize {
+      get { return byteSize_; }
+      set {
+        byteSize_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "width" field.</summary>
+    public const int WidthFieldNumber = 5;
+    private int width_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Width {
+      get { return width_; }
+      set {
+        width_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "height" field.</summary>
+    public const int HeightFieldNumber = 6;
+    private int height_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Height {
+      get { return height_; }
+      set {
+        height_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "duration" field.</summary>
+    public const int DurationFieldNumber = 7;
+    private int duration_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Duration {
+      get { return duration_; }
+      set {
+        duration_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "file_name" field.</summary>
+    public const int FileNameFieldNumber = 8;
+    private string fileName_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string FileName {
+      get { return fileName_; }
+      set {
+        fileName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "total_parts" field.</summary>
+    public const int TotalPartsFieldNumber = 9;
+    private int totalParts_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int TotalParts {
+      get { return totalParts_; }
+      set {
+        totalParts_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MediaRef);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MediaRef other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (MediaId != other.MediaId) return false;
+      if (Kind != other.Kind) return false;
+      if (Mime != other.Mime) return false;
+      if (ByteSize != other.ByteSize) return false;
+      if (Width != other.Width) return false;
+      if (Height != other.Height) return false;
+      if (Duration != other.Duration) return false;
+      if (FileName != other.FileName) return false;
+      if (TotalParts != other.TotalParts) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (MediaId != 0L) hash ^= MediaId.GetHashCode();
+      if (Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) hash ^= Kind.GetHashCode();
+      if (Mime.Length != 0) hash ^= Mime.GetHashCode();
+      if (ByteSize != 0L) hash ^= ByteSize.GetHashCode();
+      if (Width != 0) hash ^= Width.GetHashCode();
+      if (Height != 0) hash ^= Height.GetHashCode();
+      if (Duration != 0) hash ^= Duration.GetHashCode();
+      if (FileName.Length != 0) hash ^= FileName.GetHashCode();
+      if (TotalParts != 0) hash ^= TotalParts.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (MediaId != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(MediaId);
+      }
+      if (Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) {
+        output.WriteRawTag(16);
+        output.WriteEnum((int) Kind);
+      }
+      if (Mime.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(Mime);
+      }
+      if (ByteSize != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(ByteSize);
+      }
+      if (Width != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(Width);
+      }
+      if (Height != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(Height);
+      }
+      if (Duration != 0) {
+        output.WriteRawTag(56);
+        output.WriteInt32(Duration);
+      }
+      if (FileName.Length != 0) {
+        output.WriteRawTag(66);
+        output.WriteString(FileName);
+      }
+      if (TotalParts != 0) {
+        output.WriteRawTag(72);
+        output.WriteInt32(TotalParts);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (MediaId != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(MediaId);
+      }
+      if (Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) {
+        output.WriteRawTag(16);
+        output.WriteEnum((int) Kind);
+      }
+      if (Mime.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(Mime);
+      }
+      if (ByteSize != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(ByteSize);
+      }
+      if (Width != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(Width);
+      }
+      if (Height != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(Height);
+      }
+      if (Duration != 0) {
+        output.WriteRawTag(56);
+        output.WriteInt32(Duration);
+      }
+      if (FileName.Length != 0) {
+        output.WriteRawTag(66);
+        output.WriteString(FileName);
+      }
+      if (TotalParts != 0) {
+        output.WriteRawTag(72);
+        output.WriteInt32(TotalParts);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (MediaId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MediaId);
+      }
+      if (Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Kind);
+      }
+      if (Mime.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Mime);
+      }
+      if (ByteSize != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ByteSize);
+      }
+      if (Width != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Width);
+      }
+      if (Height != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Height);
+      }
+      if (Duration != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Duration);
+      }
+      if (FileName.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(FileName);
+      }
+      if (TotalParts != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TotalParts);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MediaRef other) {
+      if (other == null) {
+        return;
+      }
+      if (other.MediaId != 0L) {
+        MediaId = other.MediaId;
+      }
+      if (other.Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) {
+        Kind = other.Kind;
+      }
+      if (other.Mime.Length != 0) {
+        Mime = other.Mime;
+      }
+      if (other.ByteSize != 0L) {
+        ByteSize = other.ByteSize;
+      }
+      if (other.Width != 0) {
+        Width = other.Width;
+      }
+      if (other.Height != 0) {
+        Height = other.Height;
+      }
+      if (other.Duration != 0) {
+        Duration = other.Duration;
+      }
+      if (other.FileName.Length != 0) {
+        FileName = other.FileName;
+      }
+      if (other.TotalParts != 0) {
+        TotalParts = other.TotalParts;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            MediaId = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            Kind = (global::Botgram.Protocol.V1.MediaKind) input.ReadEnum();
+            break;
+          }
+          case 26: {
+            Mime = input.ReadString();
+            break;
+          }
+          case 32: {
+            ByteSize = input.ReadInt64();
+            break;
+          }
+          case 40: {
+            Width = input.ReadInt32();
+            break;
+          }
+          case 48: {
+            Height = input.ReadInt32();
+            break;
+          }
+          case 56: {
+            Duration = input.ReadInt32();
+            break;
+          }
+          case 66: {
+            FileName = input.ReadString();
+            break;
+          }
+          case 72: {
+            TotalParts = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            MediaId = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            Kind = (global::Botgram.Protocol.V1.MediaKind) input.ReadEnum();
+            break;
+          }
+          case 26: {
+            Mime = input.ReadString();
+            break;
+          }
+          case 32: {
+            ByteSize = input.ReadInt64();
+            break;
+          }
+          case 40: {
+            Width = input.ReadInt32();
+            break;
+          }
+          case 48: {
+            Height = input.ReadInt32();
+            break;
+          }
+          case 56: {
+            Duration = input.ReadInt32();
+            break;
+          }
+          case 66: {
+            FileName = input.ReadString();
+            break;
+          }
+          case 72: {
+            TotalParts = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// Client-provided media: either the caller's freshly uploaded client_file_id or an
+  /// existing media_id the caller may reference. Metadata is required for a new upload and
+  /// ignored for a media_id.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MediaSource : pb::IMessage<MediaSource>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MediaSource> _parser = new pb::MessageParser<MediaSource>(() => new MediaSource());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MediaSource> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[209]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaSource() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaSource(MediaSource other) : this() {
+      kind_ = other.kind_;
+      mime_ = other.mime_;
+      fileName_ = other.fileName_;
+      byteSize_ = other.byteSize_;
+      width_ = other.width_;
+      height_ = other.height_;
+      duration_ = other.duration_;
+      totalParts_ = other.totalParts_;
+      switch (other.OriginCase) {
+        case OriginOneofCase.ClientFileId:
+          ClientFileId = other.ClientFileId;
+          break;
+        case OriginOneofCase.MediaId:
+          MediaId = other.MediaId;
+          break;
+      }
+
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaSource Clone() {
+      return new MediaSource(this);
+    }
+
+    /// <summary>Field number for the "client_file_id" field.</summary>
+    public const int ClientFileIdFieldNumber = 1;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ClientFileId {
+      get { return HasClientFileId ? (long) origin_ : 0L; }
+      set {
+        origin_ = value;
+        originCase_ = OriginOneofCase.ClientFileId;
+      }
+    }
+    /// <summary>Gets whether the "client_file_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasClientFileId {
+      get { return originCase_ == OriginOneofCase.ClientFileId; }
+    }
+    /// <summary> Clears the value of the oneof if it's currently set to "client_file_id" </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearClientFileId() {
+      if (HasClientFileId) {
+        ClearOrigin();
+      }
+    }
+
+    /// <summary>Field number for the "media_id" field.</summary>
+    public const int MediaIdFieldNumber = 2;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long MediaId {
+      get { return HasMediaId ? (long) origin_ : 0L; }
+      set {
+        origin_ = value;
+        originCase_ = OriginOneofCase.MediaId;
+      }
+    }
+    /// <summary>Gets whether the "media_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasMediaId {
+      get { return originCase_ == OriginOneofCase.MediaId; }
+    }
+    /// <summary> Clears the value of the oneof if it's currently set to "media_id" </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearMediaId() {
+      if (HasMediaId) {
+        ClearOrigin();
+      }
+    }
+
+    /// <summary>Field number for the "kind" field.</summary>
+    public const int KindFieldNumber = 3;
+    private global::Botgram.Protocol.V1.MediaKind kind_ = global::Botgram.Protocol.V1.MediaKind.Unspecified;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MediaKind Kind {
+      get { return kind_; }
+      set {
+        kind_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "mime" field.</summary>
+    public const int MimeFieldNumber = 4;
+    private string mime_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Mime {
+      get { return mime_; }
+      set {
+        mime_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "file_name" field.</summary>
+    public const int FileNameFieldNumber = 5;
+    private string fileName_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string FileName {
+      get { return fileName_; }
+      set {
+        fileName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "byte_size" field.</summary>
+    public const int ByteSizeFieldNumber = 6;
+    private long byteSize_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ByteSize {
+      get { return byteSize_; }
+      set {
+        byteSize_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "width" field.</summary>
+    public const int WidthFieldNumber = 7;
+    private int width_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Width {
+      get { return width_; }
+      set {
+        width_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "height" field.</summary>
+    public const int HeightFieldNumber = 8;
+    private int height_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Height {
+      get { return height_; }
+      set {
+        height_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "duration" field.</summary>
+    public const int DurationFieldNumber = 9;
+    private int duration_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Duration {
+      get { return duration_; }
+      set {
+        duration_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "total_parts" field.</summary>
+    public const int TotalPartsFieldNumber = 10;
+    private int totalParts_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int TotalParts {
+      get { return totalParts_; }
+      set {
+        totalParts_ = value;
+      }
+    }
+
+    private object origin_;
+    /// <summary>Enum of possible cases for the "origin" oneof.</summary>
+    public enum OriginOneofCase {
+      None = 0,
+      ClientFileId = 1,
+      MediaId = 2,
+    }
+    private OriginOneofCase originCase_ = OriginOneofCase.None;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public OriginOneofCase OriginCase {
+      get { return originCase_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearOrigin() {
+      originCase_ = OriginOneofCase.None;
+      origin_ = null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MediaSource);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MediaSource other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (ClientFileId != other.ClientFileId) return false;
+      if (MediaId != other.MediaId) return false;
+      if (Kind != other.Kind) return false;
+      if (Mime != other.Mime) return false;
+      if (FileName != other.FileName) return false;
+      if (ByteSize != other.ByteSize) return false;
+      if (Width != other.Width) return false;
+      if (Height != other.Height) return false;
+      if (Duration != other.Duration) return false;
+      if (TotalParts != other.TotalParts) return false;
+      if (OriginCase != other.OriginCase) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasClientFileId) hash ^= ClientFileId.GetHashCode();
+      if (HasMediaId) hash ^= MediaId.GetHashCode();
+      if (Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) hash ^= Kind.GetHashCode();
+      if (Mime.Length != 0) hash ^= Mime.GetHashCode();
+      if (FileName.Length != 0) hash ^= FileName.GetHashCode();
+      if (ByteSize != 0L) hash ^= ByteSize.GetHashCode();
+      if (Width != 0) hash ^= Width.GetHashCode();
+      if (Height != 0) hash ^= Height.GetHashCode();
+      if (Duration != 0) hash ^= Duration.GetHashCode();
+      if (TotalParts != 0) hash ^= TotalParts.GetHashCode();
+      hash ^= (int) originCase_;
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (HasClientFileId) {
+        output.WriteRawTag(8);
+        output.WriteInt64(ClientFileId);
+      }
+      if (HasMediaId) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MediaId);
+      }
+      if (Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) Kind);
+      }
+      if (Mime.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Mime);
+      }
+      if (FileName.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(FileName);
+      }
+      if (ByteSize != 0L) {
+        output.WriteRawTag(48);
+        output.WriteInt64(ByteSize);
+      }
+      if (Width != 0) {
+        output.WriteRawTag(56);
+        output.WriteInt32(Width);
+      }
+      if (Height != 0) {
+        output.WriteRawTag(64);
+        output.WriteInt32(Height);
+      }
+      if (Duration != 0) {
+        output.WriteRawTag(72);
+        output.WriteInt32(Duration);
+      }
+      if (TotalParts != 0) {
+        output.WriteRawTag(80);
+        output.WriteInt32(TotalParts);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (HasClientFileId) {
+        output.WriteRawTag(8);
+        output.WriteInt64(ClientFileId);
+      }
+      if (HasMediaId) {
+        output.WriteRawTag(16);
+        output.WriteInt64(MediaId);
+      }
+      if (Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) Kind);
+      }
+      if (Mime.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Mime);
+      }
+      if (FileName.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(FileName);
+      }
+      if (ByteSize != 0L) {
+        output.WriteRawTag(48);
+        output.WriteInt64(ByteSize);
+      }
+      if (Width != 0) {
+        output.WriteRawTag(56);
+        output.WriteInt32(Width);
+      }
+      if (Height != 0) {
+        output.WriteRawTag(64);
+        output.WriteInt32(Height);
+      }
+      if (Duration != 0) {
+        output.WriteRawTag(72);
+        output.WriteInt32(Duration);
+      }
+      if (TotalParts != 0) {
+        output.WriteRawTag(80);
+        output.WriteInt32(TotalParts);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasClientFileId) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ClientFileId);
+      }
+      if (HasMediaId) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(MediaId);
+      }
+      if (Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Kind);
+      }
+      if (Mime.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Mime);
+      }
+      if (FileName.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(FileName);
+      }
+      if (ByteSize != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ByteSize);
+      }
+      if (Width != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Width);
+      }
+      if (Height != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Height);
+      }
+      if (Duration != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Duration);
+      }
+      if (TotalParts != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TotalParts);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MediaSource other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Kind != global::Botgram.Protocol.V1.MediaKind.Unspecified) {
+        Kind = other.Kind;
+      }
+      if (other.Mime.Length != 0) {
+        Mime = other.Mime;
+      }
+      if (other.FileName.Length != 0) {
+        FileName = other.FileName;
+      }
+      if (other.ByteSize != 0L) {
+        ByteSize = other.ByteSize;
+      }
+      if (other.Width != 0) {
+        Width = other.Width;
+      }
+      if (other.Height != 0) {
+        Height = other.Height;
+      }
+      if (other.Duration != 0) {
+        Duration = other.Duration;
+      }
+      if (other.TotalParts != 0) {
+        TotalParts = other.TotalParts;
+      }
+      switch (other.OriginCase) {
+        case OriginOneofCase.ClientFileId:
+          ClientFileId = other.ClientFileId;
+          break;
+        case OriginOneofCase.MediaId:
+          MediaId = other.MediaId;
+          break;
+      }
+
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            ClientFileId = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            MediaId = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            Kind = (global::Botgram.Protocol.V1.MediaKind) input.ReadEnum();
+            break;
+          }
+          case 34: {
+            Mime = input.ReadString();
+            break;
+          }
+          case 42: {
+            FileName = input.ReadString();
+            break;
+          }
+          case 48: {
+            ByteSize = input.ReadInt64();
+            break;
+          }
+          case 56: {
+            Width = input.ReadInt32();
+            break;
+          }
+          case 64: {
+            Height = input.ReadInt32();
+            break;
+          }
+          case 72: {
+            Duration = input.ReadInt32();
+            break;
+          }
+          case 80: {
+            TotalParts = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            ClientFileId = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            MediaId = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            Kind = (global::Botgram.Protocol.V1.MediaKind) input.ReadEnum();
+            break;
+          }
+          case 34: {
+            Mime = input.ReadString();
+            break;
+          }
+          case 42: {
+            FileName = input.ReadString();
+            break;
+          }
+          case 48: {
+            ByteSize = input.ReadInt64();
+            break;
+          }
+          case 56: {
+            Width = input.ReadInt32();
+            break;
+          }
+          case 64: {
+            Height = input.ReadInt32();
+            break;
+          }
+          case 72: {
+            Duration = input.ReadInt32();
+            break;
+          }
+          case 80: {
+            TotalParts = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class UploadMediaRequest : pb::IMessage<UploadMediaRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<UploadMediaRequest> _parser = new pb::MessageParser<UploadMediaRequest>(() => new UploadMediaRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<UploadMediaRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[210]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UploadMediaRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UploadMediaRequest(UploadMediaRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      media_ = other.media_ != null ? other.media_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UploadMediaRequest Clone() {
+      return new UploadMediaRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "media" field.</summary>
+    public const int MediaFieldNumber = 2;
+    private global::Botgram.Protocol.V1.MediaSource media_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MediaSource Media {
+      get { return media_; }
+      set {
+        media_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as UploadMediaRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(UploadMediaRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (!object.Equals(Media, other.Media)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (media_ != null) hash ^= Media.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (media_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Media);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (media_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Media);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (media_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Media);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(UploadMediaRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.media_ != null) {
+        if (media_ == null) {
+          Media = new global::Botgram.Protocol.V1.MediaSource();
+        }
+        Media.MergeFrom(other.Media);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaSource();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaSource();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class UploadMediaResult : pb::IMessage<UploadMediaResult>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<UploadMediaResult> _parser = new pb::MessageParser<UploadMediaResult>(() => new UploadMediaResult());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<UploadMediaResult> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[211]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UploadMediaResult() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UploadMediaResult(UploadMediaResult other) : this() {
+      media_ = other.media_ != null ? other.media_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UploadMediaResult Clone() {
+      return new UploadMediaResult(this);
+    }
+
+    /// <summary>Field number for the "media" field.</summary>
+    public const int MediaFieldNumber = 1;
+    private global::Botgram.Protocol.V1.MediaRef media_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MediaRef Media {
+      get { return media_; }
+      set {
+        media_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as UploadMediaResult);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(UploadMediaResult other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Media, other.Media)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (media_ != null) hash ^= Media.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (media_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Media);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (media_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Media);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (media_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Media);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(UploadMediaResult other) {
+      if (other == null) {
+        return;
+      }
+      if (other.media_ != null) {
+        if (media_ == null) {
+          Media = new global::Botgram.Protocol.V1.MediaRef();
+        }
+        Media.MergeFrom(other.Media);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaRef();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaRef();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MediaMessage : pb::IMessage<MediaMessage>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MediaMessage> _parser = new pb::MessageParser<MediaMessage>(() => new MediaMessage());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MediaMessage> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[212]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaMessage() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaMessage(MediaMessage other) : this() {
+      media_ = other.media_ != null ? other.media_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaMessage Clone() {
+      return new MediaMessage(this);
+    }
+
+    /// <summary>Field number for the "media" field.</summary>
+    public const int MediaFieldNumber = 1;
+    private global::Botgram.Protocol.V1.MediaRef media_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MediaRef Media {
+      get { return media_; }
+      set {
+        media_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MediaMessage);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MediaMessage other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Media, other.Media)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (media_ != null) hash ^= Media.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (media_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Media);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (media_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Media);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (media_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Media);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MediaMessage other) {
+      if (other == null) {
+        return;
+      }
+      if (other.media_ != null) {
+        if (media_ == null) {
+          Media = new global::Botgram.Protocol.V1.MediaRef();
+        }
+        Media.MergeFrom(other.Media);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaRef();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaRef();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class SendMediaRequest : pb::IMessage<SendMediaRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SendMediaRequest> _parser = new pb::MessageParser<SendMediaRequest>(() => new SendMediaRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SendMediaRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[213]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SendMediaRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SendMediaRequest(SendMediaRequest other) : this() {
+      _hasBits0 = other._hasBits0;
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      randomId_ = other.randomId_;
+      media_ = other.media_ != null ? other.media_.Clone() : null;
+      caption_ = other.caption_;
+      entities_ = other.entities_.Clone();
+      replyToMessageId_ = other.replyToMessageId_;
+      silent_ = other.silent_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SendMediaRequest Clone() {
+      return new SendMediaRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "random_id" field.</summary>
+    public const int RandomIdFieldNumber = 2;
+    private long randomId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long RandomId {
+      get { return randomId_; }
+      set {
+        randomId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "media" field.</summary>
+    public const int MediaFieldNumber = 3;
+    private global::Botgram.Protocol.V1.MediaSource media_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MediaSource Media {
+      get { return media_; }
+      set {
+        media_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "caption" field.</summary>
+    public const int CaptionFieldNumber = 4;
+    private string caption_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Caption {
+      get { return caption_; }
+      set {
+        caption_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "entities" field.</summary>
+    public const int EntitiesFieldNumber = 5;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.MessageEntity> _repeated_entities_codec
+        = pb::FieldCodec.ForMessage(42, global::Botgram.Protocol.V1.MessageEntity.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> entities_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> Entities {
+      get { return entities_; }
+    }
+
+    /// <summary>Field number for the "reply_to_message_id" field.</summary>
+    public const int ReplyToMessageIdFieldNumber = 6;
+    private readonly static long ReplyToMessageIdDefaultValue = 0L;
+
+    private long replyToMessageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ReplyToMessageId {
+      get { if ((_hasBits0 & 1) != 0) { return replyToMessageId_; } else { return ReplyToMessageIdDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        replyToMessageId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "reply_to_message_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasReplyToMessageId {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "reply_to_message_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearReplyToMessageId() {
+      _hasBits0 &= ~1;
+    }
+
+    /// <summary>Field number for the "silent" field.</summary>
+    public const int SilentFieldNumber = 7;
+    private bool silent_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Silent {
+      get { return silent_; }
+      set {
+        silent_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SendMediaRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SendMediaRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if (RandomId != other.RandomId) return false;
+      if (!object.Equals(Media, other.Media)) return false;
+      if (Caption != other.Caption) return false;
+      if(!entities_.Equals(other.entities_)) return false;
+      if (ReplyToMessageId != other.ReplyToMessageId) return false;
+      if (Silent != other.Silent) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      if (RandomId != 0L) hash ^= RandomId.GetHashCode();
+      if (media_ != null) hash ^= Media.GetHashCode();
+      if (Caption.Length != 0) hash ^= Caption.GetHashCode();
+      hash ^= entities_.GetHashCode();
+      if (HasReplyToMessageId) hash ^= ReplyToMessageId.GetHashCode();
+      if (Silent != false) hash ^= Silent.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (RandomId != 0L) {
+        output.WriteRawTag(17);
+        output.WriteSFixed64(RandomId);
+      }
+      if (media_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(Media);
+      }
+      if (Caption.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Caption);
+      }
+      entities_.WriteTo(output, _repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        output.WriteRawTag(48);
+        output.WriteInt64(ReplyToMessageId);
+      }
+      if (Silent != false) {
+        output.WriteRawTag(56);
+        output.WriteBool(Silent);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      if (RandomId != 0L) {
+        output.WriteRawTag(17);
+        output.WriteSFixed64(RandomId);
+      }
+      if (media_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(Media);
+      }
+      if (Caption.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Caption);
+      }
+      entities_.WriteTo(ref output, _repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        output.WriteRawTag(48);
+        output.WriteInt64(ReplyToMessageId);
+      }
+      if (Silent != false) {
+        output.WriteRawTag(56);
+        output.WriteBool(Silent);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      if (RandomId != 0L) {
+        size += 1 + 8;
+      }
+      if (media_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Media);
+      }
+      if (Caption.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Caption);
+      }
+      size += entities_.CalculateSize(_repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ReplyToMessageId);
+      }
+      if (Silent != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SendMediaRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      if (other.RandomId != 0L) {
+        RandomId = other.RandomId;
+      }
+      if (other.media_ != null) {
+        if (media_ == null) {
+          Media = new global::Botgram.Protocol.V1.MediaSource();
+        }
+        Media.MergeFrom(other.Media);
+      }
+      if (other.Caption.Length != 0) {
+        Caption = other.Caption;
+      }
+      entities_.Add(other.entities_);
+      if (other.HasReplyToMessageId) {
+        ReplyToMessageId = other.ReplyToMessageId;
+      }
+      if (other.Silent != false) {
+        Silent = other.Silent;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 17: {
+            RandomId = input.ReadSFixed64();
+            break;
+          }
+          case 26: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaSource();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+          case 34: {
+            Caption = input.ReadString();
+            break;
+          }
+          case 42: {
+            entities_.AddEntriesFrom(input, _repeated_entities_codec);
+            break;
+          }
+          case 48: {
+            ReplyToMessageId = input.ReadInt64();
+            break;
+          }
+          case 56: {
+            Silent = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 17: {
+            RandomId = input.ReadSFixed64();
+            break;
+          }
+          case 26: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaSource();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+          case 34: {
+            Caption = input.ReadString();
+            break;
+          }
+          case 42: {
+            entities_.AddEntriesFrom(ref input, _repeated_entities_codec);
+            break;
+          }
+          case 48: {
+            ReplyToMessageId = input.ReadInt64();
+            break;
+          }
+          case 56: {
+            Silent = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MediaItem : pb::IMessage<MediaItem>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MediaItem> _parser = new pb::MessageParser<MediaItem>(() => new MediaItem());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MediaItem> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[214]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaItem() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaItem(MediaItem other) : this() {
+      _hasBits0 = other._hasBits0;
+      randomId_ = other.randomId_;
+      media_ = other.media_ != null ? other.media_.Clone() : null;
+      caption_ = other.caption_;
+      entities_ = other.entities_.Clone();
+      replyToMessageId_ = other.replyToMessageId_;
+      silent_ = other.silent_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MediaItem Clone() {
+      return new MediaItem(this);
+    }
+
+    /// <summary>Field number for the "random_id" field.</summary>
+    public const int RandomIdFieldNumber = 1;
+    private long randomId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long RandomId {
+      get { return randomId_; }
+      set {
+        randomId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "media" field.</summary>
+    public const int MediaFieldNumber = 2;
+    private global::Botgram.Protocol.V1.MediaSource media_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.MediaSource Media {
+      get { return media_; }
+      set {
+        media_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "caption" field.</summary>
+    public const int CaptionFieldNumber = 3;
+    private string caption_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Caption {
+      get { return caption_; }
+      set {
+        caption_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "entities" field.</summary>
+    public const int EntitiesFieldNumber = 4;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.MessageEntity> _repeated_entities_codec
+        = pb::FieldCodec.ForMessage(34, global::Botgram.Protocol.V1.MessageEntity.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> entities_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.MessageEntity> Entities {
+      get { return entities_; }
+    }
+
+    /// <summary>Field number for the "reply_to_message_id" field.</summary>
+    public const int ReplyToMessageIdFieldNumber = 5;
+    private readonly static long ReplyToMessageIdDefaultValue = 0L;
+
+    private long replyToMessageId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ReplyToMessageId {
+      get { if ((_hasBits0 & 1) != 0) { return replyToMessageId_; } else { return ReplyToMessageIdDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        replyToMessageId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "reply_to_message_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasReplyToMessageId {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "reply_to_message_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearReplyToMessageId() {
+      _hasBits0 &= ~1;
+    }
+
+    /// <summary>Field number for the "silent" field.</summary>
+    public const int SilentFieldNumber = 6;
+    private bool silent_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Silent {
+      get { return silent_; }
+      set {
+        silent_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MediaItem);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MediaItem other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (RandomId != other.RandomId) return false;
+      if (!object.Equals(Media, other.Media)) return false;
+      if (Caption != other.Caption) return false;
+      if(!entities_.Equals(other.entities_)) return false;
+      if (ReplyToMessageId != other.ReplyToMessageId) return false;
+      if (Silent != other.Silent) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (RandomId != 0L) hash ^= RandomId.GetHashCode();
+      if (media_ != null) hash ^= Media.GetHashCode();
+      if (Caption.Length != 0) hash ^= Caption.GetHashCode();
+      hash ^= entities_.GetHashCode();
+      if (HasReplyToMessageId) hash ^= ReplyToMessageId.GetHashCode();
+      if (Silent != false) hash ^= Silent.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (RandomId != 0L) {
+        output.WriteRawTag(9);
+        output.WriteSFixed64(RandomId);
+      }
+      if (media_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Media);
+      }
+      if (Caption.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(Caption);
+      }
+      entities_.WriteTo(output, _repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        output.WriteRawTag(40);
+        output.WriteInt64(ReplyToMessageId);
+      }
+      if (Silent != false) {
+        output.WriteRawTag(48);
+        output.WriteBool(Silent);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (RandomId != 0L) {
+        output.WriteRawTag(9);
+        output.WriteSFixed64(RandomId);
+      }
+      if (media_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Media);
+      }
+      if (Caption.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(Caption);
+      }
+      entities_.WriteTo(ref output, _repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        output.WriteRawTag(40);
+        output.WriteInt64(ReplyToMessageId);
+      }
+      if (Silent != false) {
+        output.WriteRawTag(48);
+        output.WriteBool(Silent);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (RandomId != 0L) {
+        size += 1 + 8;
+      }
+      if (media_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Media);
+      }
+      if (Caption.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Caption);
+      }
+      size += entities_.CalculateSize(_repeated_entities_codec);
+      if (HasReplyToMessageId) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ReplyToMessageId);
+      }
+      if (Silent != false) {
+        size += 1 + 1;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MediaItem other) {
+      if (other == null) {
+        return;
+      }
+      if (other.RandomId != 0L) {
+        RandomId = other.RandomId;
+      }
+      if (other.media_ != null) {
+        if (media_ == null) {
+          Media = new global::Botgram.Protocol.V1.MediaSource();
+        }
+        Media.MergeFrom(other.Media);
+      }
+      if (other.Caption.Length != 0) {
+        Caption = other.Caption;
+      }
+      entities_.Add(other.entities_);
+      if (other.HasReplyToMessageId) {
+        ReplyToMessageId = other.ReplyToMessageId;
+      }
+      if (other.Silent != false) {
+        Silent = other.Silent;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 9: {
+            RandomId = input.ReadSFixed64();
+            break;
+          }
+          case 18: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaSource();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+          case 26: {
+            Caption = input.ReadString();
+            break;
+          }
+          case 34: {
+            entities_.AddEntriesFrom(input, _repeated_entities_codec);
+            break;
+          }
+          case 40: {
+            ReplyToMessageId = input.ReadInt64();
+            break;
+          }
+          case 48: {
+            Silent = input.ReadBool();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 9: {
+            RandomId = input.ReadSFixed64();
+            break;
+          }
+          case 18: {
+            if (media_ == null) {
+              Media = new global::Botgram.Protocol.V1.MediaSource();
+            }
+            input.ReadMessage(Media);
+            break;
+          }
+          case 26: {
+            Caption = input.ReadString();
+            break;
+          }
+          case 34: {
+            entities_.AddEntriesFrom(ref input, _repeated_entities_codec);
+            break;
+          }
+          case 40: {
+            ReplyToMessageId = input.ReadInt64();
+            break;
+          }
+          case 48: {
+            Silent = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// All items belong to one album; the server assigns a single grouped_id.
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class SendMultiMediaRequest : pb::IMessage<SendMultiMediaRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SendMultiMediaRequest> _parser = new pb::MessageParser<SendMultiMediaRequest>(() => new SendMultiMediaRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SendMultiMediaRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[215]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SendMultiMediaRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SendMultiMediaRequest(SendMultiMediaRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      items_ = other.items_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SendMultiMediaRequest Clone() {
+      return new SendMultiMediaRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "items" field.</summary>
+    public const int ItemsFieldNumber = 2;
+    private static readonly pb::FieldCodec<global::Botgram.Protocol.V1.MediaItem> _repeated_items_codec
+        = pb::FieldCodec.ForMessage(18, global::Botgram.Protocol.V1.MediaItem.Parser);
+    private readonly pbc::RepeatedField<global::Botgram.Protocol.V1.MediaItem> items_ = new pbc::RepeatedField<global::Botgram.Protocol.V1.MediaItem>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Botgram.Protocol.V1.MediaItem> Items {
+      get { return items_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SendMultiMediaRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SendMultiMediaRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if(!items_.Equals(other.items_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      hash ^= items_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      items_.WriteTo(output, _repeated_items_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      items_.WriteTo(ref output, _repeated_items_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      size += items_.CalculateSize(_repeated_items_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SendMultiMediaRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      items_.Add(other.items_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            items_.AddEntriesFrom(input, _repeated_items_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18: {
+            items_.AddEntriesFrom(ref input, _repeated_items_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class GetExtendedMediaRequest : pb::IMessage<GetExtendedMediaRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GetExtendedMediaRequest> _parser = new pb::MessageParser<GetExtendedMediaRequest>(() => new GetExtendedMediaRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<GetExtendedMediaRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Botgram.Protocol.V1.BotgramRpcReflection.Descriptor.MessageTypes[216]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetExtendedMediaRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetExtendedMediaRequest(GetExtendedMediaRequest other) : this() {
+      peer_ = other.peer_ != null ? other.peer_.Clone() : null;
+      messageIds_ = other.messageIds_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public GetExtendedMediaRequest Clone() {
+      return new GetExtendedMediaRequest(this);
+    }
+
+    /// <summary>Field number for the "peer" field.</summary>
+    public const int PeerFieldNumber = 1;
+    private global::Botgram.Protocol.V1.PeerRef peer_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Botgram.Protocol.V1.PeerRef Peer {
+      get { return peer_; }
+      set {
+        peer_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "message_ids" field.</summary>
+    public const int MessageIdsFieldNumber = 2;
+    private static readonly pb::FieldCodec<long> _repeated_messageIds_codec
+        = pb::FieldCodec.ForInt64(18);
+    private readonly pbc::RepeatedField<long> messageIds_ = new pbc::RepeatedField<long>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<long> MessageIds {
+      get { return messageIds_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as GetExtendedMediaRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(GetExtendedMediaRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Peer, other.Peer)) return false;
+      if(!messageIds_.Equals(other.messageIds_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (peer_ != null) hash ^= Peer.GetHashCode();
+      hash ^= messageIds_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      messageIds_.WriteTo(output, _repeated_messageIds_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (peer_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Peer);
+      }
+      messageIds_.WriteTo(ref output, _repeated_messageIds_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (peer_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
+      }
+      size += messageIds_.CalculateSize(_repeated_messageIds_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(GetExtendedMediaRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.peer_ != null) {
+        if (peer_ == null) {
+          Peer = new global::Botgram.Protocol.V1.PeerRef();
+        }
+        Peer.MergeFrom(other.Peer);
+      }
+      messageIds_.Add(other.messageIds_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18:
+          case 16: {
+            messageIds_.AddEntriesFrom(input, _repeated_messageIds_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (peer_ == null) {
+              Peer = new global::Botgram.Protocol.V1.PeerRef();
+            }
+            input.ReadMessage(Peer);
+            break;
+          }
+          case 18:
+          case 16: {
+            messageIds_.AddEntriesFrom(ref input, _repeated_messageIds_codec);
             break;
           }
         }

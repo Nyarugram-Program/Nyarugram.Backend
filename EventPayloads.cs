@@ -7,6 +7,13 @@ namespace Botgram.Backend;
 public interface IEventPayload { }
 public sealed record GidChanged(string UserId, string Gid) : IEventPayload;
 public sealed record CallSignal(string CallId, string SenderId, string Type, string Data) : IEventPayload;
+// Batch A message-lifecycle payloads (schema v10). All are pts stream events.
+public sealed record MessageDeleted(string ConversationId, long[] MessageIds) : IEventPayload;
+public sealed record MessagePinned(string ConversationId, long[] MessageIds, bool Pinned) : IEventPayload;
+public sealed record ContentsRead(string ConversationId, long[] MessageIds) : IEventPayload;
+public sealed record StoredDraft(string Text, MessageEntity[]? Entities, long? ReplyTo, DateTimeOffset UpdatedAt);
+public sealed record DraftChanged(string ConversationId, StoredDraft? Draft) : IEventPayload;
+public sealed record UserTyping(string ConversationId, string UserId, int Action) : IEventPayload;
 
 internal static class EventPayloadTypes
 {
@@ -14,6 +21,12 @@ internal static class EventPayloadTypes
     {
         "conversation.created" => typeof(Conversation),
         "message.created" => typeof(Message),
+        "message.edited" => typeof(Message),
+        "message.deleted" => typeof(MessageDeleted),
+        "message.pinned" => typeof(MessagePinned),
+        "content.read" => typeof(ContentsRead),
+        "draft.changed" => typeof(DraftChanged),
+        "user.typing" => typeof(UserTyping),
         "receipt.updated" => typeof(Receipt),
         "call.updated" => typeof(Call),
         "call.signal" => typeof(CallSignal),

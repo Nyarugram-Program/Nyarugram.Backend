@@ -56,6 +56,40 @@ message RpcRequest {
     E2eeGetStatusRequest e2ee_get_status = 141;
     E2eeListRequest e2ee_list = 142;
     E2eeGetPeerBundleRequest e2ee_get_peer_bundle = 143;
+    // Batch A: core message lifecycle and per-account dialog state (messages.*).
+    // Tags 144..169 are permanently allocated to these operations.
+    DeleteMessagesRequest delete_messages = 144;
+    DeleteHistoryRequest delete_history = 145;
+    DeleteSavedHistoryRequest delete_saved_history = 146;
+    DeletePhoneCallHistoryRequest delete_phone_call_history = 147;
+    EditMessageRequest edit_message = 148;
+    GetMessageEditDataRequest get_message_edit_data = 149;
+    ForwardMessagesRequest forward_messages = 150;
+    SetTypingRequest set_typing = 151;
+    SaveDraftRequest save_draft = 152;
+    ClearAllDraftsRequest clear_all_drafts = 153;
+    GetAllDraftsRequest get_all_drafts = 154;
+    UpdatePinnedMessageRequest update_pinned_message = 155;
+    UnpinAllMessagesRequest unpin_all_messages = 156;
+    ToggleDialogPinRequest toggle_dialog_pin = 157;
+    ReorderPinnedDialogsRequest reorder_pinned_dialogs = 158;
+    MarkDialogUnreadRequest mark_dialog_unread = 159;
+    GetDialogUnreadMarksRequest get_dialog_unread_marks = 160;
+    ReadMessageContentsRequest read_message_contents = 161;
+    GetOnlinesRequest get_onlines = 162;
+    GetCommonChatsRequest get_common_chats = 163;
+    HidePeerSettingsBarRequest hide_peer_settings_bar = 164;
+    ReportSpamRequest report_spam = 165;
+    GetMessagesViewsRequest get_messages_views = 166;
+    GetOutboxReadDateRequest get_outbox_read_date = 167;
+    SearchRequest search = 168;
+    GetSearchCountersRequest get_search_counters = 169;
+    // Batch I: media messages (tags 170..173). File bytes travel only on the dedicated
+    // binary media endpoints below, never inside this RPC envelope.
+    UploadMediaRequest upload_media = 170;
+    SendMediaRequest send_media = 171;
+    SendMultiMediaRequest send_multi_media = 172;
+    GetExtendedMediaRequest get_extended_media = 173;
     // Authentication-plane replacements for the retired JSON REST API. Tags are
     // permanently allocated: never reuse or renumber them.
     // 200..204 are accepted on the unauthenticated /api/v1/auth endpoint;
@@ -121,6 +155,36 @@ message RpcResponse {
     E2eeChatStatusList e2ee_get_status = 141;
     E2eeChatStatusList e2ee_list = 142;
     E2eePeerBundle e2ee_get_peer_bundle = 143;
+    AffectedMessages delete_messages = 144;
+    AffectedHistory delete_history = 145;
+    AffectedHistory delete_saved_history = 146;
+    AffectedFoundMessages delete_phone_call_history = 147;
+    Updates edit_message = 148;
+    MessageEditData get_message_edit_data = 149;
+    Updates forward_messages = 150;
+    BoolValue set_typing = 151;
+    BoolValue save_draft = 152;
+    BoolValue clear_all_drafts = 153;
+    Updates get_all_drafts = 154;
+    Updates update_pinned_message = 155;
+    AffectedHistory unpin_all_messages = 156;
+    BoolValue toggle_dialog_pin = 157;
+    BoolValue reorder_pinned_dialogs = 158;
+    BoolValue mark_dialog_unread = 159;
+    PeerList get_dialog_unread_marks = 160;
+    AffectedMessages read_message_contents = 161;
+    ChatOnlines get_onlines = 162;
+    GroupList get_common_chats = 163;
+    BoolValue hide_peer_settings_bar = 164;
+    BoolValue report_spam = 165;
+    MessageViewsList get_messages_views = 166;
+    OutboxReadDate get_outbox_read_date = 167;
+    SearchPage search = 168;
+    SearchCounters get_search_counters = 169;
+    UploadMediaResult upload_media = 170;
+    Updates send_media = 171;
+    Updates send_multi_media = 172;
+    Updates get_extended_media = 173;
     AuthCapabilities auth_capabilities = 200;
     AuthSession auth_register = 201;
     AuthSession auth_login = 202;
@@ -402,6 +466,12 @@ message Message {
   bool outgoing = 5;
   bool unread = 6;
   oneof body { TextMessage text = 10; ServiceMessage service = 11; E2eeEnvelope e2ee = 12; }
+  // Forward attribution for copied messages; absent on natively sent messages.
+  optional UserRef forward_from = 13;
+  optional int64 forward_from_date_ms = 14;
+  // Media body and album grouping (batch I); absent on text and service messages.
+  MediaMessage media = 15;
+  optional int64 grouped_id = 16;
 }
 message NotifySettings {
   optional bool show_previews = 1;
@@ -416,6 +486,10 @@ message Dialog {
   int64 read_outbox_max_id = 4;
   int32 unread_count = 5;
   NotifySettings notify_settings = 6;
+  // Per-account dialog state (schema v10). Absent fields keep pre-v10 defaults.
+  bool pinned = 7;
+  bool unread_mark = 8;
+  optional DraftState draft = 9;
 }
 message SyncState { int32 pts = 1; int32 qts = 2; int64 date_ms = 3; int32 seq = 4; int32 unread_count = 5; }
 message ReadReceipt { PeerRef peer = 1; int64 max_message_id = 2; int32 pts = 3; int32 pts_count = 4; }
@@ -434,6 +508,15 @@ message Update {
     PresenceChanged presence_changed = 7;
     PhoneCallChanged phone_call = 8;
     PhoneCallSignalingData phone_call_signaling = 9;
+    // Batch A message-lifecycle updates. messages_deleted, message_edited,
+    // messages_pinned and contents_read carry the recipient's own pts/pts_count;
+    // draft_changed and user_typing are replayable stateless notifications.
+    MessagesDeleted messages_deleted = 10;
+    MessageEdited message_edited = 11;
+    MessagesPinned messages_pinned = 12;
+    ContentsRead contents_read = 13;
+    DraftChanged draft_changed = 14;
+    UserTyping user_typing = 15;
   }
 }
 message Updates { repeated Update updates = 1; repeated UserSummary users = 2; repeated GroupSummary groups = 3; int64 date_ms = 4; int32 seq = 5; }
@@ -822,3 +905,219 @@ message TotpResult {
   int64 expires_at_ms = 5;
   repeated string recovery_codes = 6;
 }
+
+// --- Batch A: core message lifecycle and per-account dialog state (messages.*) ---
+// Deletes: delete_messages without revoke hides messages for the caller only;
+// revoke applies per conversation kind (direct: either party, group: author only).
+message DeleteMessagesRequest { repeated int64 message_ids = 1; bool revoke = 2; }
+// delete_history clears the caller's view through max_message_id. just_clear keeps
+// the dialog listed; without it the dialog stays hidden until a newer message id
+// appears (server stores a hidden_through boundary, never deletes membership).
+// revoke (direct chats only) also clears the peer's boundary and notifies both.
+message DeleteHistoryRequest {
+  PeerRef peer = 1;
+  bool just_clear = 2;
+  bool revoke = 3;
+  int64 max_message_id = 4;
+}
+message DeleteSavedHistoryRequest { PeerRef peer = 1; int64 max_message_id = 2; }
+// revoke clears the call-history boundary for both direct-chat parties.
+message DeletePhoneCallHistoryRequest { bool revoke = 1; }
+message AffectedHistory { int32 pts = 1; int32 pts_count = 2; int32 offset = 3; }
+message AffectedFoundMessages {
+  int32 pts = 1;
+  int32 pts_count = 2;
+  int32 offset = 3;
+  repeated int64 messages = 4;
+}
+// Author-only text edits within the 48h window; media/markup/scheduling rejected.
+message EditMessageRequest {
+  PeerRef peer = 1;
+  int64 message_id = 2;
+  string text = 3;
+  repeated MessageEntity entities = 4;
+}
+message MessageEditData { bool caption = 1; }
+message GetMessageEditDataRequest { PeerRef peer = 1; int64 message_id = 2; }
+// Copies text messages with forward attribution. Service and e2ee bodies are
+// rejected; each copy enters the target through the idempotent acceptance path.
+message ForwardMessagesRequest {
+  PeerRef from_peer = 1;
+  PeerRef to_peer = 2;
+  repeated int64 message_ids = 3;
+  repeated sfixed64 random_ids = 4;
+  bool silent = 5;
+  bool drop_author = 6;
+}
+enum TypingAction {
+  TYPING_ACTION_UNSPECIFIED = 0;
+  TYPING = 1;
+  CANCEL = 2;
+  RECORD_AUDIO = 3;
+  RECORD_VIDEO = 4;
+  RECORD_ROUND = 5;
+  UPLOAD_PHOTO = 6;
+  UPLOAD_VIDEO = 7;
+  UPLOAD_AUDIO = 8;
+  UPLOAD_DOCUMENT = 9;
+  UPLOAD_ROUND = 10;
+  CHOOSE_STICKER = 11;
+  CHOOSE_CONTACT = 12;
+  GEO_LOCATION = 13;
+  GAME_PLAY = 14;
+}
+// Transient: delivered as an expiring event, never replayed after expiry.
+message SetTypingRequest { PeerRef peer = 1; TypingAction action = 2; }
+// Server-side draft for one conversation; empty text clears the draft.
+message DraftState {
+  string text = 1;
+  repeated MessageEntity entities = 2;
+  optional int64 reply_to_message_id = 3;
+  int64 updated_at_ms = 4;
+}
+message SaveDraftRequest {
+  PeerRef peer = 1;
+  string text = 2;
+  repeated MessageEntity entities = 3;
+  optional int64 reply_to_message_id = 4;
+}
+message ClearAllDraftsRequest {}
+message GetAllDraftsRequest {}
+message UpdatePinnedMessageRequest {
+  PeerRef peer = 1;
+  int64 message_id = 2;
+  bool unpin = 3;
+  bool silent = 4;
+}
+message UnpinAllMessagesRequest { PeerRef peer = 1; }
+message ToggleDialogPinRequest { PeerRef peer = 1; bool pinned = 2; }
+message ReorderPinnedDialogsRequest { repeated PeerRef order = 1; bool force = 2; }
+message MarkDialogUnreadRequest { PeerRef peer = 1; bool unread = 2; }
+message GetDialogUnreadMarksRequest {}
+message PeerList { repeated PeerRef peers = 1; }
+message ReadMessageContentsRequest { repeated int64 message_ids = 1; }
+message GetOnlinesRequest { PeerRef peer = 1; }
+message ChatOnlines { int32 onlines = 1; }
+message GetCommonChatsRequest {
+  UserSelector user = 1;
+  int64 max_chat_id = 2;
+  int32 limit = 3;
+}
+message HidePeerSettingsBarRequest { PeerRef peer = 1; }
+message ReportSpamRequest { PeerRef peer = 1; }
+message GetMessagesViewsRequest {
+  PeerRef peer = 1;
+  repeated int64 message_ids = 2;
+  bool increment = 3;
+}
+// Views parallel to the requested message ids; 0 for messages without viewers.
+message MessageViewsList { repeated int32 views = 1; }
+message GetOutboxReadDateRequest { PeerRef peer = 1; int64 message_id = 2; }
+message OutboxReadDate { int64 date_ms = 1; }
+enum SearchFilter {
+  SEARCH_FILTER_UNSPECIFIED = 0;
+  EMPTY = 1;
+  PINNED = 2;
+}
+// Conversation-scoped text search. Only EMPTY and PINNED filters are accepted;
+// media filters are explicitly unsupported until media storage exists.
+message SearchRequest {
+  PeerRef peer = 1;
+  string query = 2;
+  SearchFilter filter = 3;
+  optional UserSelector from_user = 4;
+  int64 min_date_ms = 5;
+  int64 max_date_ms = 6;
+  int64 offset_message_id = 7;
+  int32 add_offset = 8;
+  int32 limit = 9;
+  int64 max_message_id = 10;
+  int64 min_message_id = 11;
+}
+message SearchPage {
+  repeated Message messages = 1;
+  repeated UserSummary users = 2;
+  repeated GroupSummary groups = 3;
+  int32 count = 4;
+}
+message GetSearchCountersRequest { PeerRef peer = 1; repeated SearchFilter filters = 2; }
+// Each counter echoes its requested filter kind with the current match count.
+message SearchCounter { SearchFilter filter = 1; int32 count = 2; }
+message SearchCounters { repeated SearchCounter counters = 1; }
+
+// --- Batch A update payloads ---
+message MessagesDeleted { repeated int64 message_ids = 1; int32 pts = 2; int32 pts_count = 3; }
+message MessageEdited { Message message = 1; int32 pts = 2; int32 pts_count = 3; }
+message MessagesPinned {
+  PeerRef peer = 1;
+  repeated int64 message_ids = 2;
+  bool pinned = 3;
+  int32 pts = 4;
+  int32 pts_count = 5;
+}
+message ContentsRead { repeated int64 message_ids = 1; int32 pts = 2; int32 pts_count = 3; }
+// Absent draft means the stored draft was cleared.
+message DraftChanged { PeerRef peer = 1; optional DraftState draft = 2; }
+message UserTyping { PeerRef peer = 1; UserRef user = 2; TypingAction action = 3; }
+
+// --- Batch I: media messages (tags 170..173) ---
+// Bytes never enter the RPC envelope: the client uploads parts to
+// PUT /api/v1/media/{client_file_id}/{part} and downloads with
+// GET /api/v1/media/{media_id}?offset=&limit=. Both endpoints require the same Bearer
+// session and enforce part counts, size limits and conversation membership.
+enum MediaKind {
+  MEDIA_KIND_UNSPECIFIED = 0;
+  PHOTO = 1;
+  DOCUMENT = 2;
+}
+message MediaRef {
+  int64 media_id = 1;
+  MediaKind kind = 2;
+  string mime = 3;
+  int64 byte_size = 4;
+  int32 width = 5;
+  int32 height = 6;
+  int32 duration = 7;
+  string file_name = 8;
+  int32 total_parts = 9;
+}
+// Client-provided media: either the caller's freshly uploaded client_file_id or an
+// existing media_id the caller may reference. Metadata is required for a new upload and
+// ignored for a media_id.
+message MediaSource {
+  oneof origin {
+    int64 client_file_id = 1;
+    int64 media_id = 2;
+  }
+  MediaKind kind = 3;
+  string mime = 4;
+  string file_name = 5;
+  int64 byte_size = 6;
+  int32 width = 7;
+  int32 height = 8;
+  int32 duration = 9;
+  int32 total_parts = 10;
+}
+message UploadMediaRequest { PeerRef peer = 1; MediaSource media = 2; }
+message UploadMediaResult { MediaRef media = 1; }
+message MediaMessage { MediaRef media = 1; }
+message SendMediaRequest {
+  PeerRef peer = 1;
+  sfixed64 random_id = 2;
+  MediaSource media = 3;
+  string caption = 4;
+  repeated MessageEntity entities = 5;
+  optional int64 reply_to_message_id = 6;
+  bool silent = 7;
+}
+message MediaItem {
+  sfixed64 random_id = 1;
+  MediaSource media = 2;
+  string caption = 3;
+  repeated MessageEntity entities = 4;
+  optional int64 reply_to_message_id = 5;
+  bool silent = 6;
+}
+// All items belong to one album; the server assigns a single grouped_id.
+message SendMultiMediaRequest { PeerRef peer = 1; repeated MediaItem items = 2; }
+message GetExtendedMediaRequest { PeerRef peer = 1; repeated int64 message_ids = 2; }

@@ -247,7 +247,9 @@ public sealed class PostgresDeliveryPersistence(NpgsqlDataSource dataSource,
                 """, cancellationToken, consumer.Name, consumer.Generation, position.Topic, position.Partition, position.Offset, delivery.OutboxId) is null)
                 throw new InvalidDataException("Broker position identity conflict");
         }
-        if (delivery.Payload is Message)
+        // message.edited reuses the Message payload but has no conversation sequence or
+        // projection version; only message.created owns history projection work.
+        if (delivery.Type == "message.created")
             await Execute(connection, transaction, """
             INSERT INTO botgram_intake_v1.projection_tasks
                 (consumer_name,generation,outbox_id,event_id,conversation_id,sequence,message,message_version,format)

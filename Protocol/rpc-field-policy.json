@@ -34,7 +34,9 @@
     "qts": {"action":"ignore","when":"always","reason":"No encrypted-message stream; qts is not a supported cursor, response qts remains zero."},
     "reject": {"action":"reject","when":"non-default","httpStatus":501,"reason":"Unsupported business intent must not be silently lost, including features the legacy Gateway ignored."},
     "accessHash": {"action":"ignore","when":"always","reason":"MTProto access_hash is not authorization; Bearer, UUID mapping and membership authorize local references."},
-    "map": {"action":"mapping","when":"present","reason":"Map through the named typed protobuf field; retain existing business validation."}
+    "map": {"action":"mapping","when":"present","reason":"Map through the named typed protobuf field; retain existing business validation."},
+    "noWebpage": {"action":"ignore","when":"always","reason":"v1 generates no link previews; the flag has no observable behavior difference in sending, editing or drafts."},
+    "uploadProgress": {"action":"ignore","when":"always","reason":"Typing action kind is relayed without upload progress percentages."}
   },
   "inheritedFields": {"networkType":"local","disableFree":"local"},
   "requests": [
@@ -58,7 +60,37 @@
     {"tl":"TL_users_getFullUser","javaType":"org.telegram.tgnet.TLRPC$TL_users_getFullUser","tag":117,"operation":"get_full_user","message":"GetFullUserRequest","fields":{"id":{"decision":"map","to":["GetFullUserRequest.user"],"nested":"InputUser"}}},
     {"tl":"TL_messages_getFullChat","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getFullChat","tag":118,"operation":"get_full_group","message":"GetFullGroupRequest","fields":{"chat_id":{"decision":"map","to":["GetFullGroupRequest.group_id"],"conversion":"Existing stable TL chat ID to group UUID; no new identity allocation"}}},
     {"tl":"TL_messages_getChats","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getChats","tag":119,"operation":"get_groups","message":"GetGroupsRequest","fields":{"id":{"decision":"map","to":["GetGroupsRequest.group_ids"],"conversion":"Existing stable TL chat IDs to group UUIDs"}}},
-    {"tl":"TL_account_getNotifySettings","javaType":"org.telegram.tgnet.tl.TL_account$getNotifySettings","tag":120,"operation":"get_notify_settings","message":"GetNotifySettingsRequest","fields":{"peer":{"decision":"map","to":["GetNotifySettingsRequest.target"],"nested":"InputNotifyPeer"}},"legacyAlias":"getNotifySettings"}
+    {"tl":"TL_account_getNotifySettings","javaType":"org.telegram.tgnet.tl.TL_account$getNotifySettings","tag":120,"operation":"get_notify_settings","message":"GetNotifySettingsRequest","fields":{"peer":{"decision":"map","to":["GetNotifySettingsRequest.target"],"nested":"InputNotifyPeer"}},"legacyAlias":"getNotifySettings"},
+    {"tl":"TL_messages_uploadMedia","javaType":"org.telegram.tgnet.TLRPC$TL_messages_uploadMedia","tag":170,"operation":"upload_media","message":"UploadMediaRequest","fields":{"peer":{"decision":"map","to":["UploadMediaRequest.peer"],"nested":"InputPeer"},"media":{"decision":"map","to":["UploadMediaRequest.media"],"conversion":"TL media subclass validated by the client mapper: InputMediaUploadedPhoto/Document resolve the client_file_id of the uploaded parts, InputMediaPhoto/Document reference an existing media_id; every other subclass is rejected with 501 BOTGRAM_MEDIA_UNSUPPORTED"}}},
+    {"tl":"TL_messages_sendMedia","javaType":"org.telegram.tgnet.TLRPC$TL_messages_sendMedia","tag":171,"operation":"send_media","message":"SendMediaRequest","fields":{"flags":"flags","silent":{"decision":"map","to":["SendMediaRequest.silent"]},"background":"reject","clear_draft":"localDraft","noforwards":"reject","update_stickersets_order":"reject","invert_media":"reject","peer":{"decision":"map","to":["SendMediaRequest.peer"],"nested":"InputPeer"},"reply_to":{"decision":"map","to":["SendMediaRequest.reply_to_message_id"],"nested":"InputReplyTo"},"media":{"decision":"map","to":["SendMediaRequest.media"],"conversion":"TL media subclass validated by the client mapper: InputMediaUploadedPhoto/Document resolve the client_file_id of the uploaded parts, InputMediaPhoto/Document reference an existing media_id; every other subclass is rejected with 501 BOTGRAM_MEDIA_UNSUPPORTED"},"message":{"decision":"map","to":["SendMediaRequest.caption"]},"random_id":{"decision":"map","to":["SendMediaRequest.random_id"]},"reply_markup":"reject","entities":{"decision":"map","to":["SendMediaRequest.entities"],"nested":"MessageEntity"},"schedule_date":"reject","schedule_repeat_period":"reject","send_as":{"decision":"selfSender","nested":"InputPeer"},"quick_reply_shortcut":"reject","effect":"reject","allow_paid_stars":"reject","suggested_post":"reject","ephemeralReceiverBotId":"reject"}},
+    {"tl":"TL_messages_sendMultiMedia","javaType":"org.telegram.tgnet.TLRPC$TL_messages_sendMultiMedia","tag":172,"operation":"send_multi_media","message":"SendMultiMediaRequest","fields":{"flags":"flags","silent":{"decision":"map","to":["SendMultiMediaRequest.items"],"conversion":"Applied to every item because silent is request-wide"},"background":"reject","clear_draft":"localDraft","noforwards":"reject","update_stickersets_order":"reject","invert_media":"reject","peer":{"decision":"map","to":["SendMultiMediaRequest.peer"],"nested":"InputPeer"},"reply_to":{"decision":"map","to":["SendMultiMediaRequest.items"],"conversion":"Applied to every item because the reply target is request-wide"},"multi_media":{"decision":"map","to":["SendMultiMediaRequest.items"],"conversion":"TL_inputSingleMedia list; each item supplies random_id, media, caption (message) and entities"},"schedule_date":"reject","send_as":{"decision":"selfSender","nested":"InputPeer"},"quick_reply_shortcut":"reject","effect":"reject","allow_paid_stars":"reject"}},
+    {"tl":"TL_messages_getExtendedMedia","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getExtendedMedia","tag":173,"operation":"get_extended_media","message":"GetExtendedMediaRequest","fields":{"peer":{"decision":"map","to":["GetExtendedMediaRequest.peer"],"nested":"InputPeer"},"id":{"decision":"map","to":["GetExtendedMediaRequest.message_ids"],"conversion":"Android ArrayList<Integer> to repeated int64, reverse checked int32"}}},
+    {"tl":"TL_messages_deleteMessages","javaType":"org.telegram.tgnet.TLRPC$TL_messages_deleteMessages","tag":144,"operation":"delete_messages","message":"DeleteMessagesRequest","fields":{"flags":"flags","revoke":{"decision":"map","to":["DeleteMessagesRequest.revoke"]},"id":{"decision":"map","to":["DeleteMessagesRequest.message_ids"],"conversion":"Android ArrayList<Integer> to repeated int64, reverse checked int32"}}},
+    {"tl":"TL_messages_deleteHistory","javaType":"org.telegram.tgnet.TLRPC$TL_messages_deleteHistory","tag":145,"operation":"delete_history","message":"DeleteHistoryRequest","fields":{"flags":"flags","just_clear":{"decision":"map","to":["DeleteHistoryRequest.just_clear"]},"revoke":{"decision":"map","to":["DeleteHistoryRequest.revoke"]},"peer":{"decision":"map","to":["DeleteHistoryRequest.peer"],"nested":"InputPeer"},"max_id":{"decision":"map","to":["DeleteHistoryRequest.max_message_id"]},"min_date":"reject","max_date":"reject"}},
+    {"tl":"TL_messages_deleteSavedHistory","javaType":"org.telegram.tgnet.TLRPC$TL_messages_deleteSavedHistory","tag":146,"operation":"delete_saved_history","message":"DeleteSavedHistoryRequest","fields":{"flags":"flags","parent_peer":"reject","peer":{"decision":"map","to":["DeleteSavedHistoryRequest.peer"],"nested":"InputPeer"},"max_id":{"decision":"map","to":["DeleteSavedHistoryRequest.max_message_id"]},"min_date":"reject","max_date":"reject"}},
+    {"tl":"TL_messages_deletePhoneCallHistory","javaType":"org.telegram.tgnet.TLRPC$TL_messages_deletePhoneCallHistory","tag":147,"operation":"delete_phone_call_history","message":"DeletePhoneCallHistoryRequest","fields":{"flags":"flags","revoke":{"decision":"map","to":["DeletePhoneCallHistoryRequest.revoke"]}}},
+    {"tl":"TL_messages_editMessage","javaType":"org.telegram.tgnet.TLRPC$TL_messages_editMessage","tag":148,"operation":"edit_message","message":"EditMessageRequest","fields":{"flags":"flags","no_webpage":"noWebpage","invert_media":"reject","peer":{"decision":"map","to":["EditMessageRequest.peer"],"nested":"InputPeer"},"id":{"decision":"map","to":["EditMessageRequest.message_id"]},"message":{"decision":"map","to":["EditMessageRequest.text"]},"media":"reject","reply_markup":"reject","entities":{"decision":"map","to":["EditMessageRequest.entities"],"nested":"MessageEntity"},"schedule_date":"reject","schedule_repeat_period":"reject","quick_reply_shortcut_id":"reject","rich_message":"reject"}},
+    {"tl":"TL_messages_getMessageEditData","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getMessageEditData","tag":149,"operation":"get_message_edit_data","message":"GetMessageEditDataRequest","fields":{"peer":{"decision":"map","to":["GetMessageEditDataRequest.peer"],"nested":"InputPeer"},"id":{"decision":"map","to":["GetMessageEditDataRequest.message_id"]}}},
+    {"tl":"TL_messages_forwardMessages","javaType":"org.telegram.tgnet.TLRPC$TL_messages_forwardMessages","tag":150,"operation":"forward_messages","message":"ForwardMessagesRequest","fields":{"flags":"flags","silent":{"decision":"map","to":["ForwardMessagesRequest.silent"]},"background":"reject","with_my_score":"reject","drop_author":{"decision":"map","to":["ForwardMessagesRequest.drop_author"]},"drop_media_captions":"reject","noforwards":"reject","allow_paid_floodskip":"reject","from_ephemeral":"reject","from_peer":{"decision":"map","to":["ForwardMessagesRequest.from_peer"],"nested":"InputPeer"},"id":{"decision":"map","to":["ForwardMessagesRequest.message_ids"],"conversion":"Android ArrayList<Integer> to repeated int64, reverse checked int32"},"random_id":{"decision":"map","to":["ForwardMessagesRequest.random_ids"]},"to_peer":{"decision":"map","to":["ForwardMessagesRequest.to_peer"],"nested":"InputPeer"},"top_msg_id":"reject","reply_to":"reject","schedule_date":"reject","schedule_repeat_period":"reject","send_as":"reject","quick_reply_shortcut":"reject","effect":"reject","video_timestamp":"reject","allow_paid_stars":"reject","suggested_post":"reject"}},
+    {"tl":"TL_messages_setTyping","javaType":"org.telegram.tgnet.TLRPC$TL_messages_setTyping","tag":151,"operation":"set_typing","message":"SetTypingRequest","fields":{"flags":"flags","peer":{"decision":"map","to":["SetTypingRequest.peer"],"nested":"InputPeer"},"top_msg_id":"reject","action":{"decision":"map","to":["SetTypingRequest.action"],"nested":"SendMessageAction"}}},
+    {"tl":"TL_messages_saveDraft","javaType":"org.telegram.tgnet.TLRPC$TL_messages_saveDraft","tag":152,"operation":"save_draft","message":"SaveDraftRequest","fields":{"flags":"flags","no_webpage":"noWebpage","invert_media":"reject","reply_to":{"decision":"map","to":["SaveDraftRequest.reply_to_message_id"],"nested":"InputReplyTo"},"peer":{"decision":"map","to":["SaveDraftRequest.peer"],"nested":"InputPeer"},"message":{"decision":"map","to":["SaveDraftRequest.text"]},"entities":{"decision":"map","to":["SaveDraftRequest.entities"],"nested":"MessageEntity"},"media":"reject","effect":"reject","suggested_post":"reject","rich_message":"reject"}},
+    {"tl":"TL_messages_clearAllDrafts","javaType":"org.telegram.tgnet.TLRPC$TL_messages_clearAllDrafts","tag":153,"operation":"clear_all_drafts","message":"ClearAllDraftsRequest","fields":{}},
+    {"tl":"TL_messages_getAllDrafts","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getAllDrafts","tag":154,"operation":"get_all_drafts","message":"GetAllDraftsRequest","fields":{}},
+    {"tl":"TL_messages_updatePinnedMessage","javaType":"org.telegram.tgnet.TLRPC$TL_messages_updatePinnedMessage","tag":155,"operation":"update_pinned_message","message":"UpdatePinnedMessageRequest","fields":{"flags":"flags","silent":{"decision":"map","to":["UpdatePinnedMessageRequest.silent"]},"unpin":{"decision":"map","to":["UpdatePinnedMessageRequest.unpin"]},"pm_oneside":"reject","peer":{"decision":"map","to":["UpdatePinnedMessageRequest.peer"],"nested":"InputPeer"},"id":{"decision":"map","to":["UpdatePinnedMessageRequest.message_id"]}}},
+    {"tl":"TL_messages_unpinAllMessages","javaType":"org.telegram.tgnet.TLRPC$TL_messages_unpinAllMessages","tag":156,"operation":"unpin_all_messages","message":"UnpinAllMessagesRequest","fields":{"flags":"flags","peer":{"decision":"map","to":["UnpinAllMessagesRequest.peer"],"nested":"InputPeer"},"top_msg_id":"reject","saved_peer_id":"reject"}},
+    {"tl":"TL_messages_toggleDialogPin","javaType":"org.telegram.tgnet.TLRPC$TL_messages_toggleDialogPin","tag":157,"operation":"toggle_dialog_pin","message":"ToggleDialogPinRequest","fields":{"flags":"flags","pinned":{"decision":"map","to":["ToggleDialogPinRequest.pinned"]},"peer":{"decision":"map","to":["ToggleDialogPinRequest.peer"],"nested":"InputDialogPeer"}}},
+    {"tl":"TL_messages_reorderPinnedDialogs","javaType":"org.telegram.tgnet.TLRPC$TL_messages_reorderPinnedDialogs","tag":158,"operation":"reorder_pinned_dialogs","message":"ReorderPinnedDialogsRequest","fields":{"flags":"flags","force":{"decision":"map","to":["ReorderPinnedDialogsRequest.force"]},"folder_id":"reject","order":{"decision":"map","to":["ReorderPinnedDialogsRequest.order"],"nested":"InputDialogPeer"}}},
+    {"tl":"TL_messages_markDialogUnread","javaType":"org.telegram.tgnet.TLRPC$TL_messages_markDialogUnread","tag":159,"operation":"mark_dialog_unread","message":"MarkDialogUnreadRequest","fields":{"flags":"flags","unread":{"decision":"map","to":["MarkDialogUnreadRequest.unread"]},"parentPeer":"reject","peer":{"decision":"map","to":["MarkDialogUnreadRequest.peer"],"nested":"InputDialogPeer"}}},
+    {"tl":"TL_messages_getDialogUnreadMarks","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getDialogUnreadMarks","tag":160,"operation":"get_dialog_unread_marks","message":"GetDialogUnreadMarksRequest","fields":{"flags":"flags","parentPeer":"reject"}},
+    {"tl":"TL_messages_readMessageContents","javaType":"org.telegram.tgnet.TLRPC$TL_messages_readMessageContents","tag":161,"operation":"read_message_contents","message":"ReadMessageContentsRequest","fields":{"id":{"decision":"map","to":["ReadMessageContentsRequest.message_ids"],"conversion":"Android ArrayList<Integer> to repeated int64, reverse checked int32"}}},
+    {"tl":"TL_messages_getOnlines","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getOnlines","tag":162,"operation":"get_onlines","message":"GetOnlinesRequest","fields":{"peer":{"decision":"map","to":["GetOnlinesRequest.peer"],"nested":"InputPeer"}}},
+    {"tl":"TL_messages_getCommonChats","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getCommonChats","tag":163,"operation":"get_common_chats","message":"GetCommonChatsRequest","fields":{"user_id":{"decision":"map","to":["GetCommonChatsRequest.user"],"nested":"InputUser"},"max_id":{"decision":"map","to":["GetCommonChatsRequest.max_chat_id"]},"limit":{"decision":"map","to":["GetCommonChatsRequest.limit"]}}},
+    {"tl":"TL_messages_hidePeerSettingsBar","javaType":"org.telegram.tgnet.TLRPC$TL_messages_hidePeerSettingsBar","tag":164,"operation":"hide_peer_settings_bar","message":"HidePeerSettingsBarRequest","fields":{"peer":{"decision":"map","to":["HidePeerSettingsBarRequest.peer"],"nested":"InputPeer"}}},
+    {"tl":"TL_messages_reportSpam","javaType":"org.telegram.tgnet.TLRPC$TL_messages_reportSpam","tag":165,"operation":"report_spam","message":"ReportSpamRequest","fields":{"peer":{"decision":"map","to":["ReportSpamRequest.peer"],"nested":"InputPeer"}}},
+    {"tl":"TL_messages_getMessagesViews","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getMessagesViews","tag":166,"operation":"get_messages_views","message":"GetMessagesViewsRequest","fields":{"peer":{"decision":"map","to":["GetMessagesViewsRequest.peer"],"nested":"InputPeer"},"id":{"decision":"map","to":["GetMessagesViewsRequest.message_ids"],"conversion":"Android ArrayList<Integer> to repeated int64, reverse checked int32"},"increment":{"decision":"map","to":["GetMessagesViewsRequest.increment"]}}},
+    {"tl":"TL_messages_getOutboxReadDate","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getOutboxReadDate","tag":167,"operation":"get_outbox_read_date","message":"GetOutboxReadDateRequest","fields":{"peer":{"decision":"map","to":["GetOutboxReadDateRequest.peer"],"nested":"InputPeer"},"msg_id":{"decision":"map","to":["GetOutboxReadDateRequest.message_id"]}}},
+    {"tl":"TL_messages_search","javaType":"org.telegram.tgnet.TLRPC$TL_messages_search","tag":168,"operation":"search","message":"SearchRequest","fields":{"flags":"flags","peer":{"decision":"map","to":["SearchRequest.peer"],"nested":"InputPeer"},"q":{"decision":"map","to":["SearchRequest.query"]},"from_id":{"decision":"map","to":["SearchRequest.from_user"],"nested":"InputPeer"},"saved_peer_id":"reject","saved_reaction":"reject","top_msg_id":"reject","filter":{"decision":"map","to":["SearchRequest.filter"],"nested":"MessagesFilter"},"min_date":{"decision":"map","to":["SearchRequest.min_date_ms"],"conversion":"TL seconds to checked milliseconds; reverse checked int32 seconds"},"max_date":{"decision":"map","to":["SearchRequest.max_date_ms"],"conversion":"TL seconds to checked milliseconds; reverse checked int32 seconds"},"offset_id":{"decision":"map","to":["SearchRequest.offset_message_id"]},"add_offset":{"decision":"map","to":["SearchRequest.add_offset"]},"limit":{"decision":"map","to":["SearchRequest.limit"]},"max_id":{"decision":"map","to":["SearchRequest.max_message_id"]},"min_id":{"decision":"map","to":["SearchRequest.min_message_id"]},"hash":"cacheHash"}},
+    {"tl":"TL_messages_getSearchCounters","javaType":"org.telegram.tgnet.TLRPC$TL_messages_getSearchCounters","tag":169,"operation":"get_search_counters","message":"GetSearchCountersRequest","fields":{"flags":"flags","peer":{"decision":"map","to":["GetSearchCountersRequest.peer"],"nested":"InputPeer"},"saved_peer_id":"reject","top_msg_id":"reject","filters":{"decision":"map","to":["GetSearchCountersRequest.filters"],"nested":"MessagesFilter"}}}
   ],
   "transportOperations": [
     {
@@ -232,14 +264,14 @@
     "InputDialogPeer": {
       "javaType":"org.telegram.tgnet.TLRPC$InputDialogPeer","unknownSubclassStatus":501,"fields":{},
       "variants": {
-        "TL_inputDialogPeer":{"fields":{"peer":{"decision":"map","to":["GetPeerDialogsRequest.peers"],"nested":"InputPeer"}}},
+        "TL_inputDialogPeer":{"fields":{"peer":{"decision":"map","to":["GetPeerDialogsRequest.peers","ToggleDialogPinRequest.peer","ReorderPinnedDialogsRequest.order","MarkDialogUnreadRequest.peer"],"nested":"InputPeer"}}},
         "TL_inputDialogPeerCommunity":{"rejectStatus":501,"fields":{"community":"reject"}},
         "TL_inputDialogPeerFolder":{"rejectStatus":501,"fields":{"folder_id":"reject"}}
       }
     },
     "InputReplyTo": {
       "javaType":"org.telegram.tgnet.TLRPC$InputReplyTo","unknownSubclassStatus":501,
-      "fields":{"flags":"flags","reply_to_msg_id":{"decision":"map","to":["SendMessageRequest.reply_to_message_id"],"conversion":"Same-conversation message only; checked TL int32"},"top_msg_id":"reject","reply_to_peer_id":{"decision":"sameReplyPeer","nested":"InputPeer"},"quote_text":"reject","quote_entities":"reject","quote_offset":"reject","peer":"reject","monoforum_peer_id":"reject","story_id":"reject","todo_item_id":"reject","poll_option":"reject","quote_rich":"reject"},
+      "fields":{"flags":"flags","reply_to_msg_id":{"decision":"map","to":["SendMessageRequest.reply_to_message_id","SaveDraftRequest.reply_to_message_id"],"conversion":"Same-conversation message only; checked TL int32"},"top_msg_id":"reject","reply_to_peer_id":{"decision":"sameReplyPeer","nested":"InputPeer"},"quote_text":"reject","quote_entities":"reject","quote_offset":"reject","peer":"reject","monoforum_peer_id":"reject","story_id":"reject","todo_item_id":"reject","poll_option":"reject","quote_rich":"reject"},
       "variants": {
         "TL_inputReplyToMessage":{"fields":{}},
         "TL_inputReplyToEphemeralMessage":{"rejectStatus":501,"fields":{"id":"reject"}},
@@ -301,6 +333,63 @@
         "TL_messageEntityTonAddress":{"rejectStatus":501,"fields":{}},
         "TL_messageEntityBlockquote_layer180":{"rejectStatus":501,"fields":{}},
         "TL_messageEntityMentionName_layer131":{"rejectStatus":501,"fields":{"user_id":"reject"}}
+      }
+    },
+    "SendMessageAction": {
+      "javaType":"org.telegram.tgnet.TLRPC$SendMessageAction","unknownSubclassStatus":501,
+      "fields":{"progress":"uploadProgress"},
+      "variants": {
+        "TL_sendMessageTypingAction":{"select":"SetTypingRequest.action","value":"TYPING","fields":{}},
+        "TL_sendMessageCancelAction":{"select":"SetTypingRequest.action","value":"CANCEL","fields":{}},
+        "TL_sendMessageRecordAudioAction":{"select":"SetTypingRequest.action","value":"RECORD_AUDIO","fields":{}},
+        "TL_sendMessageRecordVideoAction":{"select":"SetTypingRequest.action","value":"RECORD_VIDEO","fields":{}},
+        "TL_sendMessageRecordRoundAction":{"select":"SetTypingRequest.action","value":"RECORD_ROUND","fields":{}},
+        "TL_sendMessageUploadPhotoAction":{"select":"SetTypingRequest.action","value":"UPLOAD_PHOTO","fields":{}},
+        "TL_sendMessageUploadVideoAction":{"select":"SetTypingRequest.action","value":"UPLOAD_VIDEO","fields":{}},
+        "TL_sendMessageUploadAudioAction":{"select":"SetTypingRequest.action","value":"UPLOAD_AUDIO","fields":{}},
+        "TL_sendMessageUploadDocumentAction":{"select":"SetTypingRequest.action","value":"UPLOAD_DOCUMENT","fields":{}},
+        "TL_sendMessageUploadRoundAction":{"select":"SetTypingRequest.action","value":"UPLOAD_ROUND","fields":{}},
+        "TL_sendMessageChooseStickerAction":{"select":"SetTypingRequest.action","value":"CHOOSE_STICKER","fields":{}},
+        "TL_sendMessageChooseContactAction":{"select":"SetTypingRequest.action","value":"CHOOSE_CONTACT","fields":{}},
+        "TL_sendMessageGeoLocationAction":{"select":"SetTypingRequest.action","value":"GEO_LOCATION","fields":{}},
+        "TL_sendMessageGamePlayAction":{"select":"SetTypingRequest.action","value":"GAME_PLAY","fields":{}},
+        "TL_sendMessageEmojiInteraction":{"rejectStatus":501,"fields":{"emoticon":"reject","msg_id":"reject","interaction":"reject"}},
+        "TL_sendMessageEmojiInteractionSeen":{"rejectStatus":501,"fields":{"emoticon":"reject"}},
+        "TL_sendMessageHistoryImportAction":{"rejectStatus":501,"fields":{}},
+        "TL_sendMessageRichMessageDraftAction":{"rejectStatus":501,"fields":{"can_stop":"reject","keep_on_stop":"reject","random_id":"reject","rich_message":"reject","flags":"flags"}},
+        "TL_sendMessageStopDraftAction":{"rejectStatus":501,"fields":{"random_id":"reject"}},
+        "TL_sendMessageTextDraftAction":{"rejectStatus":501,"fields":{"can_stop":"reject","keep_on_stop":"reject","random_id":"reject","text":"reject","flags":"flags"}},
+        "TL_speakingInGroupCallAction":{"rejectStatus":501,"fields":{}},
+        "TL_sendMessageUploadAudioAction_old":{"rejectStatus":501,"fields":{}},
+        "TL_sendMessageUploadDocumentAction_old":{"rejectStatus":501,"fields":{}},
+        "TL_sendMessageUploadPhotoAction_old":{"rejectStatus":501,"fields":{}},
+        "TL_sendMessageUploadRoundAction_layer66":{"rejectStatus":501,"fields":{}},
+        "TL_sendMessageUploadVideoAction_old":{"rejectStatus":501,"fields":{}}
+      }
+    },
+    "MessagesFilter": {
+      "javaType":"org.telegram.tgnet.TLRPC$MessagesFilter","unknownSubclassStatus":501,
+      "fields":{"flags":"flags","missed":"reject"},
+      "variants": {
+        "TL_inputMessagesFilterEmpty":{"select":"SearchRequest.filter","value":"EMPTY","fields":{}},
+        "TL_inputMessagesFilterPinned":{"select":"SearchRequest.filter","value":"PINNED","fields":{}},
+        "TL_inputMessagesFilterChatPhotos":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterContacts":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterDocument":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterGeo":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterGif":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterMusic":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterMyMentions":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterPhoneCalls":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterPhotoVideo":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterPhotoVideoDocuments":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterPhotos":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterPoll":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterRoundVideo":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterRoundVoice":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterUrl":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterVideo":{"rejectStatus":501,"fields":{}},
+        "TL_inputMessagesFilterVoice":{"rejectStatus":501,"fields":{}}
       }
     }
   },
